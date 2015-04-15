@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:fn="http://www.w3.org/2005/xpath-functions"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+  xmlns:word200x="http://schemas.microsoft.com/office/word/2003/wordml"
+  xmlns:v="urn:schemas-microsoft-com:vml" 
+  xmlns:dbk="http://docbook.org/ns/docbook"
+  xmlns:wx="http://schemas.microsoft.com/office/word/2003/auxHint"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:pkg="http://schemas.microsoft.com/office/2006/xmlPackage"
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+  xmlns:rel="http://schemas.openxmlformats.org/package/2006/relationships"
+  xmlns:exsl="http://exslt.org/common"
+  xmlns:saxon="http://saxon.sf.net/"
+  xmlns:tr="http://transpect.io"
+  xmlns:hub="http://transpect.io/hub"
+  xmlns:css="http://www.w3.org/1996/css"
+  xmlns="http://docbook.org/ns/docbook"
+  xpath-default-namespace="http://docbook.org/ns/docbook"
+  exclude-result-prefixes="w o v wx xs dbk pkg r rel word200x exsl saxon fn tr hub css"
+  version="2.0">
+
+  <xsl:import href="figure-caption-vars.xsl"/>
+
+  <xsl:template match="*[
+                          ( some $element in * satisfies hub:is-figure($element) )
+                            and 
+                          ( some $element in * satisfies hub:is-figure-title($element) )
+                        ]" mode="hub:figure-captions">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.)]">
+        <xsl:choose>
+          <xsl:when test="current-group()[1][hub:is-figure(.)]
+                          and current-group()[2][hub:is-figure-title(.)]">
+            <xsl:variable name="title" select="current-group()[2]" as="element(para)"/>
+            <xsl:variable name="note-me-maybe" as="node()*">
+              <xsl:for-each-group select="current-group()[. &gt;&gt; $title]"
+                group-adjacent="(
+                                  for $r in (@role, 'NONE')[1]
+                                  return ($hub:figure-note-role-regex, $hub:figure-copyright-statement-role-regex)[matches($r, .)],
+                                  ''
+                                )[1]">
+                <xsl:choose>
+                  <xsl:when test="current-grouping-key() = $hub:figure-note-role-regex">
+                    <notes>
+                      <xsl:call-template name="hub:figure-notes"/>
+                    </notes>
+                  </xsl:when>
+                  <xsl:when test="current-grouping-key() = $hub:figure-copyright-statement-role-regex">
+                    <copyrights>
+                      <xsl:call-template name="hub:figure-copyrights"/>
+                    </copyrights>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:sequence select="current-group()"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:for-each-group>
+            </xsl:variable>
+            <figure>
+              <xsl:variable name="anchor" as="element(anchor)?" 
+                select="if($hub:use-title-child-anchor-id-for-figure-id) 
+                        then ($title//anchor[@xml:id][hub:same-scope(., $title)])[1] 
+                        else ()"/>
+              <xsl:copy-of select="$anchor/@xml:id | current-group()[1]//@css:orientation"/>
+              <title>
+                <xsl:apply-templates select="$title/@*" mode="#current"/>
+                <xsl:apply-templates select="$title/node()" mode="#current">
+                  <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
+                </xsl:apply-templates>
+              </title>
+              <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
+              <xsl:apply-templates select="current-group()[1]" mode="#current"/>
+              <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
+            </figure>
+            <xsl:apply-templates select="$note-me-maybe[not(self::notes | self::copyrights)]" mode="#current"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates select="current-group()" mode="#current"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each-group>
+    </xsl:copy>
+  </xsl:template>
+
+  <!-- if there’s more than one note or copyright statement, you’ll have to apply some more grouping -->
+  
+  <xsl:template name="hub:figure-notes">
+    <xsl:apply-templates select="current-group()" mode="#current"/>
+  </xsl:template>
+
+  <xsl:template name="hub:figure-copyrights">
+    <xsl:apply-templates select="current-group()" mode="#current"/>
+  </xsl:template>
+  
+  <xsl:template match="para[matches(@role, $hub:figure-note-role-regex)]" mode="hub:figure-captions">
+    <note>
+      <xsl:next-match/>
+    </note>
+  </xsl:template>
+
+  <xsl:template match="para[matches(@role, $hub:figure-copyright-statement-role-regex)]" mode="hub:figure-captions">
+    <info>
+      <!-- legalnotice because copyright requires a tagged year -->
+      <legalnotice role="copyright">
+        <xsl:next-match/>
+      </legalnotice>
+    </info>
+  </xsl:template>
+  
+  <xsl:template match="para
+                        [hub:is-figure(.)]
+                        [mediaobject]" mode="hub:figure-captions">
+    <xsl:choose>
+      <xsl:when test="$hub:remove-para-wrapper-for-mediaobject and hub:is-figure-title(following-sibling::*[1])">
+        <xsl:apply-templates select="node() except *[local-name() = ('tabs', 'tab')]" mode="#current"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <!-- drop alternate text, it would cause the function hub:is-figure() to always return false() -->
+  <xsl:template match="mediaobject/alt" mode="hub:figure-captions-preprocess-merge">
+    <xsl:comment>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:comment>
+  </xsl:template>
+  
+  
+  <!-- MODE: hub:figure-captions-preprocess-merge -->
+  <!-- Optional mode for preprocessing figure captions where the number is in a paragraph on its own. -->
+  <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
+    [preceding-sibling::*[1]/self::para[matches(@role, $hub:figure-number-role-regex-x, 'x')]]" mode="hub:figure-captions-preprocess-merge">
+    <xsl:variable name="number-para" select="preceding-sibling::*[1]" as="element(para)"/>
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <phrase>
+        <xsl:copy-of select="
+          ( key('hub:style-by-role', $number-para/@role), $number-para )/@*[name() = ('srcpath', 'css:font-weight', 'css:font-family')], 
+          $number-para/node()"/>
+      </phrase>
+      <xsl:text>&#x2002;</xsl:text>
+      <xsl:copy-of select="node()"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="para[matches(@role, $hub:figure-number-role-regex-x, 'x')]
+    [following-sibling::*[1]/self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]" mode="hub:figure-captions-preprocess-merge" />
+  
+  <!-- If figure and caption are in one para -->
+  <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
+                           [inlinemediaobject]
+                           [not(preceding-sibling::*[1][self::mediaobject])]" mode="hub:figure-captions-preprocess-merge">
+    <mediaobject>
+      <xsl:apply-templates select="inlinemediaobject/@*" mode="#current"/>
+      <xsl:apply-templates select="inlinemediaobject/node()" mode="#current"/>
+    </mediaobject>
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:apply-templates select="node() except inlinemediaobject" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+</xsl:stylesheet>
