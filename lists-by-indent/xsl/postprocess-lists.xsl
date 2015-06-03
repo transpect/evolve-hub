@@ -105,6 +105,11 @@
   </xsl:template>
 
 
+  <!--Put this in the importing stylesheet if you want to get rid of these: 
+  <xsl:template match="dbk:blockquote[@role = 'hub:lists']" mode="hub:postprocess-lists">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>-->
+
   <xsl:template match="varlistentry/listitem" mode="hub:postprocess-lists">
     <xsl:param name="set-override" select="'no'"/>
     <xsl:copy>

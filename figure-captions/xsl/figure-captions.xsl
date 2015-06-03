@@ -148,17 +148,20 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="para[matches(@role, $hub:figure-number-role-regex-x, 'x')]
-    [following-sibling::*[1]/self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]" mode="hub:figure-captions-preprocess-merge" />
+  <!--  <xsl:template match="para[matches(@role, $hub:figure-number-role-regex-x, 'x')]
+                           [following-sibling::*[1]/self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]" mode="hub:figure-captions-preprocess-merge" />-->
   
   <!-- If figure and caption are in one para -->
   <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
                            [inlinemediaobject]
+                           [some $text in descendant::node()[self::text()] satisfies matches($text, '\S')]
                            [not(preceding-sibling::*[1][self::mediaobject])]" mode="hub:figure-captions-preprocess-merge">
-    <mediaobject>
-      <xsl:apply-templates select="inlinemediaobject/@*" mode="#current"/>
-      <xsl:apply-templates select="inlinemediaobject/node()" mode="#current"/>
-    </mediaobject>
+    <xsl:for-each select="inlinemediaobject">
+      <mediaobject>
+       <xsl:apply-templates select="./@*" mode="#current"/>
+       <xsl:apply-templates select="./node()" mode="#current"/>
+     </mediaobject>
+      </xsl:for-each>
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:apply-templates select="node() except inlinemediaobject" mode="#current"/>

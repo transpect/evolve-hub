@@ -179,7 +179,16 @@
                                      (
                                        matches($style, $hub:figure-title-role-regex-x, 'x')
                                        )]
-                                    [exists(tgroup/tbody/row/entry//mediaobject)]"
+                                    [exists(tgroup/tbody/row/entry//mediaobject)]
+                                    (:para and mediaobject shouldn't exist in one entry (otherwise a table is useless) 
+                                    because this destroys box tables containing a figure :)
+                                    [tgroup/tbody/row/entry[.//mediaobject 
+                                                             and 
+                                                              not(some $style in para/@role satisfies
+                                                                   (matches($style, $hub:figure-title-role-regex-x, 'x')
+                                                             ))
+                                                           ]
+                                    ]"
                                     mode="hub:tabular-float-caption-arrangements">
     <xsl:apply-templates select="tgroup/tbody/row/entry[.//mediaobject]/node()" mode="#current"/>
     <xsl:apply-templates select="tgroup/tbody/row/entry[
@@ -1677,7 +1686,7 @@
   <xsl:variable name="hub:blockquote-heading-role-regex" as="xs:string"
     select="'^Headline[-_\s]Special-2$'" />
   
-  <xsl:template match="*[para[matches(@role, $hub:blockquote-role-regex)]]" mode="hub:blockquotes">
+  <xsl:template match="*[not(self::blockquote)][para[matches(@role, $hub:blockquote-role-regex)]]" mode="hub:blockquotes">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" group-adjacent="exists(self::para[matches(@role, $hub:blockquote-role-regex)])">
@@ -1728,10 +1737,7 @@
       select="descendant::node()[
                                     not(node())
                                     or self::tab[not(parent::tabs)]
-                                    or self::entry 
-                                    or self::footnote
-                                    or self::figure
-                                    or self::listitem
+                                    or local-name() = $hub:same-scope-element-names
                                     or self::tabs 
                                     ][hub:same-scope(., current()/..)]"
       group-starting-with="tab">
@@ -1904,6 +1910,11 @@
   
   <xsl:template match="phrase[matches(@role, $hub:no-cstyle-regex)][empty(@css:* | @xml:lang)]" mode="hub:preprocess-hierarchy">
     <xsl:apply-templates mode="#current" />
+  </xsl:template>
+
+  <!-- Collateral: normalize @xml:lang, stripping the country or other suffixes -->
+  <xsl:template match="@xml:lang[matches(., '^(\p{Ll}+).*$')]" mode="hub:group-environments">
+    <xsl:attribute name="{name()}" select="replace(., '^(\p{Ll}+).*$', '$1')"/>
   </xsl:template>
 
   <xsl:template match="emphasis[matches(., '^\d+$')][every $a in @* satisfies ($a/self::attribute(srcpath) or $a/self::attribute(xml:lang))]" mode="hub:hierarchy">
@@ -2642,6 +2653,10 @@
     <xsl:apply-templates select="/" mode="hub:clean-hub"/>
   </xsl:template>
 
+  <xsl:template match="*[matches(@conditon, 'Story(ID|Ref)')]" mode="hub:clean-hub">
+    <xsl:message select="'StoryRef/StoryID element ', local-name(.), ' discarded'"/>
+  </xsl:template>
+  
   <!-- set language attribute: project-specific? -->
   <xsl:template match="/*" mode="hub:clean-hub">
     <xsl:variable name="lang" as="xs:string"
@@ -2652,8 +2667,8 @@
                   info/css:rules/css:rule[@xml:lang][1]/@xml:lang,
                   'en'
                 )[1],
-                '[-_]\p{Lu}+$',
-                ''
+                '^(\p{Ll}+)$',
+                '$1'
               )"/>
     <xsl:copy>
       <xsl:if test="$lang ne ''">
@@ -2701,11 +2716,15 @@
   <xsl:variable name="hub:clean-hub-ignored-generated-phrase-role-regex" as="xs:string+"
     select="'^hub:(identifier|caption-number|caption-text)$'"/>
   
+  <xsl:variable name="hub:dissolve-phrases-with-same-formatting-as-parent" as="xs:boolean" select="true()"/>
+  
   <!-- Dissolve phrases whose formatting is the same as their parents’. Will lose srcpath attributes though. 
   Solution: either devise a template with a similarly complex matching pattern for the ancestor element,
   in order to attache the dissolved phrases’ srcpath to it, or adapt the message rendering so that it uses 
   ancestor paths if it doesn’t find an immediate matching element. -->
+  <!-- very dangerous template! semantic information like metadata tagging can be removed -->
   <xsl:template match="phrase[@role and not(matches(@role, $hub:clean-hub-ignored-generated-phrase-role-regex))]
+                             [$hub:dissolve-phrases-with-same-formatting-as-parent]
                              [exists(
                                 key('hub:style-by-role', @role)
                                   /@*[not(name() = ('layout-type', 'name', 'native-name'))]
@@ -3332,10 +3351,7 @@
       <linegroup remap="{name()}">
         <xsl:for-each-group select="descendant::node()[
                                       not(node())
-                                      or self::entry 
-                                      or self::footnote
-                                      or self::listitem
-                                      or self::figure
+                                      or local-name() = $hub:same-scope-element-names
                                   ][hub:same-scope(., current())]" group-starting-with="br">
           <xsl:apply-templates select="$context" mode="hub:upward-project-br">
           <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()" tunnel="yes" />
@@ -3346,7 +3362,7 @@
     <xsl:apply-templates select="$prelim" mode="hub:apres-split-at-br" />
   </xsl:template>
 
-  <xsl:template match="*[local-name() = $hub:split-at-br-element-names][not(../local-name() = 'footnote')][
+  <xsl:template match="*[local-name() = $hub:split-at-br-element-names][not(../local-name() = $hub:same-scope-element-names)][
                          not(.//br[
                            hub:same-scope(., current())
                          ])

@@ -41,14 +41,18 @@
   <xsl:function name="hub:same-scope" as="xs:boolean">
     <xsl:param name="node" as="node()" />
     <xsl:param name="ancestor-elt" as="element(*)*" />
-    <xsl:sequence select="not($node/ancestor::*[self::entry 
-                                                or self::footnote
-                                                or self::blockquote
-                                                or self::annotation
-                                                or self::figure
-                                                or self::listitem]
+    <xsl:sequence select="not($node/ancestor::*[local-name() = $hub:same-scope-element-names]
                                                [some $a in ancestor::* satisfies (some $b in $ancestor-elt satisfies ($a is $b))])" />
   </xsl:function>
+
+  <xsl:variable name="hub:same-scope-element-names" as="xs:string*"
+    select="('annotation', 
+             'entry', 
+             'blockquote', 
+             'figure', 
+             'footnote', 
+             'listitem', 
+             'table')"/>
 
   <xsl:function name="hub:escape-for-regex" as="xs:string">
     <xsl:param name="input" as="xs:string"/>
@@ -84,7 +88,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="@* | indexterm | para" mode="discard-index-terms-and-paras"/>
+  <xsl:template match="@* | indexterm | para | alt" mode="discard-index-terms-and-paras"/>
   
   <xsl:function name="hub:insert-sep" as="element(*)">
     <xsl:param name="elt" as="element(*)" />
@@ -225,6 +229,18 @@
         <xsl:sequence select="hub:get-endpos-of-string1-in-string2($string2, $text-before-string1, $string1, $current-pos + 1)"/>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:function>
+
+<xsl:function name="hub:contains-tokens" as="xs:boolean">
+    <xsl:param name="string" as="xs:string?"/>
+    <xsl:param name="tokens" as="xs:string*"/>
+    <xsl:sequence select="tokenize($string, '\s+') = $tokens"/>
+  </xsl:function>
+  
+  <xsl:function name="hub:contains-token" as="xs:boolean">
+    <xsl:param name="string" as="xs:string?"/>
+    <xsl:param name="token" as="xs:string"/>
+    <xsl:sequence select="tokenize($string, '\s+') = $token"/>
   </xsl:function>
 
 </xsl:stylesheet>

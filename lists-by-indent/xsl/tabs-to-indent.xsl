@@ -56,6 +56,29 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template match="*[self::figure | self::table][title/(. | key('hub:style-by-role', @role))/@css:margin-left]"
+                mode="hub:tabs-to-indent">
+    <xsl:copy>
+      <xsl:if test="exists(title/(.| key('hub:style-by-role', @role))/@css:margin-left)">
+        <xsl:attribute name="margin-left" 
+          select="hub:to-twips((title/@css:margin-left, key('hub:style-by-role', title/@role)/@css:margin-left)[1])"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="*[self::figure | self::table | self::informalfigure | self::informaltable]
+                        [(. | key('hub:style-by-role', @role))/@css:margin-left]"
+                mode="hub:tabs-to-indent">
+    <xsl:copy>
+      <xsl:if test="exists((.| key('hub:style-by-role', @role))/@css:margin-left)">
+        <xsl:attribute name="margin-left" 
+          select="hub:to-twips((@css:margin-left, key('hub:style-by-role', @role)/@css:margin-left)[1])"/>
+      </xsl:if>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+
   <xsl:template match="*[hub:element-with-tab-and-matching-mark-regex(.)]
                          /node()[1][. instance of text()]" mode="hub:tabs-to-indent">
     <xsl:param name="identifier-already-tagged" select="false()" tunnel="yes"/>

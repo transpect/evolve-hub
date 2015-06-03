@@ -57,7 +57,7 @@
               </title>
               <xsl:if test="$copyright-statement">
                 <info>
-                  <legalnotice>
+                  <legalnotice role="copyright">
                     <xsl:apply-templates select="$copyright-statement" mode="#current"/>
                   </legalnotice>
                 </info>
