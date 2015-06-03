@@ -97,7 +97,7 @@
         </varlistentry>
       </xsl:when>
     	<xsl:when test="$is-variable-list">
-        <xsl:variable name="first-tab" select="($first-para//tab[hub:same-scope(., current())][not(ancestor::tabs)])[1]"/>
+    	  <xsl:variable name="first-tab" select="($first-para//tab[not(parent::tabs)][hub:same-scope(., current())])[1]" as="element(tab)"/>
         <varlistentry>
           <term>
             <xsl:copy-of select="hub:split-term-at-tab($first-para,$first-tab)"/>
@@ -404,7 +404,7 @@
   <xsl:function name="hub:is-variable-list-listitem-with-phrase-identifier" as="xs:boolean">
     <xsl:param name="para" as="element(para)?"/>
     <xsl:sequence select="exists(
-                            $para//tab[hub:same-scope(., $para)][1][
+                            $para//tab[not(parent::tabs)][hub:same-scope(., $para)][1][
                               exists(
                                 preceding::node()[self::phrase][hub:is-identifier(.)]
                                   [hub:same-scope(., $para)]
@@ -420,8 +420,8 @@
                               //phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
                           )
                           and exists(
-                            ($para//tab[hub:same-scope(., $para)])[1]
-                              /preceding::node()[not(ancestor::tabs)][. &gt;&gt; $para]
+                            ($para//tab[not(parent::tabs)][hub:same-scope(., $para)])[1]
+                              /preceding::node()[. &gt;&gt; $para]
                           )"/>
   </xsl:function>
 
