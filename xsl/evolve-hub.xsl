@@ -26,7 +26,6 @@
   <xsl:include href="http://transpect.io/evolve-hub/xsl/hub-functions.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
 
-
   <xsl:output
     method="xml"
     indent="no"
@@ -85,7 +84,7 @@
     select="$remove-empty-paras" />
 
   <xsl:variable name="hub:empty-para-role-regex-x" as="xs:string"
-    select="'^letex_empty_para$'"/>
+    select="'^tr_empty_para$'"/>
 
   <xsl:variable name="hub:base-style-regex" select="'^(No_paragraph_style|Standard)$'"/> 
   
@@ -155,6 +154,7 @@
       mode="hub:preprocess-hierarchy">
       <xsl:message select="'INFO: Removed empty para', 
                            if(@role ne '') then concat('with role ', xs:string(@role)) else '',
+                           if(@srcpath ne '') then concat(' with srcpath ', xs:string(@srcpath)) else '',
                            if(*) then string-join(('; all descendant elements:', distinct-values(for $e in .//* return local-name($e))),' ') else ''"/>
     </xsl:template>
     
@@ -198,6 +198,7 @@
                                    )
                                  ]/node()" mode="#current"/>
   </xsl:template>
+  
   <!-- mode: join-tables -->
 
   <xsl:variable name="hub:split-style-regex" as="xs:string" select="'SPLIT'"/>
@@ -893,6 +894,12 @@
 
   <xsl:template match="phrase | superscript | subscript" mode="hub:join-phrases-unwrap">
     <xsl:apply-templates mode="hub:join-phrases" />
+  </xsl:template>
+  
+  <xsl:template match="*" mode="hub:join-phrases-unwrap">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="hub:join-phrases" />  
+    </xsl:copy>
   </xsl:template>
 
 
@@ -1727,7 +1734,7 @@
     select="('para', 'simpara', 'title')"/>
 
   <xsl:template match="*[local-name() = $hub:split-at-tab-element-names]
-                        /*[not(self::entry or self::footnote or self::listitem or self::figure)][
+                        /*[not(local-name() = $hub:same-scope-element-names)][
                         .//tab[not(parent::tabs)][
                            hub:same-scope(., current())
                          ]
@@ -1911,7 +1918,7 @@
   <xsl:template match="phrase[matches(@role, $hub:no-cstyle-regex)][empty(@css:* | @xml:lang)]" mode="hub:preprocess-hierarchy">
     <xsl:apply-templates mode="#current" />
   </xsl:template>
-
+  
   <!-- Collateral: normalize @xml:lang, stripping the country or other suffixes -->
   <xsl:template match="@xml:lang[matches(., '^(\p{Ll}+).*$')]" mode="hub:group-environments">
     <xsl:attribute name="{name()}" select="replace(., '^(\p{Ll}+).*$', '$1')"/>
@@ -2070,9 +2077,8 @@
   </xsl:template>
 
   <!-- first node in figure or table title is an indexterm: move the indexterm at end of title -->
-  <!-- I do not know who added sections and anchors and for which purpose without explaining, but I  excluded pageanchors, from being sorted at the end. When they are rendered it is annoying -->
   <xsl:template match="*[self::table or self::figure or self::section]
-                         /title[node()[1][self::indexterm or self::anchor[not(@xml:id and matches(@xml:id, '^page_'))]]]" mode="hub:repair-hierarchy" priority="1">
+                         /title[node()[1][self::indexterm or self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]]]" mode="hub:repair-hierarchy" priority="1">
     <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or self::anchor)][preceding-sibling::*[self::indexterm or self::anchor]][1]" as="node()?"/>
     <xsl:copy>
       <xsl:choose>
@@ -2715,7 +2721,6 @@
 
   <xsl:variable name="hub:clean-hub-ignored-generated-phrase-role-regex" as="xs:string+"
     select="'^hub:(identifier|caption-number|caption-text)$'"/>
-  
   <xsl:variable name="hub:dissolve-phrases-with-same-formatting-as-parent" as="xs:boolean" select="true()"/>
   
   <!-- Dissolve phrases whose formatting is the same as their parents’. Will lose srcpath attributes though. 
@@ -2767,7 +2772,7 @@
     <xsl:sequence select="$props[name() = name($prop) and . = $prop]"/>
   </xsl:function>
 
-  <xsl:template match="@override[not(/*/@version = '5.1-variant le-tex_Hub-1.0')]">
+  <xsl:template match="@override[not(/*/@version = '5.1-variant tr_Hub-1.0')]">
     <xsl:copy/>
     <xsl:attribute name="css:pseudo-marker_content" select='concat("&apos;", ., "&apos;")'/>
   </xsl:template>
@@ -3225,11 +3230,12 @@
   
   <!-- mode: hub:reorder-marginal-notes-->
   <!-- In this mode sidebars are placed inside the paras they were originally anchored. 
-  This should happen before the list modes-->
-  <xsl:variable name="sidenote-not-to-pulled-in-titles" as="xs:string" select="concat($hub:table-title-role-regex-x, '|', $hub:table-number-role-regex-x, '|', $hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x)"/>
+  This should happen before the list modes and after postprocess-hierarchy-->
+  <xsl:variable name="sidenote-not-to-be-pulled-in-titles" as="xs:string" select="concat($hub:table-title-role-regex-x, '|', $hub:table-number-role-regex-x, '|', $hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x)"/>
   
   <xsl:template match="*[not(self::title)]
-    [not(self::para[matches(@role, $sidenote-not-to-pulled-in-titles)])][anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
+                        [not(self::para[matches(@role, $sidenote-not-to-be-pulled-in-titles)])]
+                        [anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
     <xsl:variable name="sidenote-anchor" as="element(anchor)+" select="anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]"/>
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*"/>
@@ -3250,18 +3256,19 @@
   </xsl:template>
     
    <!-- pull sidebars before titles (table and figure titles as well) --> 
-   <xsl:template match="*[self::title or self::para[matches(@role, $sidenote-not-to-pulled-in-titles)]]
-                        [.//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
+
+   <xsl:template match="*[self::title[not(parent::title)] or self::para[matches(@role, $sidenote-not-to-be-pulled-in-titles)]]
+                         [.//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
     <xsl:variable name="sidenote" as="element(sidebar)*" select=".//anchor/key('hub:linking-item-by-id', @xml:id)[self::sidebar[hub:is-marginal-note(.)]]"/>
-    <xsl:choose>
-      <xsl:when test="matches(@role, concat($hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x))">
+ <!--   <xsl:choose>
+      <xsl:when test="matches(@role, concat($hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x))">-->
         <xsl:copy copy-namespaces="no">
           <xsl:apply-templates select="@*, node() except $sidenote" mode="#current"/>
         </xsl:copy>
         <xsl:apply-templates select="$sidenote" mode="#current">
           <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
         </xsl:apply-templates>
-      </xsl:when>
+<!--      </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates select="$sidenote" mode="#current">
           <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
@@ -3270,8 +3277,7 @@
           <xsl:apply-templates select="@*, node() except $sidenote" mode="#current"/>
         </xsl:copy>
       </xsl:otherwise>
-    </xsl:choose>
-   
+    </xsl:choose>-->
   </xsl:template>
   
   <xsl:template match="anchor" mode="hub:reorder-marginal-notes">
@@ -3299,8 +3305,8 @@
   </xsl:template>
   
   <!-- Override these in your adaptions-->
-  <xsl:variable name="hub:marginal-note-container-style-regex" as="xs:string" select="'^le-tex_margin-box'"/>
-  <xsl:variable name="hub:marginal-note-para-style-regex" as="xs:string" select="'^le-tex_p_margin'"/>
+  <xsl:variable name="hub:marginal-note-container-style-regex" as="xs:string" select="'^tr_margin-box'"/>
+  <xsl:variable name="hub:marginal-note-para-style-regex" as="xs:string" select="'^tr_p_margin'"/>
   
   
   <xsl:function name="hub:is-marginal-note" as="xs:boolean">
