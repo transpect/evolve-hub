@@ -34,7 +34,7 @@
     mode="hub:prepare-lists">
   </xsl:template>
 
-  <!-- folgende Absätze erkennen und ins vorherige listitem sortieren -->
+  <!-- Detect consecutive list paras and sort them into preceding listitem -->
   <xsl:template match="orderedlist[listitem/para[1][not(@margin-left) and @text-indent and @text-indent &gt; 0]
                                    and listitem[para[1][@margin-left]]]"
     mode="hub:prepare-lists">
@@ -59,12 +59,34 @@
     </xsl:copy>
   </xsl:template>
 
+  <!-- Pull equations out of lists 
+  <xsl:template match="orderedlist[listitem[para[1]/@role = $hub:equation-roles]]" mode="hub:prepare-lists">
+    <xsl:for-each-group select="node()" group-starting-with="listitem[para[1]/@role = $hub:equation-roles]">
+      <xsl:choose>
+        <xsl:when test="current-group()[1][self::listitem[para[1]/@role = $hub:equation-roles]]">
+          <xsl:apply-templates select="current-group()[1]/node()" mode="#current"/>
+          <xsl:if test="current-group()[position() &gt; 1]">
+            <orderedlist>
+              <xsl:apply-templates select="current-group()[position() &gt; 1]" mode="#current"/>
+            </orderedlist>
+          </xsl:if>
+        </xsl:when>
+        <xsl:otherwise>
+          <orderedlist>
+            <xsl:apply-templates select="current-group()" mode="#current"/>
+          </orderedlist>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each-group>
+  </xsl:template>
+  -->
+
   <xsl:template match="listitem[para[1][not(@margin-left) and @text-indent and @text-indent &gt; 0]
                        and parent::orderedlist[listitem[1][para[1][@margin-left]]]]" mode="hub:prepare-lists">
-    <!-- das sind über tabs oder text-indent gesetzte Absätze zum vorherigem Listenpunkt -->
+    <!-- these are consecutive list paras set via tabs oder text-indent  -->
   </xsl:template>
 
-  <!-- @tab-stops von Folgeabsätzen in listitem anpassen -->
+  <!-- adjust @tab-stops of consecutive list paragraphs in listitem -->
   <xsl:template match="para[parent::listitem and not(@margin-left) and @text-indent]/@tab-stops
                        [tokenize(tokenize(., ' ')[1], ';')[1] = ../@text-indent]" mode="hub:prepare-lists">
     <xsl:variable name="new-tabs" select="string-join(tokenize(., ' ')[position() &gt; 1], ' ')"/>
@@ -73,7 +95,7 @@
     </xsl:if>
   </xsl:template>
 
-  <!-- IDML, folgeabsätze in Listenpunkten -->
+  <!-- IDML, consecutive list paras in listitems -->
   <xsl:template match="orderedlist[listitem/para[1][not(descendant::phrase[@role = 'hub:identifier'])]
                        and listitem/para[1][descendant::phrase[@role = 'hub:identifier']]
                        and (every $x in listitem/para[1] satisfies exists($x/@margin-left))
@@ -137,6 +159,7 @@
       <xsl:otherwise><xsl:sequence select="$list-style-type"/></xsl:otherwise>
     </xsl:choose>
   </xsl:function>
+
 
   <xsl:template match="css:rule" mode="hub:prepare-lists">
     <xsl:call-template name="css:move-to-attic">

@@ -45,8 +45,8 @@
             <xsl:variable name="text" select="current-group()[position() &gt; 1 and . &lt;&lt; $table] except $note" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
             <table>
               <xsl:attribute name="frame" select="if ($table/name()='informaltable') 
-                                                  then tr:get-frame-attribute($table/@css:*[matches(name(.),'border\-.+\-style')]) 
-                                                  else tr:get-frame-attribute($table/informaltable/@css:*[matches(name(.),'border\-.+\-style')])"/>
+                                                  then hub:get-frame-attribute($table/@css:*[matches(name(.),'border\-.+\-style')]) 
+                                                  else  hub:get-frame-attribute($table/informaltable/@css:*[matches(name(.),'border\-.+\-style')])"/>
               <xsl:apply-templates select="$table/@*[not(some $i in (parent::*/descendant::*/@*) satisfies $i=.)]
                 | $table/@role" mode="#current"/>
               <xsl:apply-templates select="$table/self::informaltable/(@css:*)
@@ -88,7 +88,7 @@
   <xsl:template match="informaltable" priority="-5" mode="hub:table-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:attribute name="frame" select="tr:get-frame-attribute(./@css:*[matches(name(.),'border\-.+\-style')])"/>
+      <xsl:attribute name="frame" select="hub:get-frame-attribute(./@css:*[matches(name(.),'border\-.+\-style')])"/>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
@@ -96,13 +96,13 @@
   <xsl:template match="informaltable" mode="hub:process-informaltables">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="hub:table-captions"/>
-      <xsl:attribute name="frame" select="tr:get-frame-attribute(./@css:*[matches(name(.),'border\-.+\-style')])"/>
+      <xsl:attribute name="frame" select="hub:get-frame-attribute(./@css:*[matches(name(.),'border\-.+\-style')])"/>
       <xsl:apply-templates select="@role" mode="hub:table-captions"/>
       <xsl:apply-templates mode="hub:table-captions"/>
     </xsl:copy>
   </xsl:template>
   
-  <xsl:function name="tr:get-frame-attribute">
+  <xsl:function name="hub:get-frame-attribute">
     <xsl:param name="border-style" as="attribute()*"/>
     <xsl:choose>
       <xsl:when test="$border-style[matches(local-name(),'left')][not(.=('nil','none'))] and $border-style[matches(local-name(),'right')][not(.=('nil','none'))] and $border-style[matches(local-name(),'top')][not(.=('nil','none'))] and $border-style[matches(local-name(),'bottom')][not(.=('nil','none'))]">all</xsl:when>

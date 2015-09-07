@@ -18,6 +18,10 @@
   version="2.0"
   xpath-default-namespace="http://docbook.org/ns/docbook"
   exclude-result-prefixes = "w o v wx xs dbk pkg r rel word200x exsl saxon fn tr hub">
+  
+  <xsl:param name="hub:handle-several-images-per-caption" as="xs:boolean" select="false()">
+    <!-- will call another template in figure captions that tries to create figures of several images having just one caption -->
+  </xsl:param>
 
   <xsl:variable name="hub:figure-title-role-regex-x"  as="xs:string"
     select="'^(

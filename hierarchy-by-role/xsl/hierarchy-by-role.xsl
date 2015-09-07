@@ -129,8 +129,13 @@
                       <xsl:if test="$hub:hierarchy-title-roles">
                         <xsl:apply-templates select="@role" mode="hub:hierarchy"/>
                       </xsl:if>
+                      <xsl:variable name="potential-end-anchor" as="element(anchor)?"
+                        select=".//anchor[hub:same-scope(., current())]
+                                         [@xml:id = string-join(($anchor/@xml:id, '_end'), '')]"/>
                       <xsl:apply-templates select="@* except @role, node()" mode="hub:hierarchy">
-                        <xsl:with-param name="suppress" select="if ($hub:anchor-ids-to-section) then $anchor else ()" tunnel="yes"/>
+                        <xsl:with-param name="suppress" select="if ($hub:anchor-ids-to-section) 
+                                                                then ($anchor, $potential-end-anchor) 
+                                                                else ()" tunnel="yes"/>
                       </xsl:apply-templates>
                     </title>
                     <xsl:sequence

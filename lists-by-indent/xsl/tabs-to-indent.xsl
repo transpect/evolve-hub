@@ -35,12 +35,12 @@
   </xsl:template>
 
   <xsl:template match="  *[not(self::title or child::title) or self::figure or self::table or self::equation]
-                          [tr:element-with-tab-and-matching-mark-regex(.)] 
+                          [hub:element-with-tab-and-matching-mark-regex(.)] 
                        | dbk:para[not(@role = $hub:equation-roles)]" 
                 mode="hub:tabs-to-indent">
       <xsl:copy>
       <xsl:variable name="default-tabstop" as="xs:double"
-        select="if (tr:element-with-tab-and-matching-mark-regex(.))
+        select="if (hub:element-with-tab-and-matching-mark-regex(.))
                 then $hub:default-tabstop
                 else 0"/>
       <xsl:attribute name="text-indent" 
@@ -79,7 +79,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="*[tr:element-with-tab-and-matching-mark-regex(.)]
+  <xsl:template match="*[hub:element-with-tab-and-matching-mark-regex(.)]
                          /node()[1][. instance of text()]" mode="hub:tabs-to-indent">
     <xsl:param name="identifier-already-tagged" select="false()" tunnel="yes"/>
     <xsl:choose>
@@ -99,7 +99,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:function name="tr:element-with-tab-and-matching-mark-regex" as="xs:boolean">
+  <xsl:function name="hub:element-with-tab-and-matching-mark-regex" as="xs:boolean">
     <xsl:param name="element" as="element()"/>
     <xsl:sequence select="boolean(
                             $element[
@@ -107,20 +107,44 @@
                             ][
                               not(@tab-stops) 
                               and exists($hub:default-tabstop) 
-                              and node()[1][matches(., $mark-regex)][not(matches(., $mark-exceptions))]
+                              and node()[not(self::anchor)][1][matches(., $mark-regex)][not(matches(., $mark-exceptions))]
                               and (: next content element is an tabulator :)
                               (
                                 (:simplest case: second node is the tab :)
-                                node()[2]/self::tab 
+                                node()[not(self::anchor)][2]/self::tab 
                                 or
                                 (: more complex: the next first text node (anywhere nested) is the tabulatur :)
-                                node()[2]//node()[hub:same-scope(., $element)][. instance of text()][1]/parent::tab
+                                node()[not(self::anchor)][2]//node()[hub:same-scope(., $element)][. instance of text()][1]/parent::tab
                               )
                             ][
                               not(ancestor::*/name() = $hub:float-names) and not(self::*/name() = $hub:no-tabs)
                             ]
                           )"/>
   </xsl:function>
+
+  <!--<xsl:function name="hub:element-with-tab" as="xs:boolean">
+    <xsl:param name="element" as="element()"/>
+    <xsl:sequence select="boolean(
+                            $element[
+                              not(self::dbk:phrase or self::formalpara)
+                            ][
+                              not(@tab-stops) 
+                              and exists($hub:default-tabstop) 
+                              and (: next content element is an tabulator :)
+                              (
+                                (:simplest case: second node is the tab :)
+                                node()[2]/self::tab 
+                                or
+                                (: more complex: the next first text node (anywhere nested) is the tabulatur :)
+                                node()[2]//node()[. instance of text()][1]/parent::tab
+                                or
+                                (self::para and count(descendant::tab[not(ancestor::*:tabs)])=1)
+                              )
+                            ][
+                              not(ancestor::*/name() = $hub:float-names) and not(self::*/name() = $hub:no-tabs)
+                            ]
+                          )"/>
+  </xsl:function>-->
 
   <!-- Another class of input: style definitions with css:display="list-item" -->
   

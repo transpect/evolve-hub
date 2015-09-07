@@ -104,7 +104,6 @@
     </xsl:copy>
   </xsl:template>
 
-
   <!--Put this in the importing stylesheet if you want to get rid of these: 
   <xsl:template match="dbk:blockquote[@role = 'hub:lists']" mode="hub:postprocess-lists">
     <xsl:apply-templates mode="#current"/>

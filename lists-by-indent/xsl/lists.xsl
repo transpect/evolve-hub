@@ -42,7 +42,7 @@
 
   <!-- itemizedlist -->
 
-  <xsl:template match="orderedlist[hub:is-itemized-list(.)]" mode="hub:lists" priority="+1">
+  <xsl:template match="orderedlist[hub:is-itemized-list(.)]" mode="hub:lists" priority="1">
     <itemizedlist mark="{listitem[1]/para[1]//descendant::phrase[hub:is-identifier(.)]}">
       <xsl:apply-templates mode="#current">
         <xsl:with-param name="set-override" select="'no'" tunnel="yes"/>
@@ -163,12 +163,12 @@
     <xsl:apply-templates mode="hub:lists"/>
   </xsl:template>
 
-  <!-- Folgeabsätze zum vorgehendem Listenpunkt -->
+  <!-- continuations: -->
   <xsl:template match="orderedlist[parent::listitem]
                                   [hub:has-no-identifiers(.)]
                                   [not(hub:is-variable-list(.))]
                                   [hub:same-margin-left(., parent::listitem/para[1]/@margin-left)]" 
-                mode="hub:lists">
+                mode="hub:lists" priority="1.5">
     <xsl:apply-templates select="listitem/node()" mode="#current"/>
   </xsl:template>
 
@@ -309,7 +309,8 @@
     <xsl:param name="list" as="element(*)"/>
     <xsl:param name="margin" as="xs:string?"/>
     <xsl:variable name="margin-int" select="xs:integer(number(($margin, 0)[1]))" as="xs:integer"/>
-    <xsl:value-of select="if (every $x in $list/listitem/para[1]/@margin-left satisfies abs($x - $margin-int) le 1) then true() else false()"/>
+    <xsl:value-of select="if (every $x in $list/listitem/para[1]/@margin-left[. castable as xs:integer] 
+                              satisfies abs(xs:integer($x) - $margin-int) le $hub:indent-epsilon) then true() else false()"/>
   </xsl:function>
 
   <xsl:function name="hub:has-no-identifiers" as="xs:boolean">
@@ -319,88 +320,107 @@
   </xsl:function>
   
   <xsl:function name="hub:is-itemized-list" as="xs:boolean">
-    <xsl:param name="list" as="node()"/>
-    <xsl:value-of select="if (
-                            matches(
-                              $list/listitem[1]/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)][1], 
-                              $hub:itemizedlist-mark-regex
-                            )
-                            and (
-                              every $first-para-in-listitem in $list/listitem/para[1]
-                              satisfies exists(
-                                $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
+    <xsl:param name="list" as="element(*)"/>
+    <xsl:value-of select="if ( 
+                              (
+                                matches(
+                                  $list/listitem[1]/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)][1], 
+                                  $hub:itemizedlist-mark-regex
+                                )
+                                and (
+                                  every $first-para-in-listitem in $list/listitem/para[1]
+                                  satisfies exists(
+                                    $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
+                                  )
+                                )
+                                and (
+                                  every $first-para-in-listitem in $list/listitem/para[1]
+                                  satisfies (
+                                    every $first-identifier 
+                                    in $first-para-in-listitem//phrase[
+                                      hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)
+                                    ][1]
+                                    satisfies matches($first-identifier, $hub:itemizedlist-mark-regex)
+                                  )
+                                )
                               )
-                            )
-                            and (
-                              every $first-para-in-listitem in $list/listitem/para[1]
-                              satisfies (
-                                every $first-identifier 
-                                in $first-para-in-listitem//phrase[
-                                  hub:same-scope(., $first-para-in-listitem)][hub:is-identifier[(.)]
-                                ][1]
-                                satisfies matches($first-identifier, $hub:itemizedlist-mark-regex)
-                              )
-                            )
-                          )
-                          then true() else false()"/>
+                              or hub:is-itemized-list-because-we-know-better($list)
+                          ) then true() else false()"/>
+  </xsl:function>
+
+  <xsl:function name="hub:is-itemized-list-because-we-know-better" as="xs:boolean">
+    <xsl:param name="list" as="element(*)"/>
+    <xsl:sequence select="false()"/>
   </xsl:function>
 
   <xsl:function name="hub:is-ordered-list" as="xs:boolean">
-    <xsl:param name="list" as="node()"/>
-    <xsl:value-of select="if (
-                            exists(
-                              $list/listitem/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)]
-                            )
-                            and (
-                              every $first-para-in-listitem in $list/listitem/para[1]
-                              satisfies exists(
-                                $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
+    <xsl:param name="list" as="element(*)"/>
+    <xsl:value-of select="if ( 
+                              (
+                                exists(
+                                  $list/listitem/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)]
+                                )
+                                and (
+                                  every $first-para-in-listitem in $list/listitem/para[1]
+                                  satisfies exists(
+                                    $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
+                                  )
+                                )
+                                and (
+                                  hub:get-list-type(
+                                    for $para in $list/listitem/para[1] 
+                                    return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
+                                  ) = $hub:known-ordered-list-types
+                                )
                               )
-                            )
-                            and (
-                              hub:get-list-type(
-                                for $para in $list/listitem/para[1] 
-                                return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
-                              ) = $hub:known-ordered-list-types
-                            )
-                          )
-                          then true()
-                          else false()"/>
+                              or hub:is-ordered-list-because-we-know-better($list)
+                          ) then true() else false()"/>
+  </xsl:function>
+
+  <xsl:function name="hub:is-ordered-list-because-we-know-better" as="xs:boolean">
+    <xsl:param name="list" as="element(*)"/>
+    <xsl:sequence select="false()"/>
   </xsl:function>
 
   <xsl:function name="hub:is-variable-list" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
-    <xsl:value-of select="if (
-                            exists($list/listitem/para) (: we don’t require that every listitem needs a para – there may be complete tables in listitem, for ex. :)
-                            and 
+    <xsl:value-of select="if ( 
                               (
-                                hub:get-list-type(
-                                  for $first-para-in-listitem in $list/listitem/para[1]
-                                  return $first-para-in-listitem
-                                    //phrase[hub:is-identifier(.)][hub:same-scope(., $first-para-in-listitem)][1]
-                                ) eq 'other'
-                                and
-                                (
-                                  every $first-para-in-listitem in $list/listitem/para[1] satisfies (
-                                    hub:is-variable-list-listitem-with-phrase-identifier($first-para-in-listitem)
-                                    and 
-                                    not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
+                                exists($list/listitem/para) (: we don’t require that every listitem needs a para – there may be complete tables in listitem, for ex. :)
+                                and 
+                                  (
+                                    hub:get-list-type(
+                                      for $first-para-in-listitem in $list/listitem/para[1]
+                                      return $first-para-in-listitem
+                                        //phrase[hub:is-identifier(.)][hub:same-scope(., $first-para-in-listitem)][1]
+                                    ) eq 'other'
+                                    and
+                                    (
+                                      every $first-para-in-listitem in $list/listitem/para[1] satisfies (
+                                        hub:is-variable-list-listitem-with-phrase-identifier($first-para-in-listitem)
+                                        and 
+                                        not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
+                                      )
+                                    )
+                                  or
+                                  (
+                                    every $first-para-in-listitem in $list/listitem/para[1] satisfies (
+                                      hub:is-variable-list-listitem-without-phrase-identifier($first-para-in-listitem)
+                                      and
+                                      not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
+                                    )
                                   )
                                 )
-                              or
-                              (
-                                every $first-para-in-listitem in $list/listitem/para[1] satisfies (
-                                  hub:is-variable-list-listitem-without-phrase-identifier($first-para-in-listitem)
-                                  and
-                                  not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
-                                )
                               )
-                            )
-                          )
-                          then true() 
-                          else false()"/>
+                              or hub:is-variable-list-because-we-know-better($list)
+                          ) then true() else false()"/>
   </xsl:function>
 
+  <xsl:function name="hub:is-variable-list-because-we-know-better" as="xs:boolean">
+    <xsl:param name="list" as="element(*)"/>
+    <xsl:sequence select="false()"/>
+  </xsl:function>
+  
   <xsl:function name="hub:is-variable-list-listitem-with-phrase-identifier" as="xs:boolean">
     <xsl:param name="para" as="element(para)?"/>
     <xsl:sequence select="exists(
@@ -447,7 +467,9 @@
 
   <xsl:function name="hub:get-list-type" as="xs:string">
     <xsl:param name="marks" as="node()*"/>
-    <xsl:variable name="true-marks" select="for $x in $marks return replace($x,  $hub:orderedlist-mark-regex, '$1')"/>
+    <xsl:variable name="true-marks" as="xs:string*">
+      <xsl:apply-templates select="$marks" mode="hub:list-true-marks"/>
+    </xsl:variable>
     <xsl:choose>
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^[ivx]+$')">lowerroman</xsl:when>
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^[IVX]+$')">upperroman</xsl:when>
@@ -464,6 +486,12 @@
       </xsl:otherwise>
     </xsl:choose>    
   </xsl:function>
+
+  <xsl:template match="node()" mode="hub:list-true-marks" as="xs:string">
+    <!-- If someone changed …|[a-z]|… to …|[a-z][.:\)]|… in $hub:orderedlist-mark-regex, we need the double replace
+      because $1 then contains the punctuation. You might need to customize this template if you customized the regex further. -->
+    <xsl:sequence select="replace(replace(normalize-space(.),  $hub:orderedlist-mark-regex, '$1'), '[.:\)\)]', '', 'i')"/>
+  </xsl:template>
 
   <xsl:function name="hub:is-identifier" as="xs:boolean">
     <xsl:param name="phrase" as="element(phrase)" />
