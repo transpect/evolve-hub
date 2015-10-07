@@ -4,7 +4,6 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:tr="http://transpect.io"
-  xmlns:cascade="http://transpect.io/cascade"
   xmlns:hub="http://transpect.io/hub"
   version="1.0"
   name="evolve-hub"
@@ -74,7 +73,7 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </tr:simple-progress-msg>
   
-  <cascade:dynamic-transformation-pipeline> 
+  <tr:dynamic-transformation-pipeline> 
     <p:with-option name="fallback-xpl" select="$fallback-xpl"/>
     <p:with-option name="fallback-xsl" select="$fallback-xsl"/>
     <p:with-option name="debug" select="$debug"/>
@@ -82,7 +81,7 @@
     <p:with-option name="load" select="$load"/>
     <p:input port="additional-inputs"><p:empty/></p:input>
     <p:input port="options"><p:empty/></p:input>
-  </cascade:dynamic-transformation-pipeline>
+  </tr:dynamic-transformation-pipeline>
 
   <tr:simple-progress-msg name="success-msg" file="evolve-hub-success.txt">
     <p:input port="msgs">
