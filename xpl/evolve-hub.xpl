@@ -37,7 +37,7 @@
     they’d have to be imported by driver.xsl, too.
     Also note that driver.xsl and driver.xpl don’t need to reside in the same 
     configuration directory. You might perfectly well use the common pipeline 
-    together with a series’ XSLT stylesheet. The transpect:load-cascaded mechanism will
+    together with a series’ XSLT stylesheet. The tr:load-cascaded mechanism will
     take care of loading the most specific available of each file type. 
     If some (not just one, not all) series would like to share a pipeline or an 
     XSLT stylesheet, they should create the corresponding files at some location

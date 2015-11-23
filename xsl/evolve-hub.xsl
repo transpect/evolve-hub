@@ -2600,7 +2600,7 @@
   </xsl:template>
 
   <!-- This template could and probably should be imported from
-       http://transpect.le-tex.de/hub2html/xsl/css-atts2wrap.xsl
+       http://transpect.io/hub2html/xsl/css-atts2wrap.xsl
        It is redundantly included here in order to keep the number
        of external dependencies small. -->
   <xsl:template name="css:move-to-attic" as="element(css:rule)">
