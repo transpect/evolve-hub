@@ -56,6 +56,28 @@
     </xsl:copy>
   </xsl:template>
   
+  <!-- Paras that start with a tab -->
+  <xsl:template match="dbk:para[not(@role = $hub:equation-roles)]
+                               [
+                                 .//dbk:tab[hub:same-scope(., current())]
+                                           [not(parent::dbk:tabs)]
+                                           [every $text in current()//text()[hub:same-scope(., current())]
+                                                                            [matches(., '\S')]
+                                            satisfies ($text &gt;&gt; .)]
+                               ]" 
+                mode="hub:tabs-to-indent" priority="1.5">
+    <xsl:variable name="tab-decl" as="element(dbk:tab)?"
+                  select="(dbk:tabs/dbk:tab[1], key('hub:style-by-role', @role)/dbk:tabs/dbk:tab[1])[1]"/>
+    <xsl:variable name="tabstop" as="xs:double"
+      select="(for $t in $tab-decl return hub:to-twips($t/@horizontal-position), $hub:default-tabstop)[1]"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@* except @text-indent" mode="#current"/>
+      <xsl:attribute name="text-indent" 
+        select="((@text-indent[. castable as xs:double], 0)[1] cast as xs:double) + $tabstop"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
   <xsl:template match="*[self::figure | self::table][title/(. | key('hub:style-by-role', @role))/@css:margin-left]"
                 mode="hub:tabs-to-indent" priority="2.5">
     <xsl:copy>
