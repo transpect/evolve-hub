@@ -38,12 +38,12 @@
   </xsl:template>-->
   
   <xsl:template match="  *[not(self::title or child::title) or self::figure or self::table or self::equation]
-                          [letex:element-with-tab-and-matching-mark-regex(.)] 
+                          [hub:element-with-tab-and-matching-mark-regex(.)] 
                        | dbk:para[not(hub:is-equation-para(.))]" 
                 mode="hub:tabs-to-indent">
       <xsl:copy>
       <xsl:variable name="default-tabstop" as="xs:double"
-        select="if (letex:element-with-tab-and-matching-mark-regex(.))
+        select="if (hub:element-with-tab-and-matching-mark-regex(.))
                 then $hub:default-tabstop
                 else 0"/>
       <xsl:attribute name="text-indent" 
