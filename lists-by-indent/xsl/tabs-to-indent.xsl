@@ -12,7 +12,7 @@
 
   <!-- variable mark-regex: a node matching this regex always has to be followed by a tab element! -->
   <xsl:variable name="mark-regex" select="'^([&#x25a1;&#x25cf;&#x2212;&#x2022;&#x2012;-&#x2015;&#x23AF;&#xF0B7;&#xF0BE;&#61485;-]|[\(\[]?(\p{Ll}+|\p{Lu}+|[0-9]+)[.\)\]]?)$'"/>
-  <xsl:variable name="mark-exceptions" select="'^(BEISPIEL|ANMERKUNG)$'"/>
+  <xsl:variable name="mark-exceptions" select="'^(BEISPIEL|ANMERKUNG)$'" as="xs:string"/>
   <xsl:variable name="hub:float-names" select="('figure', 'table', 'informaltable')"/>
   <xsl:variable name="hub:default-tabstop" as="xs:double" select="400"/>
 	<xsl:variable name="hub:no-tabs" select="('bibliomisc','biblioentry','anchor', 'appendix')"/>
@@ -21,7 +21,10 @@
   <!-- seems to work for IDML output already (@margin-left, @text-indent already present). 
        To do: use the tabstop information from style definitions. -->
 
-  <xsl:template match="*[
+  <!-- GI 2015-11-26: There hasn’t been a @tab-stops attribute for quite some time. This template isn’t used any more.
+    The question is whether [@tab-stops] should be replaced with [tabs | key('hub:style-by-role', @role)/tabs] -->
+
+  <!--<xsl:template match="*[
                          @tab-stops
                          and (node()[not(self::*/name()=$hub:no-tabs)])[1]/self::tab
                        ][
@@ -32,15 +35,15 @@
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:apply-templates select="node() except node()[1]" mode="#current"/>
     </xsl:copy>
-  </xsl:template>
-
+  </xsl:template>-->
+  
   <xsl:template match="  *[not(self::title or child::title) or self::figure or self::table or self::equation]
-                          [hub:element-with-tab-and-matching-mark-regex(.)] 
-                       | dbk:para[not(@role = $hub:equation-roles)]" 
+                          [letex:element-with-tab-and-matching-mark-regex(.)] 
+                       | dbk:para[not(hub:is-equation-para(.))]" 
                 mode="hub:tabs-to-indent">
       <xsl:copy>
       <xsl:variable name="default-tabstop" as="xs:double"
-        select="if (hub:element-with-tab-and-matching-mark-regex(.))
+        select="if (letex:element-with-tab-and-matching-mark-regex(.))
                 then $hub:default-tabstop
                 else 0"/>
       <xsl:attribute name="text-indent" 
@@ -55,6 +58,11 @@
       <xsl:apply-templates select="node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
+  
+  <xsl:function name="hub:is-equation-para" as="xs:boolean">
+    <xsl:param name="para" as="element(*)"/>
+    <xsl:sequence select="$para/@role = $hub:equation-roles"/>
+  </xsl:function>
   
   <!-- Paras that start with a tab -->
   <xsl:template match="dbk:para[not(@role = $hub:equation-roles)]
@@ -205,7 +213,7 @@
   
   <xsl:template match="@css:list-style-type" mode="hub:list-style-type">
     <phrase role="hub:identifier">
-      <!--<xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tabs-to-indent_liststyletype')"/>-->
+      <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tabs-to-indent_liststyletype')"/>
       <xsl:choose>
         <xsl:when test=". = 'box'"><xsl:value-of select="'&#x25fd;'"/></xsl:when>
         <xsl:when test=". = 'check'"><xsl:value-of select="'&#x2713;'"/></xsl:when>

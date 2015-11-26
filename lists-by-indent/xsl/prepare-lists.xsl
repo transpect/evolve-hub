@@ -21,7 +21,7 @@
   xpath-default-namespace="http://docbook.org/ns/docbook"
   exclude-result-prefixes = "w o v wx xs dbk pkg r rel word200x exsl saxon fn tr">
 
-  <!-- Unterpunkte einer Liste in vorheriges listitem packen -->
+  <!-- Pull sub list items into preceding list item. -->
   <xsl:template match="listitem[following-sibling::node()[1][self::listitem[orderedlist and count(node()) = count(orderedlist)]]]" mode="hub:prepare-lists">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>

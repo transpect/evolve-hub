@@ -126,7 +126,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="blockquote[parent::entry]" mode="hub:postprocess-lists">
+  <xsl:template match="blockquote[parent::entry]" mode="hub:postprocess-lists" priority="2">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
@@ -153,9 +153,35 @@
                          (: also covers the common case not(preceding-sibling::node()) ! :)
                        ]" mode="hub:postprocess-lists"/>
 
-  <xsl:template match="@margin-left" mode="hub:postprocess-lists"/>
+  <!-- remove attributes set by mode twipsify-lengths and used by lists-by-indent -->
+  <xsl:template match="@*[name() = $twipsify-lengths-attribute-names]" mode="hub:postprocess-lists">
+    <xsl:variable name="css-rule" as="element()*"
+      select="(key('hub:style-by-role', parent::*/@role))[1]"/>
+    <xsl:if test="not(
+                    $css-rule/@*[name() eq current()/name()] eq current() or
+                    $css-rule/css:attic/@*[name() eq current()/name()] eq current()
+                  )">
+      <xsl:copy/>
+    </xsl:if>
+  </xsl:template>
   
-  <xsl:template match="@text-indent" mode="hub:postprocess-lists"/>
+  <!-- remove these attributes below listitem in any case -->
+  <xsl:template match="  @margin-left | listitem/para/@css:margin-left
+                       | @text-indent | listitem/para/@css:text-indent" 
+                mode="hub:postprocess-lists" priority="1"/>
+  
+  <!-- Idea for improvement: add the net indentation (css:margin-left + text-indent) as css:margin-left to each 
+    itemizedlist, orderedlist, variablelist element. The issue with this approach may be: when converting
+    the css properties to style attributes on HTML’s ol, ul, or dl elements, the nested lists
+    receive an *extra* margin-left, in addition to the default indentation. -->
+
+  
+  <xsl:template match="listitem/para" mode="hub:postprocess-lists">
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:apply-templates  mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
   
   <!-- css:display = 'block' has been introduced by NoList overrides in IDML -->
   <xsl:template match="listitem/para/@css:display[. = 'block']"/>

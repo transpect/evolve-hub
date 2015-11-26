@@ -46,6 +46,7 @@
   <xsl:param name="debug-path" select="concat($stylesheet-dir, 'debug')"/>
   <xsl:param name="set-debugging-info-origin" select="'false'"/>
   <xsl:param name="srcpaths" select="'no'"/>
+  <xsl:param name="create-caption-numtext-separator" select="'no'"/>
   <xsl:param name="expand-css-properties" select="'yes'"/>
   <xsl:param name="remove-HyperlinkTextDestination-links" select="'no'"/>
   <xsl:param name="aux" select="'no'"/>
@@ -94,6 +95,8 @@
 
 
   
+  <xsl:variable name="hub:no-identifier-needed" select="'^tr_no_id_style$'" as="xs:string"/>
+  
   <xsl:template match="sidebar[hub:is-in-sidebar-without-purpose(.)]" mode="hub:dissolve-sidebars-without-purpose">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
@@ -102,8 +105,15 @@
  <!-- if sidebars above are dissolved also paras whose only purpose is to reference such a sidebar can be discarded -->
   <xsl:template match="anchor[key('hub:linking-item-by-id', @xml:id)[hub:is-in-sidebar-without-purpose(.)]]" mode="hub:dissolve-sidebars-without-purpose"/>
   
-  <xsl:template match="para[.//anchor[key('hub:linking-item-by-id', @xml:id)[hub:is-in-sidebar-without-purpose(.)]][hub:same-scope(., current())]]
-    [matches(hub:same-scope-text(.), '^\s*$')]" mode="hub:dissolve-sidebars-without-purpose"/>
+  <xsl:template match="para[.//anchor[key('hub:linking-item-by-id', @xml:id)[hub:is-in-sidebar-without-purpose(.)]]
+                                     [hub:same-scope(., current())]]
+                                     [matches(hub:same-scope-text(.), '^\s*$')]
+                                     [every $elt in * satisfies $elt[self::anchor[key('hub:linking-item-by-id', @xml:id)[hub:is-in-sidebar-without-purpose(.)]]] or 
+                                      self::phrase[every $child in * satisfies $child[self::anchor[key('hub:linking-item-by-id', @xml:id)[hub:is-in-sidebar-without-purpose(.)]]]]
+                                     ]" 
+                mode="hub:dissolve-sidebars-without-purpose">
+    <!-- this template discards page anchors etc.-->
+  </xsl:template>
   
   <xsl:function name="hub:is-in-sidebar-without-purpose" as="xs:boolean">
     <xsl:param name="context" as="element(*)"/>
@@ -291,41 +301,43 @@
   <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]]" mode="hub:join-tables">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="row" group-adjacent="exists(entry[matches(@role, $hub:split-style-regex)] | entry[parent::*/preceding-sibling::*[1]/entry[matches(@role, $hub:split-style-regex)]])">
-         <xsl:choose>
-          <xsl:when test="current-grouping-key()">
-            <xsl:copy>
-              <xsl:apply-templates select="@*" mode="#current"/>
-              <xsl:for-each select="entry">
-                <xsl:copy>
-                  <xsl:apply-templates select="@*" mode="#current"/>
-                  <xsl:variable name="pos" select="position()"/>
-                  <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" 
-                    group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) or 
-                                           (not(exists(preceding-sibling::*)) and 
-                                            parent::*[self::entry[parent::*[self::row[preceding-sibling::*[self::row[entry[matches(@role, $hub:split-style-regex)]/para[matches(@role, $hub:split-style-regex)]]]]]]])])">
-                    <xsl:choose>
-                      <xsl:when test="current-grouping-key()">
-                        <xsl:copy>
-                          <xsl:call-template name="hub:merge-srcpaths">
-                            <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
-                          </xsl:call-template>
+      <xsl:for-each-group select="row" group-starting-with="*[self::row][entry[matches(@role, $hub:split-style-regex)][not(parent::*/preceding-sibling::*[1][entry[matches(@role, $hub:split-style-regex)]])]]">
+         <xsl:for-each-group select="current-group()" group-adjacent="exists(entry[matches(@role, $hub:split-style-regex)] | entry[parent::*/preceding-sibling::*[1]/entry[matches(@role, $hub:split-style-regex)]])">
+          <xsl:choose>
+            <xsl:when test="current-grouping-key()">
+              <xsl:copy>
+                <xsl:apply-templates select="@*" mode="#current"/>
+                <xsl:for-each select="entry">
+                  <xsl:copy>
+                    <xsl:apply-templates select="@*" mode="#current"/>
+                    <xsl:variable name="pos" select="position()"/>
+                    <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" 
+                      group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) or 
+                                             (not(exists(preceding-sibling::*)) and 
+                                             parent::*[self::entry[parent::*[self::row[preceding-sibling::*[1][self::row[entry[position() = last()][matches(@role, $hub:split-style-regex)]/para[position() = last()][matches(@role, $hub:split-style-regex)]]]]]]])])">
+                      <xsl:choose>
+                        <xsl:when test="current-grouping-key()">
+                          <xsl:copy>
+                            <xsl:call-template name="hub:merge-srcpaths">
+                              <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
+                            </xsl:call-template>
                           <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
-                        </xsl:copy>
-                      </xsl:when>
+                          </xsl:copy>
+                          </xsl:when>
                       <xsl:otherwise>
-                        <xsl:apply-templates select="current-group()" mode="#current"/>
-                      </xsl:otherwise>
-                    </xsl:choose>
-                  </xsl:for-each-group>
-                </xsl:copy>
-              </xsl:for-each>
-            </xsl:copy>
-          </xsl:when>
+                            <xsl:apply-templates select="current-group()" mode="#current"/>
+                        </xsl:otherwise>
+                      </xsl:choose>
+                      </xsl:for-each-group>
+                  </xsl:copy>
+                </xsl:for-each>
+              </xsl:copy>
+            </xsl:when>
           <xsl:otherwise>
-            <xsl:apply-templates select="current-group()" mode="#current"/>
-          </xsl:otherwise>
-        </xsl:choose>
+              <xsl:apply-templates select="current-group()" mode="#current"/>
+            </xsl:otherwise>
+          </xsl:choose>
+          </xsl:for-each-group>
       </xsl:for-each-group>
     </xsl:copy>
   </xsl:template>
@@ -903,7 +915,11 @@
     <xsl:sequence select="''"/>
   </xsl:template>
   
-  <xsl:template match="text()[matches(., '^[\p{Zs}\s]+$')]
+  <!-- overwrite this variable to join i.e. punctuation text nodes between phrase elements -->
+  <xsl:variable name="hub:join-phrases-text-node-regex" as="xs:string"
+    select="'^[\p{Zs}\s]+$'"/>
+  
+  <xsl:template match="text()[matches(., $hub:join-phrases-text-node-regex)]
                              [hub:signature(preceding-sibling::*[1]) = hub:signature(following-sibling::*[1])]" 
                 mode="hub:phrase-signature" as="xs:string">
     <xsl:sequence select="hub:signature(preceding-sibling::*[1])"/>
@@ -1475,48 +1491,11 @@
               <xsl:apply-templates select="current-group()[position() gt 1]" mode="#current" />
             </formalpara>
           </xsl:for-each-group>
-				</xsl:when>
-				<xsl:when test="current-grouping-key()">
-          <xsl:variable name="list-regex" select="concat('^', if ($regex-container/*[@list='yes']/@regex) then $regex-container/*[@list='yes']/@regex else '', '$')" as="xs:string" />
-          <xsl:for-each-group select="current-group()" group-ending-with="*[matches(@role, $list-regex)][not(following-sibling::*[1][matches(@role, $list-regex)])]">
-            <xsl:choose>
-              <xsl:when test="current-group()[last()][matches(@role, $list-regex)]">
-                <para role="{$regex-container/*[1]/@role}">
-                  <!-- save srcpath attributes -->
-                  <xsl:variable name="srcpaths" select="for $i in current-group() return if ($i[matches(@role, $list-regex) or $i/self::informaltable]) then () else $i/@srcpath"/>
-                  <xsl:if test="$srcpaths">
-                    <xsl:attribute name="srcpath" select="string-join($srcpaths, '&#x20;')"/>
-                  </xsl:if>
-                  <xsl:for-each select="current-group()">
-                    <xsl:choose>
-                      <xsl:when test="matches(@role, $list-regex) or self::informaltable">
-                        <xsl:apply-templates select="." mode="#current"/>
-                      </xsl:when>
-                      <xsl:otherwise>
-                        <xsl:apply-templates select="current()/node()" mode="#current"/>
-                      </xsl:otherwise>
-                    </xsl:choose>
-                  </xsl:for-each>
-                </para>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:for-each select="current-group()">
-                  <xsl:choose>
-                    <xsl:when test="local-name()=('table', 'informaltable')">
-                      <para role="{$regex-container/*[1]/@role}">
-                        <xsl:apply-templates select="@srcpath, ." mode="#current" />
-                      </para>
-                    </xsl:when>
-                    <xsl:otherwise>
-                      <para role="{if (matches(@role, $hub:blockquote-role-regex)) then @role else $regex-container/*[1]/@role}">
-                        <xsl:apply-templates select="@srcpath, node()" mode="#current" />
-                      </para>
-                    </xsl:otherwise>
-                  </xsl:choose>
-                </xsl:for-each>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:for-each-group>
+		</xsl:when>
+		<xsl:when test="current-grouping-key()">
+          <formalpara role="{$regex-container/*[1]/@role}">
+            <xsl:apply-templates select="current-group()" mode="#current" />
+          </formalpara>
         </xsl:when>
         <!-- no node in current-group conforms to the current hub:regex-container -->
         <xsl:otherwise>
@@ -1809,12 +1788,17 @@
        adjacent paras with right tabs. There is no preferred point in the pipeline when this 
        mode should run. Maybe run it before lists. Requires that hub:split-at-tab has run before. -->
   <xsl:template match="*[*[local-name() = $hub:split-at-tab-element-names][tab[@role = 'right'][not(preceding-sibling::*[local-name() = 'br'])]]]"
-    mode="hub:right-tab-to-tables">
+    mode="hub:right-tab-to-tables"  priority="3">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="*" 
         group-adjacent="exists(self::*[local-name() = $hub:split-at-tab-element-names][tab[@role = 'right'][not(preceding-sibling::*[local-name() = 'br'])]])">
         <xsl:choose>
+          <xsl:when test="current-grouping-key() and current-group()[every $tab in tab[@role = 'right']/following-sibling::node()[1] satisfies matches($tab, $hub:post-identifier-regex, 'x')]">
+            <xsl:apply-templates select="current-group()" mode="#current">
+              <xsl:with-param name="set-post-identifier" as="xs:boolean" tunnel="yes" select="true()"/>
+            </xsl:apply-templates>
+          </xsl:when>
           <xsl:when test="current-grouping-key()">
             <informaltable role="hub:right-tab">
               <tgroup cols="2">
@@ -1835,22 +1819,41 @@
   </xsl:template>
 
   <xsl:template match="*[local-name() = $hub:split-at-tab-element-names][tab[@role = 'right'][not(preceding-sibling::*[local-name() = 'br'])]]"
-    mode="hub:right-tab-to-tables">
-    <row>
-      <entry colname="c1" >
-        <simpara>
-          <xsl:copy-of select="@srcpath"/>
+    mode="hub:right-tab-to-tables" priority="3">
+    <xsl:param name="set-post-identifier" as="xs:boolean?" tunnel="yes"/>
+    <xsl:choose>
+      <xsl:when test="$set-post-identifier">
+        <xsl:copy copy-namespaces="no">
+          <xsl:copy-of select="@*"/>
           <xsl:apply-templates select="tab[@role = 'right'][last()]/preceding-sibling::node()" mode="#current"/>
-        </simpara>
-      </entry>
-      <entry colname="c2" role="right-align">
-        <simpara>
-          <xsl:apply-templates select="tab[@role = 'right'][last()]/following-sibling::node()" mode="#current"/>
-        </simpara>
-      </entry>
-    </row>
+        <xsl:element name="phrase">
+            <xsl:attribute name="role" select="'hub:post-identifier'"/>
+            <xsl:apply-templates select="tab[@role = 'right'][last()]/following-sibling::node()" mode="#current"/>
+          </xsl:element>
+        </xsl:copy>
+      </xsl:when>
+      <xsl:otherwise>
+        <row>
+          <entry colname="c1" >
+            <simpara>
+              <xsl:copy-of select="@srcpath"/>
+              <xsl:apply-templates select="tab[@role = 'right'][last()]/preceding-sibling::node()" mode="#current"/>
+            </simpara>
+          </entry>
+        <entry colname="c2" role="right-align">
+            <simpara>
+              <xsl:apply-templates select="tab[@role = 'right'][last()]/following-sibling::node()" mode="#current"/>
+            </simpara>
+          </entry>
+        </row>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
+  <xsl:variable name="hub:post-identifier-regex" select="'^\p{Lu}\d+\.\d+$'" as="xs:string">
+    <!-- This regex controls whether to create a table or only a phrase @role="hub:post-identifier". The above case covers string like F8.90 -->
+  </xsl:variable>
+  
   <!-- mode: hub:repair-hierarchy
        don't nest sidebars -->
   <xsl:template match="sidebar[not(@remap)][descendant::sidebar[not(@remap)]]"
@@ -2068,8 +2071,11 @@
               '^(', $hub:figure-caption-start-regex, '|', $hub:table-caption-start-regex, '|', $hub:listing-caption-start-regex, ')(', $hub:caption-sep-regex, ')(', $hub:caption-number-regex, ')'
             )" />
 
+  <xsl:variable name="hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional" as="xs:string"
+    select="'[ .:&#xa0;&#x2002;&#8212;]'"/>
+
   <xsl:variable name="hub:caption-sep-among-caption-number-and-caption-text-regex" as="xs:string"
-    select="'[ .:&#xa0;&#x2002;&#8212;]?'"/>
+    select="concat($hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, '?')"/>
 
   <!-- §§§ to clarify: what is a 'sep' in captions? Isn`t <tab/> a separator? -->
   <xsl:variable name="hub:caption-number-plus-sep-regex" as="xs:string"
@@ -2153,6 +2159,7 @@
     <xsl:analyze-string select="." regex="{$hub:itemizedlist-mark-at-start-regex}" flags="s">
       <xsl:matching-substring>
         <phrase role="hub:identifier">
+          <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'itemizedlistmark-and-ancer')"/>
           <xsl:value-of select="regex-group(1)" />
         </phrase>
         <xsl:if test="not($context/following-sibling::node()[1]/self::tab)">
@@ -2193,6 +2200,7 @@
                                and following-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::tab
                              ]" mode="hub:identifiers">
     <phrase role="hub:identifier">
+      <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet')"/>
       <xsl:copy>
         <xsl:apply-templates select="@*" mode="#current"/>
         <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
@@ -2205,6 +2213,7 @@
   -->
   <xsl:template match="text()
 		                   [not(parent::phrase[@role eq 'hub:identifier'])]
+		                   [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
 		                   [not(ancestor::*:math)]
 		                   [
                          matches(., $hub:orderedlist-mark-at-start-regex)
@@ -2221,21 +2230,33 @@
                          )
                          and . is (ancestor::*[self::para or self::tocentry or self::title[not(parent::section)]][1]//text())[1]
                        ]" mode="hub:identifiers">
+    <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:variable name="context" select="." as="text()" />
     <xsl:variable name="parent" select="parent::*[1]" as="element()"/>
     <xsl:analyze-string select="." regex="{$hub:orderedlist-mark-at-start-regex}">
       <xsl:matching-substring>
         <xsl:choose>
-          <xsl:when test="$context/following-sibling::node()[1]/self::tab and matches($context, concat($hub:orderedlist-mark-at-start-regex, '[A-Za-z]'))">
+          <xsl:when test="$context/following-sibling::node()[1]/self::tab and matches($context, concat($hub:orderedlist-mark-at-start-regex, '[A-Za-z]')) or $hub:already-identified">
             <xsl:value-of select="." />
           </xsl:when>
           <xsl:otherwise>
             <phrase role="hub:identifier">
+              <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'orderlist-text1')"/>
               <xsl:value-of select="regex-group(1)" />
             </phrase>
           </xsl:otherwise>
         </xsl:choose>
-        <xsl:if test="not($context/following::node()[1]/self::tab) and not(every $t in $parent/* satisfies $t = $context)">
+        <xsl:if test="((
+                         matches(regex-group(0), '[\s\p{Zs}]+$')
+                         and
+                         not($context/following::*[1]/self::tab)
+                      )
+                      or 
+                      (
+                        not($context/following::node()[1]/self::tab) and 
+                        not(every $t in $parent/(* | text()) satisfies $t = $context)
+                      ))
+                      and not($hub:already-identified)">
           <tab>
             <xsl:text>&#9;</xsl:text>
           </tab>
@@ -2267,15 +2288,25 @@
         <xsl:when test="phrase[@role eq 'hub:identifier']">
           <xsl:apply-templates mode="#current"/>
         </xsl:when>
+        <xsl:when test="not(tab) and matches(normalize-space(.), $hub:orderedlist-mark-regex)">
+          <xsl:apply-templates mode="#current">
+            <xsl:with-param name="hub:already-identified" select="false()" tunnel="yes" as="xs:boolean"/>
+          </xsl:apply-templates>
+        </xsl:when>
         <xsl:when test="tab[following-sibling::node()[self::text() or self::phrase]] and not(phrase[@role eq 'hub:caption-number'])">
           <xsl:variable name="tab" select="tab[1]" as="element(tab)"/>
           <phrase role="hub:identifier">
-            <xsl:apply-templates select="node()[ . &lt;&lt; $tab]" mode="#current"/>
+            <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'section-title-identifier')"/>
+            <xsl:apply-templates select="node()[ . &lt;&lt; $tab]" mode="#current">
+              <xsl:with-param name="hub:already-identified" select="true()" tunnel="yes" as="xs:boolean"/>
+            </xsl:apply-templates>
           </phrase>
           <xsl:apply-templates select="$tab | node()[ . &gt;&gt; $tab]" mode="#current"/>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:apply-templates mode="#current"/>
+          <xsl:apply-templates mode="#current">
+            <xsl:with-param name="hub:already-identified" select="true()" tunnel="yes" as="xs:boolean"/>
+          </xsl:apply-templates>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:copy>
@@ -2284,10 +2315,13 @@
   <xsl:variable name="hub:caption-tagging-for-listings" as="xs:boolean"
     select="false()" />
 
+  <xsl:variable name="hub:create-caption-numtext-separator" as="xs:boolean"
+    select="if(hub:boolean-param($create-caption-numtext-separator)) then true() else false()" />
+
   <!-- This template has a name so that you can match another element (e.g., sidebar[@role = 'o_table']/title)
        in your importing stylesheet and treat it as a float title. -->
-  <xsl:template match="  figure/title 
-                       | table/title 
+  <xsl:template match="  figure/title[not(matches(@role, $hub:no-identifier-needed))]
+                       | table/title[not(matches(@role, $hub:no-identifier-needed))]
                        | mediaobject/caption
                        | formalpara[@role eq 'Programcode'][$hub:caption-tagging-for-listings]/title" 
     name="hub:float-title-identifier" 
@@ -2306,10 +2340,14 @@
                                               [not(phrase[@role = 'hub:identifier'])]
                         and 
                         node()[2]/self::tab and not(parent::*/@label)">
+          <xsl:if test="node()[1][anchor]">
+            <xsl:apply-templates select="node()[1]/anchor" mode="#current"/>
+          </xsl:if>
           <phrase role="hub:caption-number">
             <xsl:analyze-string select="node()[1]" regex="{$hub:number-and-suffix-id-regex}">
               <xsl:matching-substring>
                 <phrase role="hub:identifier">
+                  <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'float-title-tab-identifier')"/>
                   <xsl:value-of select="."/>
                 </phrase>
               </xsl:matching-substring>
@@ -2335,6 +2373,7 @@
             <xsl:analyze-string select="$identifier" regex="{$hub:number-and-suffix-id-regex}">
               <xsl:matching-substring>
                 <phrase role="hub:identifier">
+                  <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'identifier-with-prec-anchors')"/>
                   <xsl:value-of select="."/>
                 </phrase>
               </xsl:matching-substring>
@@ -2355,6 +2394,7 @@
                   <xsl:analyze-string select="." regex="{$hub:number-and-suffix-id-regex}">
                     <xsl:matching-substring>
                       <phrase role="hub:identifier">
+                        <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'figtablist-identi')"/>
                         <xsl:value-of select="."/>
                       </phrase>
                     </xsl:matching-substring>
@@ -2408,11 +2448,12 @@
               </xsl:otherwise>
             </xsl:choose>
           </xsl:variable>
-          <xsl:apply-templates select="anchor[matches(string-join(following-sibling::node(), ''), $hub:caption-number-without-sep-regex)]" mode="#current"/>
+          <xsl:apply-templates select="descendant::*[self::anchor | self::indexterm][matches(string-join(following-sibling::node(), ''), $hub:caption-number-without-sep-regex)]" mode="#current"/>
           <phrase role="hub:caption-number">
             <xsl:analyze-string select="$caption-number" regex="{$hub:number-and-suffix-id-regex}">
               <xsl:matching-substring>
                 <phrase role="hub:identifier">
+                  <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'identifier-in-capnum-without-sep')"/>
                   <xsl:value-of select="."/>
                 </phrase>
               </xsl:matching-substring>
@@ -2430,15 +2471,23 @@
               </xsl:apply-templates>
             </phrase>
           </xsl:variable>
-          <xsl:apply-templates select="$caption-number-with-tagged-separator" mode="hub:fix-floats-strip-num">
+          <xsl:if test="$hub:create-caption-numtext-separator and 
+                        exists($caption-number-with-tagged-separator//hub:caption-separator/node())">
+            <phrase role="hub:caption-numtext-separator">
+              <xsl:sequence select="$caption-number-with-tagged-separator//hub:caption-separator/node()"/>
+            </phrase>
+          </xsl:if>
+        <xsl:apply-templates select="$caption-number-with-tagged-separator" mode="hub:fix-floats-strip-num">
             <xsl:with-param name="insert-tab" tunnel="yes"
-              select="if(contains($cleaned-text, '&#x9;')) then false() else true()"/>
+              select="if(contains($cleaned-text, '&#x9;') or $hub:create-caption-numtext-separator) 
+                      then false() else true()"/>
           </xsl:apply-templates>
         </xsl:when>
 
         <xsl:when test="tab">
           <xsl:variable name="tab" select="tab[1]"/>
           <phrase role="hub:identifier">
+            <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tab-identifier')"/>
             <xsl:apply-templates select="node()[ . &lt;&lt; $tab]" mode="#current"/>
           </phrase>
           <xsl:apply-templates select="$tab | node()[ . &gt;&gt; $tab]" mode="#current"/>
@@ -2460,6 +2509,7 @@
             <xsl:analyze-string select="$caption-number" regex="[0-9]+">
               <xsl:matching-substring>
                 <phrase role="hub:identifier">
+                  <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'float-cap-start-identifier')"/>
                   <xsl:value-of select="." />
                 </phrase>
               </xsl:matching-substring>
@@ -2497,6 +2547,8 @@
     <xsl:param name="caption-number" as="xs:string" tunnel="yes"/>
     <xsl:param name="parent" as="element(*)" tunnel="yes"/>
    
+    <xsl:variable name="context" select="." as="node()"/>
+   
     <xsl:variable name="previous-text"
       select="replace(
                 string-join(preceding::text()[. &gt;&gt; $parent], ''),
@@ -2505,21 +2557,65 @@
               )" as="xs:string"/>
     <xsl:choose>
       <!-- current node is an element and previous text is exactly the caption-number -->
-      <xsl:when test="self::* and $previous-text eq $caption-number">
-        <hub:caption-separator/>
-        <xsl:next-match/>
+      <!--<xsl:when test="self::* and $previous-text eq $caption-number and 
+                      not(
+                        matches(
+                          following::node()[1], 
+                          concat('^', $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional)
+                      ))">
+        <hub:caption-separator role="start" hub-origin="el-is-capnum"/>
+      </xsl:when>-->
+      
+      <!-- tag all optional caption separator chars after caption-number -->
+      <xsl:when test=". instance of text() and 
+                      matches(
+                        $previous-text, 
+                        concat(
+                          '^(',
+                          $caption-number, 
+                          $hub:caption-sep-among-caption-number-and-caption-text-regex,
+                          ')$'
+                        )
+                      )">
+        <xsl:analyze-string select="." regex="{concat('^(', $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, ')')}">
+          <xsl:matching-substring>
+            <hub:caption-separator hub-origin="text-with-capnum-and-sep">
+              <xsl:analyze-string select="." regex="&#x9;">
+                <xsl:matching-substring>
+                  <tab/>
+                </xsl:matching-substring>
+                <xsl:non-matching-substring>
+                  <xsl:value-of select="."/>
+                </xsl:non-matching-substring>
+              </xsl:analyze-string>
+            </hub:caption-separator>
+          </xsl:matching-substring>
+          <xsl:non-matching-substring>
+            <xsl:value-of select="."/>
+          </xsl:non-matching-substring>
+        </xsl:analyze-string>
       </xsl:when>
       
-      <!-- current node is text() and previous-text does not start with caption-number -->
+      <!-- current node is text() and previous-text does not start with caption-number 
+           (the current node is part of the caption-number and/or part of the caption-text) -->
       <xsl:when test=". instance of text() and not(starts-with($previous-text, $caption-number))">
         <xsl:variable name="current-text" select="." as="xs:string"/>
         <xsl:variable name="end-position" select="hub:get-endpos-of-string1-in-string2($caption-number, $previous-text, ., 1)" as="element(hub:pos)?"/>
         
         <xsl:choose>
           <xsl:when test="exists($end-position)">
-            <xsl:analyze-string select="$current-text" regex="{string-join(('^', for $i in (1 to xs:integer($end-position/@val)) return '.', '(', $hub:caption-sep-regex, ')?'), '')}">
+            <xsl:analyze-string select="$current-text" 
+              regex="{string-join(
+                        (
+                          '^', 
+                          for $i in (1 to xs:integer($end-position/@val)) return '.', 
+                          '(', $hub:caption-sep-among-caption-number-and-caption-text-regex, ')?'
+                        ), 
+                        '')}">
               <xsl:matching-substring>
-                <hub:caption-separator/>
+                <hub:caption-separator hub-origin="text-is-part-of-capnum">
+                  <xsl:value-of select="regex-group(1)"/>
+                </hub:caption-separator>
               </xsl:matching-substring>
               <xsl:non-matching-substring>
                 <xsl:value-of select="."/>
@@ -2540,22 +2636,43 @@
   <!-- Remember to add this mode to the list of catch-all modes
        if specifying the modes explicitly -->
   
-  <!-- current node is the or part of the caption-number, see mode hub:insert-caption-num-to-text-separator
-  There may be more than one hub:caption-separator. Did not check thoroughly, but it probably happens when
-  the caption starts with whitespace. We’ll remove everything before the *last* hub:caption-separator -->
-  <!-- I had the problem that the separator was inside an italic phrase and so the phrase was cmpletely discarded. I added the last condition though.
-    We should split the hub:identifier mode soon into several modes -->
-  <xsl:template match="node()[ . &lt;&lt; (ancestor::*[last()]//hub:caption-separator)[last()][not(. is current()/node()[1])]]" mode="hub:fix-floats-strip-num"/>
-
+  <!-- current node is the, part of the caption-number or an element containing hub:caption-separator, 
+       see mode hub:insert-caption-num-to-text-separator. There may be more than one hub:caption-separator! -->
+  <xsl:template match="node()[not(self::hub:caption-separator)][ . &lt;&lt; (ancestor::*[last()]//hub:caption-separator)[1]]" mode="hub:fix-floats-strip-num" priority="1">
+    <xsl:apply-templates select="hub:caption-separator" mode="#current"/>
+  <xsl:apply-templates select="node()[not(self::hub:caption-separator)][preceding-sibling::hub:caption-separator]" mode="#current"/>
+  </xsl:template>
   <xsl:template match="hub:caption-separator" mode="hub:fix-floats-strip-num">
     <xsl:param name="insert-tab" select="false()" tunnel="yes"/>
-    <xsl:if test="$insert-tab and not(matches(following-sibling::node()[1], '^\s*[.:]'))">
-      <tab>
-        <xsl:text>&#9;</xsl:text>
-      </tab>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test=". is (ancestor::*[last()]//hub:caption-separator)[1] and
+                       not($hub:create-caption-numtext-separator) and 
+                       $insert-tab and 
+                       not(matches(string-join(following::hub:caption-separator, ''), '^\p{Zs}*[.:]'))">
+       <tab>
+         <xsl:text>&#9;</xsl:text>
+       </tab>
+      </xsl:when>
+      <xsl:when test="not($hub:create-caption-numtext-separator)">
+        <xsl:apply-templates mode="#current"/>
+      </xsl:when>
+      <!-- otherwise: do not output caption separator, already tagged in <phrase role="hub:caption-numtext-separator"> -->
+      <xsl:otherwise/>
+    </xsl:choose>
   </xsl:template>
   
+
+  <xsl:template mode="hub:fix-floats-strip-num"
+    match="node()[not(self::hub:caption-separator)][*][every $e in .//* satisfies $e/self::hub:caption-separator]">
+    <xsl:choose>
+      <xsl:when test="not($hub:create-caption-numtext-separator)">
+        <xsl:next-match/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates mode="#current"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
   <!-- mode: hub:twipsify-lengths -->
 
@@ -2646,7 +2763,7 @@
                             '$1'
                           )"/>
     <link>
-      <xsl:apply-templates select="@role, node()" mode="#current"/>
+      <xsl:apply-templates select="@*[name() = ('role', 'srcpath')], node()" mode="#current"/>
     </link>
     <xsl:value-of select="replace(
                             text()[
@@ -2776,6 +2893,11 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
+  <!-- Remove phrases that have been created by split-at-tab or that have lost their style -->
+  <xsl:template match="phrase[not(@role)][every $att in @* satisfies ($att/self::attribute(srcpath))]" mode="hub:clean-hub">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+
   <!-- move trailing whitespace outside of links. Changed template because it made problems with whitespaces inside links. Content was duplicated -->
   <xsl:template match="link[every $n in node() satisfies $n instance of text()]
                            [matches(., '[^\p{Zs}][\p{Zs}+]+$')]" mode="hub:clean-hub">
@@ -2798,26 +2920,10 @@
     <xsl:sequence select="$props[name() = name($prop) and . = $prop]"/>
   </xsl:function>
 
-  <xsl:template match="@override[not(/*/@version = '5.1-variant tr_Hub-1.0')]">
+  <xsl:template match="@override[not(/*/@version = '5.1-variant le-tex_Hub-1.0')]">
     <xsl:copy/>
     <xsl:attribute name="css:pseudo-marker_content" select='concat("&apos;", ., "&apos;")'/>
   </xsl:template>
-
-
-  <!-- (lists-by-indent mode: hub:postprocess-lists) -->
-  
-  <!-- remove attributes set by mode twipsify-lengths and used by lists-by-indent -->
-  <xsl:template match="@*[name() = $twipsify-lengths-attribute-names]" mode="hub:postprocess-lists">
-    <xsl:variable name="css-rule" as="element()*"
-      select="(key('hub:style-by-role', parent::*/@role))[1]"/>
-    <xsl:if test="not(
-                    $css-rule/@*[name() eq current()/name()] eq current() or
-                    $css-rule/css:attic/@*[name() eq current()/name()] eq current()
-                  )">
-      <xsl:copy/>
-    </xsl:if>
-  </xsl:template>
-
 
   <!-- mode: hub:ids -->
 
@@ -3011,7 +3117,7 @@
                                                     else if (starts-with(., 'www'))
                                                          then concat('http://', .)
                                                          else ." />
-      <xsl:apply-templates mode="#current"/>
+      <xsl:apply-templates select="@srcpath, node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
 
@@ -3043,6 +3149,7 @@
             </xsl:matching-substring>
             <xsl:non-matching-substring>
               <link>
+                <xsl:apply-templates select="$context/@srcpath" mode="#current"/>
                 <xsl:value-of select="."/>
               </link>
             </xsl:non-matching-substring>
@@ -3226,13 +3333,13 @@
               <xsl:attribute name="role" select="'same-work-internal'" />
             </xsl:otherwise>
           </xsl:choose>
-          <xsl:apply-templates mode="#current"/>
+          <xsl:apply-templates select="@srcpath, node()" mode="#current"/>
         </xsl:copy>
       </xsl:when>
       <xsl:when test="exists($type)">
         <xsl:copy>
           <xsl:attribute name="xlink:href" select="concat('urn:X-hub:unresolved-same-work-externalref?id=', $type, '_', @target-id)" />
-          <xsl:apply-templates mode="#current"/>
+          <xsl:apply-templates select="@srcpath, node()" mode="#current"/>
         </xsl:copy>
       </xsl:when>
       <xsl:otherwise>
@@ -3259,23 +3366,23 @@
   <!-- In this mode sidebars are placed inside the paras they were originally anchored. 
   This should happen before the list modes and after postprocess-hierarchy-->
   <xsl:variable name="sidenote-not-to-be-pulled-in-titles" as="xs:string" select="concat($hub:table-title-role-regex-x, '|', $hub:table-number-role-regex-x, '|', $hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x)"/>
-  <xsl:variable name="sidenote-at-end-of-para-style-regex" as="xs:string" select="'tr_list_para'"/>
+  <xsl:variable name="sidenote-at-end-of-para-style-regex" as="xs:string" select="'letex_list_para'"/>
   
   <xsl:template match="*[not(self::title)]
                         [not(self::para[matches(@role, $sidenote-not-to-be-pulled-in-titles)])]
-                        [anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
-    <xsl:variable name="sidenote-anchor" as="element(anchor)+" select="anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]"/>
+                        [.//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
+    <xsl:variable name="sidenote-anchor" as="element(anchor)+" select=".//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]"/>
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*"/>
       <!-- the out commented code pulls the sidebars to the start or end of the para. It is more useful to do that later, depending on the displaying of the marginal note -->
      <!-- <xsl:apply-templates select="$sidenote-anchor[(string-length(normalize-space(string-join(preceding-sibling::node()//text(), ''))) + string-length(normalize-space(string-join(parent::phrase/preceding-sibling::node()//text(), '')))) lt
         (string-length(normalize-space(string-join(following-sibling::node()//text(), ''))) + string-length(normalize-space(string-join(parent::phrase/following-sibling::node()//text(), ''))))]/key('hub:linking-item-by-id', @xml:id)" mode="hub:reorder-marginal-notes">
-            <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
+            <xsl:with-param name=keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
           </xsl:apply-templates>
           <xsl:apply-templates select="node()" mode="#current"/>
       <xsl:apply-templates select=" $sidenote-anchor[(string-length(normalize-space(string-join(preceding-sibling::node()//text(), ''))) + string-length(normalize-space(string-join(parent::phrase/preceding-sibling::node()//text(), '')))) ge
         (string-length(normalize-space(string-join(following-sibling::node()//text(), ''))) + string-length(normalize-space(string-join(parent::phrase/following-sibling::node()//text(), ''))))]/key('hub:linking-item-by-id', @xml:id)" mode="hub:reorder-marginal-notes">
-        <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
+        <xsl:with-param name="keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
       </xsl:apply-templates>-->
       <xsl:choose>
         <xsl:when test="not(matches(@role, $sidenote-at-end-of-para-style-regex))">
@@ -3285,8 +3392,10 @@
         </xsl:when>
         <xsl:otherwise>
           <!-- For example in lists sidenotes shouldn't be at the beginning to avoid them being put into the term -->
-          <xsl:apply-templates select="node()[not(self::anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]])]" mode="#current"/>
-          <xsl:apply-templates select="anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]" mode="#current">
+          <xsl:apply-templates select="node()" mode="#current">
+            <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
+          </xsl:apply-templates>
+          <xsl:apply-templates select=".//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]" mode="#current">
           <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
           </xsl:apply-templates>
         </xsl:otherwise>
@@ -3295,22 +3404,34 @@
   </xsl:template>
   
   <xsl:template match="phrase[anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes" priority="3">
-    <xsl:param name="insert-sidebars" tunnel="yes"/>
+    <xsl:param name="insert-sidebars" tunnel="yes" as="xs:boolean?"/>
     <xsl:variable name="context" select="." as="element(*)" />
-    <xsl:for-each-group
-      select="descendant::node()" group-starting-with="anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]">
-      <xsl:apply-templates select="current-group()/self::anchor" mode="#current">
-        <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
-      </xsl:apply-templates>
-      <xsl:variable name="upward-projected" as="element(*)">
-        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
-          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]])]" tunnel="yes"/>
-        </xsl:apply-templates>  
-      </xsl:variable>
-      <xsl:if test="$upward-projected/node()">
-        <xsl:sequence select="$upward-projected"/>
-      </xsl:if>
-    </xsl:for-each-group>
+    <xsl:choose>
+      <xsl:when test="$insert-sidebars">
+        <xsl:for-each-group
+          select="descendant::node()" group-starting-with="anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]">
+            <xsl:apply-templates select="current-group()/self::anchor" mode="#current">
+              <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
+            </xsl:apply-templates>
+          <xsl:variable name="upward-projected" as="element(*)">
+            <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
+              <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]])]" tunnel="yes"/>
+            </xsl:apply-templates>
+          </xsl:variable>
+          <xsl:if test="$upward-projected/node()">
+              <xsl:sequence select="$upward-projected"/>  
+          </xsl:if>
+        </xsl:for-each-group>
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- do not pull sidebar up, for example phrases in titles with an anchor-->  
+      <xsl:copy copy-namespaces="no">
+          <xsl:apply-templates select="@*, node()" mode="#current">
+            <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
+          </xsl:apply-templates>
+        </xsl:copy>
+      </xsl:otherwise>
+      </xsl:choose>
   </xsl:template>
   
    <!-- pull sidebars before titles (table and figure titles as well) --> 
@@ -3318,44 +3439,34 @@
    <xsl:template match="*[self::title[not(parent::title)] or self::para[matches(@role, $sidenote-not-to-be-pulled-in-titles)]]
                          [.//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
     <xsl:variable name="sidenote" as="element(sidebar)*" select=".//anchor/key('hub:linking-item-by-id', @xml:id)[self::sidebar[hub:is-marginal-note(.)]]"/>
- <!--   <xsl:choose>
-      <xsl:when test="matches(@role, concat($hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x))">-->
-        <xsl:copy copy-namespaces="no">
-          <xsl:apply-templates select="@*, node() except $sidenote" mode="#current"/>
+ <xsl:copy copy-namespaces="no">
+          <xsl:apply-templates select="@*, node()" mode="#current">
+            <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
+          </xsl:apply-templates>
         </xsl:copy>
         <xsl:apply-templates select="$sidenote" mode="#current">
-          <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
+          <xsl:with-param name="keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
         </xsl:apply-templates>
-<!--      </xsl:when>
-      <xsl:otherwise>
-        <xsl:apply-templates select="$sidenote" mode="#current">
-          <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
-        </xsl:apply-templates>
-        <xsl:copy copy-namespaces="no">
-          <xsl:apply-templates select="@*, node() except $sidenote" mode="#current"/>
-        </xsl:copy>
-      </xsl:otherwise>
-    </xsl:choose>-->
-  </xsl:template>
+</xsl:template>
   
 
   
-  <xsl:template match="anchor" mode="hub:reorder-marginal-notes">
-    <xsl:param name="insert-sidebars" tunnel="yes"/>
+  <xsl:template match="*:anchor" mode="hub:reorder-marginal-notes" priority="2">
+    <xsl:param name="insert-sidebars" tunnel="yes" as="xs:boolean?"/>
       <xsl:copy copy-namespaces="no">
         <xsl:apply-templates select="@*, node()" mode="#current"/>
       </xsl:copy>
       <xsl:if test="$insert-sidebars and key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]">
         <xsl:apply-templates select="key('hub:linking-item-by-id', @xml:id)" mode="#current">
-          <xsl:with-param name="discard-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
+          <xsl:with-param name="keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
         </xsl:apply-templates>
       </xsl:if>
   </xsl:template>
     
   <xsl:template match="sidebar[key('hub:linking-item-by-linkend', @linkend)][hub:is-marginal-note(.)]" mode="hub:reorder-marginal-notes">
-    <xsl:param name="discard-sidebar" tunnel="yes"/>
+    <xsl:param name="keep-sidebar" tunnel="yes"/>
     <xsl:choose>
-      <xsl:when test="$discard-sidebar">
+      <xsl:when test="$keep-sidebar">
         <xsl:copy copy-namespaces="no">
           <xsl:apply-templates select="@*, node()" mode="#current"/>
         </xsl:copy>
@@ -3391,7 +3502,7 @@
 
   <xsl:template match="symbol" mode="hub:cross-link">
     <phrase role="hub:unmapped-char">
-      <xsl:apply-templates select="node()" mode="#current">
+      <xsl:apply-templates select="@srcpath, node()" mode="#current">
         <xsl:with-param name="text" select="concat(@css:font-family, '/', .)" tunnel="yes"/>
       </xsl:apply-templates>
     </phrase>

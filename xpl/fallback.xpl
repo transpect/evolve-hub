@@ -106,7 +106,11 @@
     <dd>submode</dd>
 
     <dt>hub:right-tab-to-tables</dt>    
-    <dd></dd>
+    <dd>Optional mode that creates two-columns informaltables with the role hub:right-tab of 
+      adjacent paras with right tabs. There is no preferred point in the pipeline when this 
+      mode should run. Maybe run it before lists. Requires that <span class="dependency">hub:split-at-tab</span> has run before.</dd>
+
+    <dd>You can set a regex variable <pre class="variable">hub:post-identifier-regex</pre> to override the table creation and create an identifier instead. In this case it will be labeled as phrase @role = 'hub:post-identifier'.</dd>
 
     <dt>hub:repair-hierarchy</dt>    
     <dd></dd>

@@ -60,11 +60,14 @@
               </xsl:for-each-group>
             </xsl:variable>
             <figure>
+              <xsl:if test="current-group()/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join(current-group()/@srcpath,' ')"/>  
+              </xsl:if>
               <xsl:variable name="anchor" as="element(anchor)?" 
                 select="if($hub:use-title-child-anchor-id-for-figure-id) 
                         then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][hub:same-scope(., $title)], $title//anchor[@xml:id][hub:same-scope(., $title)])[1] 
                         else ()"/>
-              <xsl:copy-of select="$anchor/@xml:id | current-group()[1]//@css:orientation"/>
+              <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation | current-group()[1]/@srcpath"/>
               <title>
                 <xsl:apply-templates select="$title/@*" mode="#current"/>
                 <xsl:apply-templates select="$title/node()" mode="#current">
@@ -114,7 +117,7 @@
   </xsl:template>
   
   <!-- This is another figure caption template to handle figures with more than one actual image in figure. Split figures for example or really several images with just one caption.
-       Still has to be tested thoroughly if used. Use it while setting the parameter hub:handle-several-images-per-caption (in caption varsl)in your adaptions to true() -->
+       Still has to be tested thoroughly if used. Use it while setting the parameter hub:handle-several-images-per-caption (in caption vars) in your adaptions to true() -->
   <xsl:template match="*[
                           ( some $element in * satisfies hub:is-figure($element) )
                           and 
@@ -126,7 +129,7 @@
       <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.) and not(preceding-sibling::*[1][hub:is-figure(.)])]">
         <xsl:choose>
           <xsl:when test="current-group()[1][hub:is-figure(.)]
-            and  (some $a in current-group() satisfies hub:is-figure-title($a))">
+            and  (some $a in current-group() satisfies (hub:is-figure-title($a) and $a/preceding-sibling::*[1][hub:is-figure(.)]))">
             <xsl:variable name="title" select="(current-group()[hub:is-figure-title(.)])[1]" as="element(para)"/>
             <xsl:variable name="note-me-maybe" as="node()*">
               <xsl:for-each-group select="current-group()[. &gt;&gt; $title]"
@@ -153,6 +156,9 @@
               </xsl:for-each-group>
             </xsl:variable>
             <figure>
+              <xsl:if test="current-group()/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join(current-group()/@srcpath,' ')"/>  
+              </xsl:if>
               <xsl:variable name="anchor" as="element(anchor)?" 
                           select="if($hub:use-title-child-anchor-id-for-figure-id) 
                                   then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][hub:same-scope(., $title)])[1] 
@@ -182,6 +188,10 @@
                         [hub:is-figure(.)]
                         [mediaobject]" mode="hub:figure-captions">
     <xsl:choose>
+      <xsl:when test=" $hub:handle-several-images-per-caption and ($hub:remove-para-wrapper-for-mediaobject and (hub:is-figure-title(following-sibling::*[1]) or hub:is-figure(following-sibling::*[1])))">
+        <xsl:apply-templates select="node() except *[local-name() = ('tabs', 'tab')]" mode="#current"/>
+        <!-- inserted this branch because otherwise only the last image in a figure with several images is unwrapped -->
+      </xsl:when>
       <xsl:when test="$hub:remove-para-wrapper-for-mediaobject and hub:is-figure-title(following-sibling::*[1])">
         <xsl:apply-templates select="node() except *[local-name() = ('tabs', 'tab')]" mode="#current"/>
       </xsl:when>

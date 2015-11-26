@@ -42,8 +42,17 @@
 
   <!-- itemizedlist -->
 
-  <xsl:template match="orderedlist[hub:is-itemized-list(.)]" mode="hub:lists" priority="1">
-    <itemizedlist mark="{listitem[1]/para[1]//descendant::phrase[hub:is-identifier(.)]}">
+  <xsl:template match="orderedlist[
+                                    hub:is-itemized-list(.) and
+                                    listitem[1]/para[1]//phrase[
+                                      hub:same-scope(., current()/listitem[1]/para[1])
+                                    ][hub:is-identifier(.)]
+                                  ]" mode="hub:lists" priority="1">
+    <xsl:variable name="first-para" as="element(para)" select="listitem[1]/para[1]"/>
+    <xsl:variable name="identifier" as="element(phrase)" 
+      select="($first-para//phrase[hub:same-scope(., $first-para)][hub:is-identifier(.)])[1]"/>
+    <itemizedlist mark="{hub:get-list-type-with-warning($identifier)}">
+      <!-- mark="{listitem[1]/para[1]//descendant::phrase[hub:is-identifier(.)]}" -->
       <xsl:apply-templates mode="#current">
         <xsl:with-param name="set-override" select="'no'" tunnel="yes"/>
         <xsl:with-param name="identifier-needed" select="'no'" tunnel="yes"/>
@@ -92,7 +101,7 @@
       	<varlistentry>
           <term/>
           <xsl:copy>
-            <xsl:apply-templates mode="#current"/>
+            <xsl:apply-templates select="node()" mode="#current"/>
           </xsl:copy>
         </varlistentry>
       </xsl:when>
@@ -168,7 +177,7 @@
                                   [hub:has-no-identifiers(.)]
                                   [not(hub:is-variable-list(.))]
                                   [hub:same-margin-left(., parent::listitem/para[1]/@margin-left)]" 
-                mode="hub:lists" priority="1.5">
+                mode="hub:lists" priority="1.5"><!-- higher priority than 1, which is the priority of the itemizedlist template (around line 50) -->
     <xsl:apply-templates select="listitem/node()" mode="#current"/>
   </xsl:template>
 
@@ -219,13 +228,16 @@
                 <xsl:choose>
                   <xsl:when test="$first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]">
                     <term>
-                      <xsl:value-of select="$first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]"/>
+                      <xsl:copy-of select="$first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]"/>
                     </term>
                     <xsl:copy>
                       <para>
-                        <xsl:apply-templates select="$first-para//node()[hub:same-scope(., $li/$first-para)] 
-                          except ($first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]/node(),
-                          $first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)])" mode="#current"/>
+                        <xsl:apply-templates select="$first-para/@*, 
+                                                     $first-para/node()[hub:same-scope(., $li/$first-para)] 
+                                                     except (
+                                                       $first-para/tab[preceding-sibling::*[1][hub:is-identifier(.)]],
+                                                       $first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]
+                                                     )" mode="#current"/>
                       </para>
                       <xsl:apply-templates select="node()[. &gt;&gt; $li/$first-para]" mode="#current"/>
                     </xsl:copy>
@@ -289,6 +301,9 @@
     <xsl:param name="identifier-needed" select="'yes'" tunnel="yes"/>
     <xsl:if test="$identifier-needed = 'yes'">
       <xsl:next-match/>
+    </xsl:if>
+  <xsl:if test="not($identifier-needed = 'yes') and descendant::anchor">
+      <xsl:apply-templates select=".//anchor" mode="#current"/>
     </xsl:if>
   </xsl:template>
 

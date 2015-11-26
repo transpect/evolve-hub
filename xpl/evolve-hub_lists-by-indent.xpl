@@ -21,7 +21,7 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.io/xproc-util/xslt-mode/xpl/xslt-mode.xpl"/>
 
-  <tr:xslt-mode msg="yes" hub-version="1.1" mode="hub:tabs-to-indent">
+  <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:tabs-to-indent">
     <p:input port="source">
       <p:pipe step="lists-by-indent" port="source"/>
     </p:input>
@@ -32,7 +32,7 @@
     <p:with-option name="prefix" select="concat($prefix, '0')"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" mode="hub:handle-indent">
+  <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:handle-indent">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
@@ -40,7 +40,7 @@
     <p:with-option name="prefix" select="concat($prefix, '1')"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" mode="hub:prepare-lists">
+  <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:prepare-lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
@@ -48,7 +48,7 @@
     <p:with-option name="prefix" select="concat($prefix, '2')"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" mode="hub:lists">
+  <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
@@ -56,7 +56,7 @@
     <p:with-option name="prefix" select="concat($prefix, '3')"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" mode="hub:postprocess-lists">
+  <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:postprocess-lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>

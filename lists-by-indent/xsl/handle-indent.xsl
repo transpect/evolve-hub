@@ -27,7 +27,8 @@
 
   <xsl:variable name="hub:list-by-indent-exception-role-regex" select="'^TOC'" as="xs:string"/>
   
-  <!-- For some people it might be usefule if paras with tables inside are not indented. Or empty paras. Those can be given here. Also a possibility to define that only certain paras (with a list style format for instance) are processed. -->
+  <!-- For some people it might be useful if paras with tables inside are not indented. Or empty paras. Those can be given here. 
+    Also a possibility to define that only certain paras (with a list style format for instance) are processed. -->
   <xsl:function name="hub:condition-that-stops-indenting-apart-from-role-regex" as="xs:boolean">
     <xsl:param name="input" as="element(*)*"/>
     <!-- to allow other conversions to stay unaffected. Override in adaptions -->
@@ -95,32 +96,13 @@
     <xsl:if test="$count gt 20">
       <xsl:message terminate="yes">Terminated at list nesting depth 20. This list detection stylesheet is probably looping.</xsl:message>
     </xsl:if>
-    <xsl:variable name="indent"
-      select="(
-                if ( $nodes[1]/@margin-left ) 
-                then $nodes[1]/@margin-left 
-                else 0
-              )
-              + (
-                if ( $nodes[1]/@text-indent ) 
-                then $nodes[1]/@text-indent 
-                else 0
-              )"/>
-<!--     <xsl:message>===============================================</xsl:message> -->
-<!--     <xsl:message select="$nodes[1]"/> -->
-<!--     <xsl:message select="$indent"/> -->
-    <xsl:variable name="temporary-list" as="node()*">
-<!--       <xsl:message select="abs($indent -->
-<!--                            - (if (@margin-left) then (@margin-left + (if (@text-indent) then @text-indent else 0)) else 0))"> -->
-<!--       </xsl:message> -->
+    <!--<xsl:variable name="indent" select="($nodes[1]/@margin-left, 0)[1] + ($nodes[1]/@text-indent, 0)[1]"/>-->
+<xsl:variable name="indent" select="min( for $n in $nodes 
+                                             return (($n/@margin-left, 0)[1] + ($n/@text-indent, 0)[1])
+                                           )"/>
+<xsl:variable name="temporary-list" as="node()*">
         <xsl:for-each-group select="$nodes"
-          group-adjacent="abs($indent - (if (@margin-left) 
-                                		   then (@margin-left + (if (@text-indent) 
-                                    							 then @text-indent 
-                                    							 else 0))
-                                		   else 0))
-                          &lt; $hub:indent-epsilon">
-<!--         <xsl:message select="current-grouping-key()"/> -->
+          group-adjacent="abs($indent - (@margin-left, 0)[1] - (@text-indent, 0)[1]) &lt;= $hub:indent-epsilon">
           <xsl:choose>
             <xsl:when test="current-grouping-key()">
               <xsl:for-each select="current-group()">
@@ -138,11 +120,7 @@
                     </listitem>
                   </xsl:for-each>
                 </xsl:when>
-                <xsl:when test="$indent &gt; (if (@margin-left) 
-                                              then (@margin-left + (if (@text-indent) 
-                                                                    then @text-indent 
-                                                                    else 0))
-                                              else 0)">
+                <xsl:when test="$indent - (@margin-left, 0)[1] - (@text-indent, 0)[1] &gt; $hub:indent-epsilon">
                   <xsl:call-template name="create-list">
                     <xsl:with-param name="nodes" select="current-group()"/>
                     <xsl:with-param name="count" select="$count + 1"/>
@@ -161,7 +139,7 @@
           </xsl:choose>
         </xsl:for-each-group>
     </xsl:variable>
-    <xsl:for-each-group select="$temporary-list" group-adjacent="local-name()">
+<xsl:for-each-group select="$temporary-list" group-adjacent="local-name()">
       <xsl:choose>
         <xsl:when test="current-group()[1][self::listitem]">
           <orderedlist>
