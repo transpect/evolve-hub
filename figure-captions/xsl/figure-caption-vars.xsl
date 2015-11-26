@@ -69,7 +69,7 @@
   -->
   
   <xsl:function name="hub:is-figure" as="xs:boolean">
-    <xsl:param name="node" as="node()"/>
+    <xsl:param name="node" as="node()?"/>
     <xsl:sequence select="if 
                           (
                             $node/self::para[mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')]
