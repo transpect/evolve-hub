@@ -101,6 +101,10 @@
     <xsl:apply-templates select="current-group()" mode="#current"/>
   </xsl:template>
   
+  <xsl:template name="hub:figure-further-paras">
+    <xsl:apply-templates select="current-group()" mode="#current"/>
+  </xsl:template>
+  
   <xsl:template match="para[matches(@role, $hub:figure-note-role-regex)]" mode="hub:figure-captions">
     <note>
       <xsl:next-match/>
@@ -243,6 +247,54 @@
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:apply-templates select="node() except inlinemediaobject" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <!-- merge several caption paras in one, separate by <br/> -->
+  <xsl:template match="*[dbk:para[hub:is-figure-title(.)]
+                                 [following-sibling::*[1][matches(@role, $hub:figure-title-further-paras-role-regex-x)]]
+                        ]
+                        [$hub:merge-several-caption-paras]" mode="hub:figure-captions-preprocess-merge">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.)]">
+        <xsl:choose>
+          <xsl:when test="current-group()[1][hub:is-figure(.)]
+                      and current-group()[2][hub:is-figure-title(.)]">
+            <xsl:variable name="title" select="current-group()[2]" as="element(dbk:para)"/>
+            <xsl:variable name="further-caption-paras" as="node()*">
+              <xsl:for-each-group select="current-group()[. &gt;&gt; $title]" group-adjacent="(
+                                                                                                for $r in (@role, 'NONE')[1]
+                                                                                                return ($hub:figure-title-further-paras-role-regex-x)[matches($r, .)],
+                                                                                                ''
+                                                                                              )[1]">
+                <xsl:choose>
+                  <xsl:when test="current-grouping-key() = $hub:figure-title-further-paras-role-regex-x">
+                    <title>
+                      <xsl:call-template name="hub:figure-further-paras"/>
+                    </title>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:sequence select="current-group()"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:for-each-group>
+            </xsl:variable>
+            <xsl:apply-templates select="current-group()[1]" mode="#current"/>
+            <para>
+              <xsl:apply-templates select="$title/@*, $title/node()" mode="#current"/>
+              <xsl:for-each select="$further-caption-paras/self::title/node()">
+                <br/>
+                <xsl:apply-templates select="current()/node()" mode="#current"/>
+              </xsl:for-each>
+            </para>
+            <xsl:apply-templates select="$further-caption-paras[not(self::title)]" mode="#current"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates select="current-group()" mode="#current"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each-group>
     </xsl:copy>
   </xsl:template>
   

@@ -22,6 +22,10 @@
   <xsl:param name="hub:handle-several-images-per-caption" as="xs:boolean" select="false()">
     <!-- will call another template in figure captions that tries to create figures of several images having just one caption -->
   </xsl:param>
+  
+  <xsl:param name="hub:merge-several-caption-paras" as="xs:boolean" select="false()">
+    <!-- will create figure title consisting of all caption para nodes separated by <br/> so it can be split later on -->
+  </xsl:param>
 
   <xsl:variable name="hub:figure-title-role-regex-x"  as="xs:string"
     select="'^(
@@ -29,6 +33,9 @@
                | figlegend
                | Figure_Legend
               )$'" />
+  
+  <xsl:variable name="hub:figure-title-further-paras-role-regex-x" as="xs:string" select="'figure_title_2'"/>
+  
   <xsl:variable name="hub:figure-caption-start-regex"  as="xs:string" select="'Bild|Abbildung|Abbildungen|Abb\.|Figures?|Figs?\.?'"/>
 
   <xsl:variable name="hub:figure-note-role-regex"  as="xs:string" select="'^figure_note$'" />
