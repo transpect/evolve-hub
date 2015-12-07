@@ -85,7 +85,7 @@
     select="$remove-empty-paras" />
 
   <xsl:variable name="hub:empty-para-role-regex-x" as="xs:string"
-    select="'^tr_empty_para$'"/>
+    select="'^(tr|letex)_empty_para$'"/>
 
   <xsl:variable name="hub:base-style-regex" select="'^(No_paragraph_style|Standard)$'"/> 
   
@@ -95,7 +95,7 @@
 
 
   
-  <xsl:variable name="hub:no-identifier-needed" select="'^tr_no_id_style$'" as="xs:string"/>
+  <xsl:variable name="hub:no-identifier-needed" select="'^(tr|letex)_no_id_style$'" as="xs:string"/>
   
   <xsl:template match="sidebar[hub:is-in-sidebar-without-purpose(.)]" mode="hub:dissolve-sidebars-without-purpose">
     <xsl:apply-templates mode="#current"/>
@@ -1946,6 +1946,12 @@
     <xsl:apply-templates mode="#current" />
   </xsl:template>
   
+  <!-- collateral: remove separators in footnotes if only identifier (or nothing) is before -->
+  <xsl:template match="footnote/para/*[@role = 'hub:separator']
+                                      [every $preceding in preceding-sibling::node() satisfies
+                                       ($preceding/@role = 'hub:identifier')]"
+                mode="hub:preprocess-hierarchy"/>
+  
   <!-- Collateral: normalize @xml:lang, stripping the country or other suffixes -->
   <xsl:template match="@xml:lang[matches(., '^(\p{Ll}+).*$')]" mode="hub:group-environments hub:split-at-tab">
     <xsl:attribute name="{name()}" select="replace(., '^(\p{Ll}+).*$', '$1')"/>
@@ -2145,7 +2151,7 @@
   </xsl:template>
 
   <xsl:template match="text()
-		                   [not(parent::phrase[@role eq 'hub:identifier'])]
+		                   [not(ancestor::phrase[hub:same-scope(current(), .)][@role eq 'hub:identifier'])]
 		                   [not(ancestor::*:math)]
 		                   [
                          matches(., $hub:itemizedlist-mark-at-start-regex) 
@@ -2178,6 +2184,7 @@
   <!-- Example: <para><phrase>1.</phrase><tab/><phrase>Text</phrase></para>
        This is the result of hub:split-at-tab -->
   <xsl:template match="phrase[not(@role eq 'hub:identifier')]
+                             [not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope(current(), .)])]
                              [
                                (
                                  matches(., $hub:orderedlist-mark-regex)
@@ -2212,7 +2219,7 @@
                    <para><phrase>1.<tab/></phrase>Text</para>
   -->
   <xsl:template match="text()
-		                   [not(parent::phrase[@role eq 'hub:identifier'])]
+		                   [not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope(current(), .)])]
 		                   [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
 		                   [not(ancestor::*:math)]
 		                   [
@@ -2969,8 +2976,6 @@
                                              string(
                                                count(
                                                  preceding::figure
-                                                 union
-                                                 preceding::processing-instruction(hub)[matches(., 'move-floats-01')]
                                                ) 
                                                + 1
                                              )
@@ -2992,8 +2997,6 @@
                                                  preceding::table union ancestor::table
                                                  union
                                                  preceding::informaltable union ancestor::informaltable
-                                                 union
-                                                 preceding::processing-instruction(hub)[matches(., 'move-floats-02')]
                                                ) 
                                                + 1
                                              )
@@ -3476,8 +3479,8 @@
   </xsl:template>
   
   <!-- Override these in your adaptions-->
-  <xsl:variable name="hub:marginal-note-container-style-regex" as="xs:string" select="'^tr_margin-box'"/>
-  <xsl:variable name="hub:marginal-note-para-style-regex" as="xs:string" select="'^tr_p_margin'"/>
+  <xsl:variable name="hub:marginal-note-container-style-regex" as="xs:string" select="'^(le-tex|tr)_margin-box'"/>
+  <xsl:variable name="hub:marginal-note-para-style-regex" as="xs:string" select="'^(le-tex|tr)_p_margin'"/>
   
   
   <xsl:function name="hub:is-marginal-note" as="xs:boolean">
