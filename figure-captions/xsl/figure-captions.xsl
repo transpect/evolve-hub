@@ -133,8 +133,8 @@
       <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.) and not(preceding-sibling::*[1][hub:is-figure(.)])]">
         <xsl:choose>
           <xsl:when test="current-group()[1][hub:is-figure(.)]
-            and  (some $a in current-group() satisfies (hub:is-figure-title($a) and $a/preceding-sibling::*[1][hub:is-figure(.)]))">
-            <xsl:variable name="title" select="(current-group()[hub:is-figure-title(.)])[1]" as="element(para)"/>
+            and  (some $a in current-group() satisfies (hub:is-figure-title($a) and ($a/preceding-sibling::*[1][hub:is-figure(.)] or $a[hub:is-figure(.)])))">
+            <xsl:variable name="title" select="(current-group()[hub:is-figure-title(.)])[1]" as="element(*)"/>
             <xsl:variable name="note-me-maybe" as="node()*">
               <xsl:for-each-group select="current-group()[. &gt;&gt; $title]"
                 group-adjacent="(
@@ -169,11 +169,17 @@
                                   else ()"/>
               <xsl:copy-of select="$anchor/@xml:id"/>
               <title>
-                <xsl:apply-templates select="$title/@*" mode="#current"/>
+                <xsl:if test="$title[not(hub:is-figure(.))]">
+                  <xsl:apply-templates select="$title/@*" mode="#current"/>
                 <xsl:apply-templates select="$title/node()" mode="#current">
-                  <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
-                </xsl:apply-templates>
+                      <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
+                    </xsl:apply-templates>
+                  </xsl:if>
               </title>
+              <xsl:if test="$title[hub:is-figure(.)]">
+                <!-- in $title is the image (if there is no real title )-->
+                <xsl:apply-templates select="$title" mode="#current"/>
+              </xsl:if>
               <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
               <xsl:apply-templates select="current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]" mode="#current"/>
               <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
@@ -197,6 +203,9 @@
         <!-- inserted this branch because otherwise only the last image in a figure with several images is unwrapped -->
       </xsl:when>
       <xsl:when test="$hub:remove-para-wrapper-for-mediaobject and hub:is-figure-title(following-sibling::*[1])">
+        <xsl:apply-templates select="node() except *[local-name() = ('tabs', 'tab')]" mode="#current"/>
+      </xsl:when>
+      <xsl:when test="$hub:remove-para-wrapper-for-mediaobject and hub:is-figure-title(.)">
         <xsl:apply-templates select="node() except *[local-name() = ('tabs', 'tab')]" mode="#current"/>
       </xsl:when>
       <xsl:otherwise>
