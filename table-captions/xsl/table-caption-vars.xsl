@@ -45,7 +45,7 @@
   <xsl:variable name="hub:table-copyright-style-regex-x" as="xs:string" select="'^letex_table_copyright$'"/>
   
   <xsl:function name="hub:is-table-title" as="xs:boolean">
-    <xsl:param name="node" as="node()"/>
+    <xsl:param name="node" as="node()?"/>
     <xsl:sequence select="if (
                                $node/self::para[
                                  matches(@role, $hub:table-title-role-regex-x, 'x')

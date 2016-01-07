@@ -26,7 +26,7 @@
   <xsl:template match="*[*[hub:is-table-title(.)]]" mode="hub:table-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="node()" group-starting-with="para[hub:is-table-title(.)]">
+      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-table-title(.)]">
         <xsl:choose>
           <xsl:when test="$hub:table-graphic-creation-enabled and current-group()[1][hub:is-table-title(.)] and current-group()[2][self::para[not(.//text())][mediaobject]]">
             <table>
@@ -47,14 +47,15 @@
               <xsl:attribute name="frame" select="if ($table/name()='informaltable') 
                                                   then hub:get-frame-attribute($table/@css:*[matches(name(.),'border\-.+\-style')]) 
                                                   else  hub:get-frame-attribute($table/informaltable/@css:*[matches(name(.),'border\-.+\-style')])"/>
-              <xsl:apply-templates select="$table/@*[not(some $i in (parent::*/descendant::*/@*) satisfies $i=.)]
-                | $table/@role" mode="#current"/>
+              <xsl:apply-templates select="$table/@*[not(some $i in (parent::*/descendant::*/@*) satisfies $i=.)] | ($table[self::para]/informaltable/@role, $table/@role)[1]" mode="#current"/>
               <xsl:apply-templates select="$table/self::informaltable/(@css:*)
                                            | $table/informaltable/(@css:*)" mode="#current"/>
               <title>
-                <xsl:apply-templates select="current-group()[1]/@*" mode="#current"/>
-                <xsl:apply-templates select="current-group()[1]/node()" mode="#current"/>
-              </title>
+                <xsl:if test="current-group()[1][hub:is-table-title(.)][not(descendant::informaltable)]">
+                  <xsl:apply-templates select="current-group()[1]/@*" mode="#current"/>
+                  <xsl:apply-templates select="current-group()[1]/node()" mode="#current"/>
+                </xsl:if>
+                </title>
               <xsl:if test="$copyright-statement">
                 <info>
                   <legalnotice role="copyright">
