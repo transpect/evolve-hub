@@ -179,8 +179,7 @@
   <!-- Another class of input: style definitions with css:display="list-item" -->
   
   <xsl:template  mode="hub:tabs-to-indent" priority="2"
-    match="*[not(self::title)]
-            [@role]
+    match="*[not(self::title or self::rule)]
             [
               (@css:display, key('hub:style-by-role', @role)/@css:display)[1] = 'list-item'
               or
