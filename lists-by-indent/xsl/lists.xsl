@@ -399,36 +399,35 @@
 
   <xsl:function name="hub:is-variable-list" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
-    <xsl:value-of select="if ( 
+    <xsl:sequence select="(
+                            exists($list/listitem/para) (: we don’t require that every listitem needs a para 
+                                                         – there may be complete tables in listitem, for ex. :)
+                            and 
                               (
-                                exists($list/listitem/para) (: we don’t require that every listitem needs a para – there may be complete tables in listitem, for ex. :)
-                                and 
-                                  (
-                                    hub:get-list-type(
-                                      for $first-para-in-listitem in $list/listitem/para[1]
-                                      return $first-para-in-listitem
-                                        //phrase[hub:is-identifier(.)][hub:same-scope(., $first-para-in-listitem)][1]
-                                    ) eq 'other'
-                                    and
-                                    (
-                                      every $first-para-in-listitem in $list/listitem/para[1] satisfies (
-                                        hub:is-variable-list-listitem-with-phrase-identifier($first-para-in-listitem)
-                                        and 
-                                        not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
-                                      )
-                                    )
-                                  or
-                                  (
-                                    every $first-para-in-listitem in $list/listitem/para[1] satisfies (
-                                      hub:is-variable-list-listitem-without-phrase-identifier($first-para-in-listitem)
-                                      and
-                                      not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
-                                    )
+                                hub:get-list-type(
+                                  for $first-para-in-listitem in $list/listitem/para[1]
+                                  return $first-para-in-listitem
+                                    //phrase[hub:is-identifier(.)][hub:same-scope(., $first-para-in-listitem)][1]
+                                ) eq 'other'
+                                and
+                                (
+                                  every $first-para-in-listitem in $list/listitem/para[1] satisfies (
+                                    hub:is-variable-list-listitem-with-phrase-identifier($first-para-in-listitem)
+                                    and 
+                                    not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
                                   )
                                 )
+                              or
+                              (
+                                every $first-para-in-listitem in $list/listitem/para[1] satisfies (
+                                  hub:is-variable-list-listitem-without-phrase-identifier($first-para-in-listitem)
+                                  and
+                                  not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
+                                )
                               )
-                              or hub:is-variable-list-because-we-know-better($list)
-                          ) then true() else false()"/>
+                            )
+                          )
+                          or hub:is-variable-list-because-we-know-better($list)"/>
   </xsl:function>
 
   <xsl:function name="hub:is-variable-list-because-we-know-better" as="xs:boolean">
