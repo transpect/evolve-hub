@@ -429,6 +429,9 @@
                           )
                           or hub:is-variable-list-because-we-know-better($list)"/>
   </xsl:function>
+  
+  <!-- the function below can be used to extend the current 
+       behaviour of hub:is-variable-list() -->
 
   <xsl:function name="hub:is-variable-list-because-we-know-better" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
