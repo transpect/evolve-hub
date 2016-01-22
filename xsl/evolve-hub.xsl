@@ -3369,7 +3369,7 @@
   <!-- In this mode sidebars are placed inside the paras they were originally anchored. 
   This should happen before the list modes and after postprocess-hierarchy-->
   <xsl:variable name="sidenote-not-to-be-pulled-in-titles" as="xs:string" select="concat($hub:table-title-role-regex-x, '|', $hub:table-number-role-regex-x, '|', $hub:figure-title-role-regex-x, '|', $hub:figure-number-role-regex-x)"/>
-  <xsl:variable name="sidenote-at-end-of-para-style-regex" as="xs:string" select="'letex_list_para'"/>
+  <xsl:variable name="sidenote-at-end-of-para-style-regex" as="xs:string" select="'transpect_list_para'"/>
   
   <xsl:template match="*[not(self::title)]
                         [not(self::para[matches(@role, $sidenote-not-to-be-pulled-in-titles)])]
@@ -3397,6 +3397,7 @@
           <!-- For example in lists sidenotes shouldn't be at the beginning to avoid them being put into the term -->
           <xsl:apply-templates select="node()" mode="#current">
             <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
+            <xsl:with-param name="discard-anchor" as="xs:boolean" select="true()" tunnel="yes"/>
           </xsl:apply-templates>
           <xsl:apply-templates select=".//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]" mode="#current">
           <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
@@ -3442,20 +3443,22 @@
    <xsl:template match="*[self::title[not(parent::title)] or self::para[matches(@role, $sidenote-not-to-be-pulled-in-titles)]]
                          [.//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]]" mode="hub:reorder-marginal-notes">
     <xsl:variable name="sidenote" as="element(sidebar)*" select=".//anchor/key('hub:linking-item-by-id', @xml:id)[self::sidebar[hub:is-marginal-note(.)]]"/>
- <xsl:copy copy-namespaces="no">
-          <xsl:apply-templates select="@*, node()" mode="#current">
-            <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
-          </xsl:apply-templates>
-        </xsl:copy>
-        <xsl:apply-templates select="$sidenote" mode="#current">
-          <xsl:with-param name="keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
-        </xsl:apply-templates>
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*, node()" mode="#current">
+        <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
+      </xsl:apply-templates>
+    </xsl:copy>
+    <xsl:apply-templates select="$sidenote" mode="#current">
+      <xsl:with-param name="keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
+    </xsl:apply-templates>
 </xsl:template>
   
 
   
   <xsl:template match="*:anchor" mode="hub:reorder-marginal-notes" priority="2">
     <xsl:param name="insert-sidebars" tunnel="yes" as="xs:boolean?"/>
+    <xsl:param name="discard-anchor" as="xs:boolean?" tunnel="yes"/>
+    <xsl:if test="not($discard-anchor)">
       <xsl:copy copy-namespaces="no">
         <xsl:apply-templates select="@*, node()" mode="#current"/>
       </xsl:copy>
@@ -3464,6 +3467,7 @@
           <xsl:with-param name="keep-sidebar" as="xs:boolean" select="true()" tunnel="yes"/>
         </xsl:apply-templates>
       </xsl:if>
+    </xsl:if>
   </xsl:template>
     
   <xsl:template match="sidebar[key('hub:linking-item-by-linkend', @linkend)][hub:is-marginal-note(.)]" mode="hub:reorder-marginal-notes">
