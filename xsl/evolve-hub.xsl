@@ -53,6 +53,7 @@
   <xsl:param name="evolve-textreference-to-link" select="'no'"/>
   <xsl:param name="move-floats" select="'yes'"/>
   <xsl:param name="remove-empty-paras" select="'no'"/>
+  <xsl:param name="map-phrase-with-css-vertical-pos-to-super-or-subscript" select="'no'"/>
   <xsl:param name="collect-continued-floats" select="'no'"/>
   <xsl:param name="clean-hub_remove-attributes-with-paths" select="'no'"/>
 
@@ -176,6 +177,17 @@
     </xsl:variable>
     <xsl:variable name="native-names" select="string-join(key('natives',current()/@name)/@native-name, ', ')"/>
     <xsl:message select="'❧❧❧❧❧❧ WARNING: CSS:RULE with identical name ', $name,' discarded. Native names were: ', $native-names"/>
+  </xsl:template>
+  
+  <!-- Some authors set superscript or subscript manually with vertical-align. This template applies proper superscript or subscript tags 
+       when such formatting is used. You have to set the param map-phrase-with-css-vertical-pos-to-super-or-subscript to 'yes' and use 
+       the mode and apply your templates in this mode hub:hierarchy. -->
+  
+  <xsl:template match="phrase[@css:top and $map-phrase-with-css-vertical-pos-to-super-or-subscript eq 'yes']" mode="hub:hierarchy">
+    <xsl:variable name="position" select="xs:decimal(replace(@css:top, '[a-zA-Z\s]', ''))" as="xs:decimal"/>
+    <xsl:element name="{if($position gt 0) then 'subscript' else 'superscript'}">
+      <xsl:apply-templates select="@* except (@css:top, @css:position), node()" mode="#current"/>
+    </xsl:element>
   </xsl:template>
   
   <!-- MODE: hub:tabular-float-caption-arrangements -->
