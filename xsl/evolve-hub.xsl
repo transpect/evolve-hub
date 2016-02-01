@@ -1639,12 +1639,13 @@
 
   <xsl:template match="para[@role = 'Parttitle_Backmatter']" mode="hub:special-paras">
   </xsl:template>
-
+  
   <!-- mode: hub:special-phrases -->
 
   <!-- ToDo: import Wingdings font map as external -->
   <xsl:variable name="hub:wingdings-phrase-role-regex" select="'Symbolphrase-to-evolve'" as="xs:string"/>
-  <xsl:variable name="hub:wingdings-font-map" select="if (doc-available('Wingdings.xml')) then document('Wingdings.xml')/symbols/symbol else ()" as="node()*"/>
+  <xsl:variable name="hub:wingdings-font-map" select="if (doc-available('http://transpect.io/evolve-hub/fontmaps/Wingdings.xml')) then document('http://transpect.io/evolve-hub/fontmaps/Wingdings.xml')/symbols/symbol else ()" as="node()*"/>
+  
   <xsl:template match="phrase[matches(@role,$hub:wingdings-phrase-role-regex)]" mode="hub:special-phrases">
     <xsl:variable name="text" select="text()"/>
     <xsl:variable name="role" select="@role"/>
@@ -1673,7 +1674,7 @@
 
   <!-- ToDo: import Symbol font map as external -->
   <xsl:variable name="hub:symbol-phrase-role-regex" select="'Symbolphrase-to-evolve'" as="xs:string"/>
-  <xsl:variable name="hub:symbol-font-map" select="if (doc-available('Symbol.xml')) then document('Symbol.xml')/symbols/symbol else ()" as="node()*"/>
+  <xsl:variable name="hub:symbol-font-map" select="if (doc-available('http://transpect.io/evolve-hub/fontmaps/Symbol.xml')) then document('http://transpect.io/evolve-hub/fontmaps/Symbol.xml')/symbols/symbol else ()" as="node()*"/>
   <xsl:template match="phrase[matches(@role,$hub:symbol-phrase-role-regex)]" mode="hub:special-phrases">
     <xsl:variable name="text" select="text()"/>
     <xsl:variable name="role" select="@role"/>
