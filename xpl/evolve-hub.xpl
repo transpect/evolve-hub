@@ -73,7 +73,12 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </tr:simple-progress-msg>
   
-  <tr:dynamic-transformation-pipeline> 
+  <tr:dynamic-transformation-pipeline>
+    <p:pipeinfo>
+      <examples xmlns="http://transpect.io" option-value="evolve-hub/fallback">
+        <file href="fallback.xpl"/>
+      </examples>
+    </p:pipeinfo>
     <p:with-option name="fallback-xpl" select="$fallback-xpl"/>
     <p:with-option name="fallback-xsl" select="$fallback-xsl"/>
     <p:with-option name="debug" select="$debug"/>
