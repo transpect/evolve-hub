@@ -1955,7 +1955,7 @@
   <xsl:variable name="hub:no-cstyle-regex" as="xs:string"
     select="'^No[-_\s]character[-_\s]style$'" />
   
-  <xsl:template match="phrase[matches(@role, $hub:no-cstyle-regex)][empty(@css:* | @xml:lang)]" mode="hub:preprocess-hierarchy">
+  <xsl:template match="phrase[matches(@role, $hub:no-cstyle-regex)][empty(@css:* | @xml:lang | @condition)]" mode="hub:preprocess-hierarchy">
     <xsl:apply-templates mode="#current" />
   </xsl:template>
   
