@@ -2869,7 +2869,8 @@
                            [every $node in node() satisfies (exists($node/(self::informaltable | self::table | self::figure)))]
                            [every $att in @* satisfies (name($att) = ('srcpath', 'role'))]
                            [every $role in $special-regex-containers/descendant::*/@role satisfies not(matches($role, @role))]
-                           [not(ancestor::*[self::epigraph])]" mode="hub:clean-hub">
+                           [not(ancestor::*[self::epigraph])]
+                           [not(parent::*[self::listitem])]" mode="hub:clean-hub">
         <xsl:apply-templates mode="#current" />
   </xsl:template>
   
