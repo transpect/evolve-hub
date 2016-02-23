@@ -3411,7 +3411,7 @@
           <!-- For example in lists sidenotes shouldn't be at the beginning to avoid them being put into the term -->
           <xsl:apply-templates select="node()" mode="#current">
             <xsl:with-param name="insert-sidebars" as="xs:boolean" select="false()" tunnel="yes"/>
-            <xsl:with-param name="discard-anchor" as="xs:boolean" select="true()" tunnel="yes"/>
+            <xsl:with-param name="discard-anchor" as="element(anchor)*" select="$sidenote-anchor" tunnel="yes"/>
           </xsl:apply-templates>
           <xsl:apply-templates select=".//anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]" mode="#current">
           <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
@@ -3471,8 +3471,8 @@
   
   <xsl:template match="*:anchor" mode="hub:reorder-marginal-notes" priority="2">
     <xsl:param name="insert-sidebars" tunnel="yes" as="xs:boolean?"/>
-    <xsl:param name="discard-anchor" as="xs:boolean?" tunnel="yes"/>
-    <xsl:if test="not($discard-anchor)">
+    <xsl:param name="discard-anchor" as="element(anchor)*" tunnel="yes"/>
+    <xsl:if test="not(@xml:id = $discard-anchor/@xml:id)">
       <xsl:copy copy-namespaces="no">
         <xsl:apply-templates select="@*, node()" mode="#current"/>
       </xsl:copy>
