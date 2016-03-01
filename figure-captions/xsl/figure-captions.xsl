@@ -246,7 +246,7 @@
   <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
                            [inlinemediaobject]
                            [some $text in descendant::node()[self::text()] satisfies matches($text, '\S')]
-                           [not(preceding-sibling::*[1][self::mediaobject])]" mode="hub:figure-captions-preprocess-merge">
+                           [not(preceding-sibling::*[1][hub:is-figure(.)])]" mode="hub:figure-captions-preprocess-merge">
     <xsl:for-each select="inlinemediaobject">
      <mediaobject>
        <xsl:apply-templates select="./@*" mode="#current"/>
