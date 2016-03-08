@@ -321,14 +321,16 @@
                 <xsl:apply-templates select="@*" mode="#current"/>
                 <xsl:for-each select="entry">
                   <xsl:copy>
-                    <xsl:apply-templates select="@*" mode="#current"/>
                     <xsl:variable name="pos" select="position()"/>
+                    <xsl:apply-templates select="@* except @css:border-bottom-width, ../following-sibling::row[1]/entry[position() eq $pos]/@css:border-bottom-width" mode="#current"/>
                     <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" 
                       group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) or 
                                              (not(exists(preceding-sibling::*)) and 
                                              parent::*[self::entry[parent::*[self::row[preceding-sibling::*[1][self::row[entry[position() = last()][matches(@role, $hub:split-style-regex)]/para[position() = last()][matches(@role, $hub:split-style-regex)]]]]]]])])">
+
                       <xsl:choose>
                         <xsl:when test="current-grouping-key()">
+                         
                           <xsl:copy>
                             <xsl:call-template name="hub:merge-srcpaths">
                               <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
@@ -336,16 +338,16 @@
                           <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
                           </xsl:copy>
                           </xsl:when>
-                      <xsl:otherwise>
+                          <xsl:otherwise>
                             <xsl:apply-templates select="current-group()" mode="#current"/>
-                        </xsl:otherwise>
-                      </xsl:choose>
-                      </xsl:for-each-group>
+                          </xsl:otherwise>
+                        </xsl:choose>
+                     </xsl:for-each-group>
                   </xsl:copy>
                 </xsl:for-each>
               </xsl:copy>
             </xsl:when>
-          <xsl:otherwise>
+            <xsl:otherwise>
               <xsl:apply-templates select="current-group()" mode="#current"/>
             </xsl:otherwise>
           </xsl:choose>
