@@ -1987,45 +1987,43 @@
     <xsl:variable name="attribs" select="@*"/>
     <xsl:variable name="colspecs" select="colspec"/>
     <xsl:variable name="existing-thead" select="thead"/>
-    <xsl:for-each-group select="tbody/row" group-starting-with="row[hub:is-first-thead-row(.)]">
-      <xsl:choose>
-        <xsl:when test="self::row[hub:is-first-thead-row(.)]">
-          <tgroup>
-            <xsl:copy-of select="$attribs"/>
-            <xsl:copy-of select="$colspecs"/>
-            <xsl:for-each-group select="current-group()" group-adjacent="exists(entry/para) 
-                                                                         and (
-                                                                           every $x in entry/para satisfies
-                                                                             (matches($x/@role, $hub:thead-pstyle-regex))
-                                                                         )">
-              <xsl:choose>
-                <xsl:when test="current-grouping-key()">
-                  <thead>
-                    <xsl:apply-templates select="$existing-thead/node()" mode="#current"/>
-                    <xsl:apply-templates select="current-group()" mode="#current"/>
-                  </thead>
-                </xsl:when>
-                <xsl:otherwise>
-                  <tbody>
-                    <xsl:apply-templates select="current-group()" mode="#current"/>
-                  </tbody>
-                </xsl:otherwise>
-              </xsl:choose>
-            </xsl:for-each-group>
-          </tgroup>
-        </xsl:when>
-        <xsl:otherwise>
-          <tgroup>
-            <xsl:copy-of select="$attribs"/>
-            <xsl:copy-of select="$colspecs"/>
-            <xsl:apply-templates select="$existing-thead" mode="#current"/>
-            <tbody>
-              <xsl:apply-templates select="current-group()" mode="#current"/>
-            </tbody>
-          </tgroup>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:for-each-group>
+    <tgroup>
+      <xsl:copy-of select="$attribs"/>
+      <xsl:copy-of select="$colspecs"/>
+      <xsl:for-each-group select="tbody/row" group-starting-with="row[hub:is-first-thead-row(.)]">
+        <xsl:choose>
+          <xsl:when test="self::row[hub:is-first-thead-row(.)]">
+           
+              <xsl:for-each-group select="current-group()" group-adjacent="exists(entry/para) 
+                                                                           and (
+                                                                             every $x in entry/para satisfies
+                                                                               (matches($x/@role, $hub:thead-pstyle-regex))
+                                                                           )">
+                <xsl:choose>
+                  <xsl:when test="current-grouping-key()">
+                    <thead>
+                      <xsl:apply-templates select="$existing-thead/node()" mode="#current"/>
+                      <xsl:apply-templates select="current-group()" mode="#current"/>
+                    </thead>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <tbody>
+                      <xsl:apply-templates select="current-group()" mode="#current"/>
+                    </tbody>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:for-each-group>
+          </xsl:when>
+          <xsl:otherwise>
+             <xsl:apply-templates select="$existing-thead" mode="#current"/>
+             <tbody>
+               <xsl:apply-templates select="current-group()" mode="#current"/>
+             </tbody>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each-group>
+      <xsl:apply-templates select="tfoot" mode="#current"/>
+    </tgroup>
   </xsl:template>
 
   <xsl:function name="hub:is-first-thead-row" as="xs:boolean">
