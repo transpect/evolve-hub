@@ -2351,7 +2351,7 @@
       select="string-join(.//text()[not(ancestor-or-self::indexterm)],'')"/>
 
     <xsl:copy>
-      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:apply-templates select="@*|processing-instruction()" mode="#current"/>
       <xsl:choose>
 
         <!-- example: <phrase>Table 4.1</phrase><tab/><phrase>…</phrase> 
