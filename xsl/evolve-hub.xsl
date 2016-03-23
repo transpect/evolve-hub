@@ -322,7 +322,7 @@
                 <xsl:for-each select="entry">
                   <xsl:copy>
                     <xsl:variable name="pos" select="position()"/>
-                    <xsl:apply-templates select="@* except @css:border-bottom-width, ../following-sibling::row[1]/entry[position() eq $pos]/@css:border-bottom-width" mode="#current"/>
+                    <xsl:apply-templates select="@* except @css:border-bottom-width, (../following-sibling::row[1]/entry[position() eq $pos]/@css:border-bottom-width, key('hub:style-by-role',../following-sibling::row[1]/entry[position() eq $pos]/@role)/@css:border-bottom-width)[1]" mode="#current"/>
                     <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" 
                       group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) or 
                                              (not(exists(preceding-sibling::*)) and 
