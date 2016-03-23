@@ -30,7 +30,7 @@
                         [not($hub:handle-several-images-per-caption)]" mode="hub:figure-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.)]">
+      <xsl:for-each-group select="*" group-starting-with="*[hub:is-figure(.)]">
         <xsl:choose>
           <xsl:when test="current-group()[1][hub:is-figure(.)]
                           and current-group()[2][hub:is-figure-title(.)]">
