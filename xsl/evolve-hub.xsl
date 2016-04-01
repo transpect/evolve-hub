@@ -760,7 +760,8 @@
       <xsl:for-each-group select="*" group-starting-with="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]">
         <xsl:variable name="mediaobjects" select="current-group() 
                                                   intersect
-                                                  following-sibling::*[hub:is-figure(.)]" />
+                                                  following-sibling::*[hub:is-figure(.)][hub:is-figure-title(preceding-sibling::*[1])]" />
+        <!-- since figures can also be figures without titles, we may only resort those with a title here -->
         <xsl:choose>
           <xsl:when test="current-group()[1][self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]">
             <xsl:copy-of select="$mediaobjects" />
