@@ -242,21 +242,27 @@
   <xsl:template match="para[matches(@role, $hub:figure-number-role-regex-x, 'x')]
                            [following-sibling::*[1]/self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]" mode="hub:figure-captions-preprocess-merge" />
   
-  <!-- If figure and caption are in one para -->
+  <!-- If figure and caption are in one para. Often happens if figures are anchored -->
   <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
                            [inlinemediaobject]
                            [some $text in descendant::node()[self::text()] satisfies matches($text, '\S')]
-                           [not(preceding-sibling::*[1][hub:is-figure(.)])]" mode="hub:figure-captions-preprocess-merge">
+                           (:[not(preceding-sibling::*[1][hub:is-figure(.)])]:)" mode="hub:figure-captions-preprocess-merge">
     <xsl:for-each select="inlinemediaobject">
      <mediaobject>
        <xsl:apply-templates select="./@*" mode="#current"/>
        <xsl:apply-templates select="./node()" mode="#current"/>
      </mediaobject>
     </xsl:for-each>
-    <xsl:copy copy-namespaces="no">
-      <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:apply-templates select="node() except inlinemediaobject" mode="#current"/>
-    </xsl:copy>
+    <xsl:next-match>
+      <xsl:with-param name="discard-image" select="true()" tunnel="yes" as="xs:boolean"/>
+    </xsl:next-match>
+  </xsl:template>
+  
+  <xsl:template match="inlinemediaobject" mode="hub:figure-captions-preprocess-merge">
+    <xsl:param name="discard-image" tunnel="yes" as="xs:boolean?"/>
+    <xsl:if test="not($discard-image)">
+      <xsl:next-match/>
+    </xsl:if>
   </xsl:template>
   
   <!-- merge several caption paras in one, separate by <br/> -->
