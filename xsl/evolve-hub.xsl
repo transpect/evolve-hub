@@ -441,9 +441,14 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:variable name="hub:exclude-sidebar-from-dissolving-if-image-contained-role-regex" as="xs:string" select="'transpect_sidenote'">
+    <!-- overwrite this in your adaptions if needed. Was needed to avoid sidenotes to be dissolved.-->
+  </xsl:variable>
+  
   <xsl:template mode="hub:simplify-complex-float-sidebars"
     match="sidebar
              [para]
+             [not(matches(@role, $hub:exclude-sidebar-from-dissolving-if-image-contained-role-regex))]
              [count(node()) eq 1]
              [
                matches(para/@role, $hub:figure-title-role-regex-x, 'x')
