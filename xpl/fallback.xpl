@@ -48,7 +48,8 @@
     <dd></dd>
  
     <dt>hub:simplify-complex-float-sidebars</dt>
-    <dd>Resolve IDML-specific float anchorings</dd>
+    <dd>Resolve IDML-specific float anchorings especially dissolving sidebar in figure and table context to allow later the creation of those environments.</dd>
+    <dd>Sidebars (InDesign textframes) with following role <pre class="variable">hub:exclude-sidebar-from-dissolving-if-image-contained-role-regex</pre> will not be dissolved.</dd>
     
     <dt>hub:resolve-sidebar-floats</dt>
     <dd>Resolve IDML-specific float anchorings</dd>
