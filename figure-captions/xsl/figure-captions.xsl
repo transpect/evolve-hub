@@ -226,6 +226,7 @@
   <!-- Optional mode for preprocessing figure captions where the number is in a paragraph on its own. -->
   <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
                            [preceding-sibling::*[1]/self::para[matches(@role, $hub:figure-number-role-regex-x, 'x')]]" mode="hub:figure-captions-preprocess-merge">
+    <xsl:param name="discard-image" tunnel="yes" as="xs:boolean?"/>
     <xsl:variable name="number-para" select="preceding-sibling::*[1]" as="element(para)"/>
     <xsl:copy>
       <xsl:copy-of select="@*"/>
@@ -235,7 +236,9 @@
           $number-para/node()"/>
       </phrase>
       <xsl:text>&#x2002;</xsl:text>
-      <xsl:copy-of select="node()"/>
+      <xsl:apply-templates select="node()" mode="#current">
+        <xsl:with-param name="discard-image" select="true()" tunnel="yes" as="xs:boolean"/>
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
   
@@ -246,7 +249,7 @@
   <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
                            [inlinemediaobject]
                            [some $text in descendant::node()[self::text()] satisfies matches($text, '\S')]
-                           (:[not(preceding-sibling::*[1][hub:is-figure(.)])]:)" mode="hub:figure-captions-preprocess-merge">
+                           (:[not(preceding-sibling::*[1][hub:is-figure(.)])]:)" mode="hub:figure-captions-preprocess-merge" priority="2">
     <xsl:for-each select="inlinemediaobject">
      <mediaobject>
        <xsl:apply-templates select="./@*" mode="#current"/>
