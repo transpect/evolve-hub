@@ -65,7 +65,7 @@
               </xsl:if>
               <xsl:variable name="anchor" as="element(anchor)?" 
                 select="if($hub:use-title-child-anchor-id-for-figure-id) 
-                        then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][hub:same-scope(., $title)], $title//anchor[@xml:id][hub:same-scope(., $title)])[1] 
+                then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)], $title//anchor[@xml:id][hub:same-scope(., $title)])[1] 
                         else ()"/>
               <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation | current-group()[1]/@srcpath"/>
               <title>
@@ -165,7 +165,7 @@
               </xsl:if>
               <xsl:variable name="anchor" as="element(anchor)?" 
                           select="if($hub:use-title-child-anchor-id-for-figure-id) 
-                                  then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][hub:same-scope(., $title)])[1] 
+                          then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
                                   else ()"/>
               <xsl:copy-of select="$anchor/@xml:id"/>
               <title>
