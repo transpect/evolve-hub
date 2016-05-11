@@ -198,7 +198,7 @@
                         [hub:is-figure(.)]
                         [mediaobject]" mode="hub:figure-captions">
     <xsl:choose>
-      <xsl:when test=" $hub:handle-several-images-per-caption and ($hub:remove-para-wrapper-for-mediaobject and (hub:is-figure-title(following-sibling::*[1]) or hub:is-figure(following-sibling::*[1])))">
+      <xsl:when test=" $hub:handle-several-images-per-caption and ($hub:remove-para-wrapper-for-mediaobject and (hub:is-figure-title(following-sibling::*[1]) or hub:is-figure(following-sibling::*[1]) or not(following-sibling::*)))">
         <xsl:apply-templates select="node() except *[local-name() = ('tabs', 'tab')]" mode="#current"/>
         <!-- inserted this branch because otherwise only the last image in a figure with several images is unwrapped -->
       </xsl:when>
