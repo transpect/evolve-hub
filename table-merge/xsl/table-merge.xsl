@@ -46,6 +46,7 @@
                           <xsl:choose>
                             <xsl:when test="string-join(current-group()[1]/*:title/*:phrase[@role='hub:caption-number']/*:phrase[@role='hub:identifier']/text(), '') = hub:get-continued-table-identifier(current-group()[last()])">
                               <table>
+                                <xsl:apply-templates select="current-group()[self::*[matches(name(),'table$')]]/@css:orientation" mode="#current"/>
                                 <xsl:apply-templates
                                   select="((current-group()[self::*[matches(name(),'table$')]]/*:title)[1] | current-group()[self::*[matches(name(),'table$')]]/*:titleabbrev), current-group()[self::*[matches(name(),'table$')]]/*:info, (current-group()[self::*[matches(name(),'table$')]]/*:alt | current-group()[self::*[matches(name(),'table$')]]/*:indexterm | current-group()[self::*[matches(name(),'table$')]]/*:textobject)"
                                   mode="#current"/>
