@@ -3074,7 +3074,7 @@
   <xsl:variable name="hub:poetry-heading-regex-x" as="xs:string"
     select="'p_text_h_verse'"/>
   
-  <xsl:template match="*[ para[matches(@role, $hub:poetry-heading-regex-x, 'x')] | linegroup][not(self::poetry)]" mode="hub:ids">
+  <xsl:template match="*[ para[matches(@role, $hub:poetry-heading-regex-x, 'x')] | linegroup][not(self::poetry or self::programlisting)]" mode="hub:ids">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="*" 
