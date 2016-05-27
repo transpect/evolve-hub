@@ -10,7 +10,8 @@
   type="hub:evolve-hub_lists-by-indent">
   
   <p:option name="debug" required="false" select="'no'"/>
-  <p:option name="debug-dir-uri" />
+  <p:option name="debug-dir-uri" select="debug-dir-uri"/>
+  <p:option name="status-dir-uri" select="status-dir-uri"/>
   <p:option name="prefix" required="false" select="'evolve-hub/5'"/>
   
   <p:input port="source" primary="true"/>
