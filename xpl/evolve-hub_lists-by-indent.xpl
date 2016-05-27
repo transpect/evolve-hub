@@ -30,6 +30,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '0')"/>
   </tr:xslt-mode>
   
@@ -38,6 +39,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '1')"/>
   </tr:xslt-mode>
   
@@ -46,6 +48,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '2')"/>
   </tr:xslt-mode>
   
@@ -54,6 +57,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '3')"/>
   </tr:xslt-mode>
   
@@ -62,6 +66,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '4')"/>
   </tr:xslt-mode>
     
