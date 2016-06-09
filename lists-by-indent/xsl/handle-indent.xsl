@@ -35,9 +35,7 @@
     <xsl:sequence select="true()"/>
   </xsl:function>
   
-<!--  as="xs:boolean"-->
-  
-  <xsl:function name="hub:elements-no-list-are-created-in">
+  <xsl:function name="hub:elements-no-list-are-created-in" as="xs:boolean">
     <xsl:param name="input" as="element(*)"/>
     <!-- had to be refactorized. In some cases lists in bibliodivs are needed for example-->
     <xsl:sequence select="if ($input[    not(self::footnote) 
