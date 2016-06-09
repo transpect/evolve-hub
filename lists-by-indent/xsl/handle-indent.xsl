@@ -35,58 +35,74 @@
     <xsl:sequence select="true()"/>
   </xsl:function>
   
+<!--  as="xs:boolean"-->
+  
+  <xsl:function name="hub:elements-no-list-are-created-in">
+    <xsl:param name="input" as="element(*)"/>
+    <!-- had to be refactorized. In some cases lists in bibliodivs are needed for example-->
+    <xsl:sequence select="if ($input[    not(self::footnote) 
+                                 and not(ancestor-or-self::toc) 
+                                 and not(ancestor-or-self::bibliography) 
+                                 and not(ancestor-or-self::info) 
+                                 and not(self::remark[@role = 'endnote'])
+                                 ]) then true() else false()"/>
+  </xsl:function>
+  
   <!-- phrase/@role='hub:identifier' have been marked in mode hub:identifiers -->
   <xsl:template match="*[
                          *[
                            @margin-left &gt; $hub:indent-epsilon 
                            and not(matches(@role, $hub:list-by-indent-exception-role-regex))
                           ]
-                         and not(self::footnote) 
-                         and not(ancestor-or-self::toc) 
-                         and not(ancestor-or-self::bibliography) 
-                         and not(ancestor-or-self::info) 
-                         and not(self::remark[@role = 'endnote'])
                        ]" mode="hub:handle-indent">
-    <xsl:copy>
-      <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="node()" 
-        group-adjacent="(
-                          (
-                            @margin-left 
-                            and @margin-left &gt; $hub:indent-epsilon
-                          )
-                          (: why should a positive text-indent indicate that there is a list?
-                          or 
-                          (
-                            @text-indent
-                            and @text-indent &gt; $hub:indent-epsilon
-                          )
-                          :)
-                        )
-                        (: cf. discussion in https://letexml.slack.com/archives/hub2app/p1426695436000042
-                          and not(
-                          exists(@text-indent) 
-                          and exists(@margin-left)
-                          and @text-indent + @margin-left = 0
-                          and not(.//tab)
-                        ):)
-                        and not(matches(@role, $hub:list-by-indent-exception-role-regex))
-                        and not(self::*[local-name() = ('title', 'subtitle', 'titleabbrev', 'bridgehead', 'entry')])
-                        and not(self::para[(@role = $hub:equation-roles) or starts-with(@role, 'heading')])
-                        and hub:condition-that-stops-indenting-apart-from-role-regex(.)
-                        and not(self::biblioentry[count(child::*)=1 and bibliomisc[not(child::node())]])">
-        <xsl:choose>
-          <xsl:when test="current-grouping-key()">
-            <xsl:call-template name="create-list">
-              <xsl:with-param name="nodes" select="current-group()"/>
-            </xsl:call-template>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:apply-templates select="current-group()" mode="#current"/>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:for-each-group>
-    </xsl:copy>
+    <xsl:choose>
+      <xsl:when test="hub:elements-no-list-are-created-in(.)">
+       
+        <xsl:copy>
+          <xsl:apply-templates select="@*" mode="#current"/>
+          <xsl:for-each-group select="node()" 
+            group-adjacent="(
+                              (
+                                @margin-left 
+                                and @margin-left &gt; $hub:indent-epsilon
+                              )
+                              (: why should a positive text-indent indicate that there is a list?
+                              or 
+                              (
+                                @text-indent
+                                and @text-indent &gt; $hub:indent-epsilon
+                              )
+                              :)
+                            )
+                            (: cf. discussion in https://letexml.slack.com/archives/hub2app/p1426695436000042
+                              and not(
+                              exists(@text-indent) 
+                              and exists(@margin-left)
+                              and @text-indent + @margin-left = 0
+                              and not(.//tab)
+                            ):)
+                            and not(matches(@role, $hub:list-by-indent-exception-role-regex))
+                            and not(self::*[local-name() = ('title', 'subtitle', 'titleabbrev', 'bridgehead', 'entry')])
+                            and not(self::para[(@role = $hub:equation-roles) or starts-with(@role, 'heading')])
+                            and hub:condition-that-stops-indenting-apart-from-role-regex(.)
+                            and not(self::biblioentry[count(child::*)=1 and bibliomisc[not(child::node())]])">
+            <xsl:choose>
+              <xsl:when test="current-grouping-key()">
+                <xsl:call-template name="create-list">
+                  <xsl:with-param name="nodes" select="current-group()"/>
+                </xsl:call-template>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:apply-templates select="current-group()" mode="#current"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:for-each-group>
+        </xsl:copy>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template name="create-list">

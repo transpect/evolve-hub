@@ -25,6 +25,7 @@
   <!-- [A-Z] not followed by dot: confusion with people’s initials in indented paras -->
   <xsl:variable name="hub:orderedlist-mark-chars-regex" as="xs:string"
     select="'[\(\[]?(([ivx]+|[IVX]+|[a-z]|[A-Z]|&#x2007;*[0-9]+)(\.\d+)*)[.:]?[\)\]]?'"/>
+  <!-- orderedlist-mark-chars-regex: the case &#x2007;(9) was not handled. perhas it should be done in the general regex as well?-->
   <xsl:variable name="hub:itemizedlist-mark-regex" as="xs:string"
     select="concat('^', $hub:itemizedlist-mark-chars-regex, '$')"/>
   <xsl:variable name="hub:orderedlist-mark-regex" as="xs:string"
