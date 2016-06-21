@@ -2169,6 +2169,7 @@
     </xsl:copy>
   </xsl:template>
 
+  <!-- there was a conflict with what is now in line 2239; arbitrarily decreasing this template’s priority --> 
   <xsl:template match="text()
 		                   [not(ancestor::phrase[hub:same-scope(current(), .)][@role eq 'hub:identifier'])]
 		                   [not(ancestor::*:math)]
@@ -2179,7 +2180,7 @@
                                             or (position()=1 and matches((.//text())[1],'\s+$'))
                                            ]
                          and . is (ancestor::para[1]//text())[1]
-                       ]" mode="hub:identifiers">
+                       ]" mode="hub:identifiers" priority="0.4">
     <xsl:variable name="context" select="." as="text()" />
     <xsl:analyze-string select="." regex="{$hub:itemizedlist-mark-at-start-regex}" flags="s">
       <xsl:matching-substring>

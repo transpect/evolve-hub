@@ -24,7 +24,7 @@
     select="'([&#xb7;&#x25aa;&#x25a1;&#x25b6;&#x25cf;&#x2212;&#x2022;\p{So}\p{Pd}&#x23af;&#xF0B7;&#xF0BE;&#61485;-])'"/>
   <!-- [A-Z] not followed by dot: confusion with people’s initials in indented paras -->
   <xsl:variable name="hub:orderedlist-mark-chars-regex" as="xs:string"
-    select="'[\(\[]?(([ivx]+|[IVX]+|[a-z]|[A-Z]|&#x2007;*[0-9]+)(\.\d+)*)[.:]?[\)\]]?'"/>
+    select="'[\(\[]?(([ivx]+|[IVX]+|[a-z]|[A-Z]|\p{Zs}*[0-9]+)(\.\d+)*)[.:]?[\)\]]?'"/>
   <!-- orderedlist-mark-chars-regex: the case &#x2007;(9) was not handled. perhas it should be done in the general regex as well?-->
   <xsl:variable name="hub:itemizedlist-mark-regex" as="xs:string"
     select="concat('^', $hub:itemizedlist-mark-chars-regex, '$')"/>
@@ -211,7 +211,8 @@
           </xsl:for-each-group>
         </xsl:when>
         <xsl:when test="current-grouping-key() = 'orderedlist'">
-          <xsl:for-each-group select="current-group()" group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">
+          <xsl:for-each-group select="current-group()" 
+            group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">
             <orderedlist numeration="{current-grouping-key()}">
               <xsl:apply-templates select="current-group()" mode="#current">
                 <xsl:with-param name="set-override" select="'yes'" tunnel="yes"/>
@@ -493,7 +494,7 @@
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^[IVX]+$')">upperroman</xsl:when>
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^[a-z]$')">loweralpha</xsl:when>
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^[A-Z]$')">upperalpha</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^&#x2007;*[0-9]+$')">arabic</xsl:when>
+      <xsl:when test="every $x in $true-marks satisfies matches($x, '^\p{Zs}*[0-9]+$')">arabic</xsl:when>
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^&#x2022;$')">bullet</xsl:when>
       <xsl:when test="every $x in $true-marks satisfies matches($x, '^&#xb7;$')">bullet</xsl:when>
       <xsl:when test="every $x in $true-marks satisfies matches($x, $hub:itemizedlist-mark-chars-regex)">
@@ -512,8 +513,10 @@
   </xsl:template>
 
   <xsl:function name="hub:is-identifier" as="xs:boolean">
-    <xsl:param name="phrase" as="element(phrase)" />
-    <xsl:sequence select="$phrase/@role eq 'hub:identifier'
+    <xsl:param name="phrase" as="element(*)" />
+    <xsl:sequence select="exists($phrase/self::phrase) 
+                          and
+                          $phrase/@role = 'hub:identifier'
                           and
                           not($phrase/ancestor::footnote) 
                           and
