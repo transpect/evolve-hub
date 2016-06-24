@@ -214,7 +214,8 @@
     </xsl:choose>
   </xsl:template>
   
-  <!-- drop alternate text, it would cause the function hub:is-figure() to always return false() -->
+  <!-- drop alternate text, it would cause the function hub:is-figure() to always return false()
+  GI 2016-06-21: Umm, why not rewrite hub_is-figure() so that it ignores alt? -->
   <xsl:template match="mediaobject/alt" mode="hub:figure-captions-preprocess-merge">
     <xsl:comment>
       <xsl:apply-templates mode="#current"/>
