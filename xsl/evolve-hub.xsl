@@ -3063,6 +3063,22 @@
     </xsl:copy>
   </xsl:template>
 
+	<xsl:template match="bibliography" mode="hub:ids">
+		<xsl:copy>
+			<xsl:attribute name="xml:id" 
+				select="concat(
+											'Bib', 
+											string(
+												count( 
+												( //bibliography ) [. &lt;&lt; current()]
+												) 
+											+ 1 
+											)
+											)"/>
+			<xsl:apply-templates select="@* | node()" mode="#current"/>
+		</xsl:copy>
+	</xsl:template>
+	
   <xsl:template match="footnote" mode="hub:ids">
     <xsl:copy>
       <xsl:attribute name="xml:id" select="concat('Fn', count(preceding::footnote) + 1)"/>
