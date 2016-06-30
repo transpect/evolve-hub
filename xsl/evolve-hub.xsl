@@ -3161,7 +3161,9 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="link[@role = $hub:internalref-all-roles]" mode="hub:cross-link">
+  <!-- This template has a name so that it can be called by this name if your adaptions have templates
+    that match other patterns but should do the same things -->
+  <xsl:template match="link[@role = $hub:internalref-all-roles]" name="hub:cross-link" mode="hub:cross-link">
     <xsl:if test="*">
       <xsl:message>Link <xsl:copy-of select="."/> contains markup. The markup will be discarded.
       </xsl:message>
