@@ -237,7 +237,7 @@
                         <xsl:apply-templates select="$first-para/@*, 
                                                      $first-para/node()[hub:same-scope(., $li/$first-para)] 
                                                      except (
-                                                       $first-para/tab[preceding-sibling::*[1][hub:is-identifier(.)]],
+                                                       $first-para/tab[preceding-sibling::*[1][self::phrase][hub:is-identifier(.)]],
                                                        $first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]
                                                      )" mode="#current"/>
                       </para>
