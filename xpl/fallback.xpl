@@ -28,14 +28,17 @@
     <p>Here all modes shall be explained. <pre class="variable">Variables</pre>, <pre class="function">functions</pre> and <span class="dependency">dependent modes</span> are tagged like this.</p>
     
     <dt>hub:dissolve-sidebars-without-purpose</dt>    
-    <dd></dd>
+    <dd>Dissolves sidebars that are a result from anchoring text frames in InDesign. The function <pre class="function">hub:is-in-sidebar-without-purpose</pre> determines which sideabrs are dissolved. Default is sidebars without @role, that were text frames or groups in InDesign. Also paragraphs that contain only anchors for those sideabrs are discarded.</dd>
     
     <dt>hub:preprocess-hierarchy</dt>    
-    <dd></dd>
+  	<dd>Some minor preprocessing templates exist. This mode is mainly for your project's adaptations. Clean stuff to make <span class="dependency">hub:hierarchy</span> work properly.</dd>
     
     <dt>hub:hierarchy</dt>
-    <dd></dd>
+  	<dd>Important mode to create the basic hierarchy of the document. Define the paragraph styles of document headings in the variable <pre class="variable">hub:hierarchy-role-regex</pre>. According to the depths of the headings. The document is partitioned to sections at these paragraphs.</dd>
     
+  	<dt>hub:postprocess-hierarchy</dt>    
+  	<dd>Discard page end anchors. This mode is mainly for your project's adaptations. Map the sections created in mode <span class="dependency">hub:hierarchy</span> to hub elements. E.g. section → chapter or section → appendix.</dd>
+  	
     <dt>hub:tabular-float-caption-arrangements</dt>
     <dd>Optional mode for preprocessing single-row, two-column informaltables where a float is in one cell
       and the caption is in another cell. Also: single-column, two-row arrangement.</dd>
@@ -45,7 +48,9 @@
     <dd>submode/later</dd>
 
     <dt>hub:join-tables</dt>
-    <dd></dd>
+  	<dd>This mode merges table cells. Its main purpose is to handle the case that a cell was splitted in InDesign to fit the the page. When that cell has to be merged again in conversion a special style appendix is expected on those cells. 
+  		It can be defined in variable <pre class="variable">hub:split-style-regex"</pre>, its default value is 'SPLIT'.</dd>
+  	<dd>The case that a paragraph in the splitted cell also was splitted is handled in this mode as well. Therefore the <pre class="variable">hub:split-style-regex"</pre> has to be added to the respective paragraphs and merges them.</dd>
  
     <dt>hub:simplify-complex-float-sidebars</dt>
     <dd>Resolve IDML-specific float anchorings especially dissolving sidebar in figure and table context to allow later the creation of those environments.</dd>
@@ -67,7 +72,7 @@
      In order to make <span class="dependency">hub:table-captions</span> work properly, the captions are pulled up, above each table.</dd>
 
     <dt>hub:join-phrases</dt>    
-    <dd></dd>
+    <dd>Merge phrases/superscripts/subscripts when they have no varying attributes.</dd>
  
     <dt>hub:join-phrases-unwrap</dt>    
     <dd>submode</dd>
@@ -77,10 +82,12 @@
  
     <dt>hub:evolve-textreference-to-link</dt>    
     <dd></dd>
+  	
     <dt>hub:figure-captions (figure-captions)</dt>
     <dd></dd>
     <dd>hub:figure-captions-preprocess-merge (figure-captions)</dd>
     <dd></dd>
+  	
     <dt>hub:join-links</dt>    
     <dd></dd>
 
@@ -95,14 +102,11 @@
     <dd></dd>
 
     <dt>hub:blockquotes</dt>    
-    <dd></dd>
+    <dd>Creates blockquote elements around adjacent paragraphs with blockquote styles. They are defined in <pre class="variable">hub:blockquote-role-regex</pre>.</dd>
  
     <dt>hub:split-at-tab</dt>    
-    <dd></dd>
+  	<dd>Optional mode that will split phrases and other elements within a para that contains tabs, such that the tabs become immediate children of the para.</dd>
   
-    <dt>hub:postprocess-hierarchy</dt>    
-    <dd></dd>
- 
     <dt>hub:upward-project-tab</dt>    
     <dd>submode</dd>
 
@@ -116,9 +120,6 @@
     <dt>hub:repair-hierarchy</dt>    
     <dd></dd>
   
-    <dt>hub:group-environments</dt>    
-    <dd></dd>
-
     <dt>hub:identifiers</dt>    
     <dd></dd>
  
@@ -132,8 +133,9 @@
     <dd></dd>
 
     <dt>hub:table-captions (table-captions)</dt>
-    <dd></dd>
-
+    <dd>This mode converts informaltables to real tables when a title can be determined. The paragraph style of the table has to set in <pre class="variable">hub:table-title-role-regex-x</pre>.</dd>
+  	<dd>Different settings can be done, for example whether the caption has to start with text of a certain pattern (<pre class="variable">hub:table-caption-must-begin-with-table-caption-start-regex</pre>)</dd>
+  	
     <dt>hub:table-captions-preprocess-merge (table-captions)</dt>
     <dd></dd>
 
@@ -150,7 +152,8 @@
     <dd></dd>
 
     <dt>hub:clean-hub</dt>    
-    <dd></dd>
+    <dd>General postprocessing mode. Discard unwanted attributes or elements here.</dd>
+  	<dd>By default phrases are dissolved that have the same formatting as their parents. You can change that behaviour by setting <pre class="variable">hub:dissolve-phrases-with-same-formatting-as-parent</pre> to false().</dd>
 
     <dt>hub:tabs-to-indent (lists-by-indent)</dt>    
     <dd>Converts tabs and negative indents/left margins to attributes: @indent and @margin-left.</dd>
@@ -188,7 +191,11 @@
     <dd></dd>
 
     <dt>hub:reorder-marginal-notes</dt>    
-    <dd></dd>
+  	<dd>In this mode sidebars are placed inside the paras they were originally anchored. This needed for correct list creation, blockquote creation etc. 
+  		and before every mode whose results would be faulty if paragraphs are interrupted by sidebars. </dd>
+  	<dd>Set <pre class="variable">sidenote-at-end-of-para-style-regex</pre> to define paras where the sidebar is pulled to the end. Otherwise thyey are included at the start of the paragraph. List paragraphs should be defined here.</dd>
+  	<dd>Define title style names in <pre class="variable">sidenote-not-to-be-pulled-in-titles</pre>. For those paragraphs the sidebars are not pulled into, but after.</dd>
+  	<dd>This should happen before the <span class="dependency">list modes</span> and after <span class="dependency">postprocess-hierarchy</span></dd>
 
     <dt>hub:split-at-br</dt>    
     <dd><pre class="variable">Split-at-br-elements</pre> [Paras and simparas] with a descendant br are split at br and are transformed to a verse-group. The sequences between the br elements are put into a verse-line element.</dd>
