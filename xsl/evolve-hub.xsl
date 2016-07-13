@@ -2171,6 +2171,7 @@
 
   <!-- there was a conflict with what is now in line 2239; arbitrarily decreasing this template’s priority --> 
   <xsl:template match="text()
+                       [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
 		                   [not(ancestor::phrase[hub:same-scope(current(), .)][@role eq 'hub:identifier'])]
 		                   [not(ancestor::*:math)]
 		                   [
@@ -2205,6 +2206,7 @@
        This is the result of hub:split-at-tab -->
   <xsl:template match="phrase[not(@role eq 'hub:identifier')]
                              [not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope(current(), .)])]
+                             [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
                              [
                                (
                                  matches(., $hub:orderedlist-mark-regex)
