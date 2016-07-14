@@ -770,7 +770,7 @@
         <xsl:choose>
           <xsl:when test="current-group()[1][self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]">
             <xsl:copy-of select="$mediaobjects" />
-            <xsl:copy-of select="current-group() except $mediaobjects" />
+            <xsl:apply-templates select="current-group() except $mediaobjects" mode="#current"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
