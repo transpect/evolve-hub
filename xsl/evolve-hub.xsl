@@ -1920,7 +1920,9 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="title[not(parent::formalpara | parent::sidebar | parent::table | parent::figure) and not(@role)][../@role]" mode="hub:repair-hierarchy">
+  <xsl:variable name="dont-repair-hierarchy-elements-regex" select="'^formalpara|sidebar|table|figure$'"/>
+  
+  <xsl:template match="title[not(parent::*[matches(local-name(),$dont-repair-hierarchy-elements-regex)]) and not(@role)][../@role]" mode="hub:repair-hierarchy">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:copy-of select="../@role"/>
@@ -1928,7 +1930,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="*[not(self::formalpara | self::sidebar | self::table  | self::figure)][@role][title[not(@role)]]/@role" mode="hub:repair-hierarchy" />
+  <xsl:template match="*[not(self::*[matches(local-name(),$dont-repair-hierarchy-elements-regex)])][@role][title[not(@role)]]/@role" mode="hub:repair-hierarchy" />
 
   <!-- collateral: -->
   <xsl:variable name="hub:chapter-title-role-regex" as="xs:string"
