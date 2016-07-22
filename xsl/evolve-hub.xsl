@@ -1751,7 +1751,7 @@
 
 
   <!-- mode: hub:split-at-tab -->
-  <!-- Optional mode that will split phrases and other elements within a para that contains
+	<!-- Optional mode that will split phrases and other elements within a para that contains
        tabs, such that the tabs become immediate children of the para. -->
 
   <xsl:variable name="hub:split-at-tab-element-names" as="xs:string+"
@@ -1764,28 +1764,42 @@
                          ]
                        ]" mode="hub:split-at-tab">
     <xsl:variable name="context" select="." as="element(*)" />
-    <xsl:for-each-group
-      select="descendant::node()[
-                                    not(node())
-                                    or self::tab[not(parent::tabs)]
-                                    or local-name() = $hub:same-scope-element-names
-                                    or self::tabs 
-                                    ][hub:same-scope(., current()/..)]"
-      group-starting-with="tab">
-      <xsl:copy-of select="current-group()/self::tab"/>
-      <xsl:variable name="upward-projected" as="element(*)">
-        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
-          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
-        </xsl:apply-templates>  
-      </xsl:variable>
-      <xsl:if test="$upward-projected/node()">
-        <xsl:sequence select="$upward-projected"/>
-      </xsl:if>
-    </xsl:for-each-group>
+  	<xsl:variable name="processed-content" as="node()*">
+	    <xsl:for-each-group
+	      select="descendant::node()[
+	                                    not(node())
+	                                    or self::tab[not(parent::tabs)]
+	                                    or local-name() = $hub:same-scope-element-names
+	                                    or self::tabs 
+	                                    ][hub:same-scope(., current()/..)]"
+	      group-starting-with="tab">
+	      <xsl:copy-of select="current-group()/self::tab"/>
+	      <xsl:variable name="upward-projected" as="element(*)">
+	        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
+	          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
+	        </xsl:apply-templates>  
+	      </xsl:variable>
+	      <xsl:if test="$upward-projected/node()">
+	        <xsl:sequence select="$upward-projected"/>
+	      </xsl:if>
+	    </xsl:for-each-group>
+    </xsl:variable>
+  	<xsl:apply-templates select="$processed-content" mode="hub:postprocess-splitted-tabs">
+  		<xsl:with-param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" select="key('hub:element-by-srcpath', $processed-content//@srcpath, $processed-content)"/>
+  	</xsl:apply-templates>
   </xsl:template>
 
-  <xsl:template match="anchor[matches(@xml:id, '^pageend')]" mode="hub:postprocess-hierarchy"/>
-
+	<xsl:key name="hub:element-by-srcpath" match="*" use="@srcpath"/>
+	
+	<xsl:template match="*[@srcpath]" mode="hub:postprocess-splitted-tabs">
+		<xsl:param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" />
+			<xsl:copy>
+				<xsl:copy-of select="@* except @srcpath" />
+				<xsl:attribute name="srcpath" select="if (count(for $vorkommen in $elements-with-srcpaths return $vorkommen[@srcpath = current()/@srcpath]) gt 1) then concat(@srcpath, ';n=', index-of($elements-with-srcpaths[@srcpath = current()/@srcpath], .)) else @srcpath"/>
+				<xsl:apply-templates mode="#current" />
+			</xsl:copy>
+	</xsl:template>
+	
   <xsl:template match="node()" mode="hub:upward-project-tab">
     <xsl:param name="restricted-to" as="node()+" tunnel="yes" />
     <xsl:if test="exists(. intersect $restricted-to)">
@@ -3408,6 +3422,9 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
   
+  
+	<xsl:template match="anchor[matches(@xml:id, '^pageend')]" mode="hub:postprocess-hierarchy"/>
+	
   <!-- mode: hub:reorder-marginal-notes-->
   <!-- In this mode sidebars are placed inside the paras they were originally anchored. 
   This should happen before the list modes and after postprocess-hierarchy-->
