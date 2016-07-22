@@ -160,9 +160,10 @@
               </xsl:for-each-group>
             </xsl:variable>
             <figure>
-              <xsl:if test="current-group()/@srcpath">
+<!--              <xsl:if test="current-group()/@srcpath">
                 <xsl:attribute name="srcpath" select="string-join(current-group()/@srcpath,' ')"/>  
-              </xsl:if>
+              </xsl:if>-->
+            	<!-- duplicates srcpaths when only a title exists.-->
               <xsl:variable name="anchor" as="element(anchor)?" 
                           select="if($hub:use-title-child-anchor-id-for-figure-id) 
                           then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
