@@ -1764,27 +1764,29 @@
                          ]
                        ]" mode="hub:split-at-tab">
     <xsl:variable name="context" select="." as="element(*)" />
-  	<xsl:variable name="processed-content" as="node()*">
-	    <xsl:for-each-group
-	      select="descendant::node()[
-	                                    not(node())
-	                                    or self::tab[not(parent::tabs)]
-	                                    or local-name() = $hub:same-scope-element-names
-	                                    or self::tabs 
-	                                    ][hub:same-scope(., current()/..)]"
-	      group-starting-with="tab">
-	      <xsl:copy-of select="current-group()/self::tab"/>
-	      <xsl:variable name="upward-projected" as="element(*)">
-	        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
-	          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
-	        </xsl:apply-templates>  
-	      </xsl:variable>
-	      <xsl:if test="$upward-projected/node()">
-	        <xsl:sequence select="$upward-projected"/>
-	      </xsl:if>
-	    </xsl:for-each-group>
+  	<xsl:variable name="processed-content" as="document-node()">
+  		<xsl:document>
+		    <xsl:for-each-group
+		      select="descendant::node()[
+		                                    not(node())
+		                                    or self::tab[not(parent::tabs)]
+		                                    or local-name() = $hub:same-scope-element-names
+		                                    or self::tabs 
+		                                    ][hub:same-scope(., current()/..)]"
+		      group-starting-with="tab">
+		      <xsl:copy-of select="current-group()/self::tab"/>
+		      <xsl:variable name="upward-projected" as="element(*)">
+		        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
+		          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
+		        </xsl:apply-templates>  
+		      </xsl:variable>
+		      <xsl:if test="$upward-projected/node()">
+		        <xsl:sequence select="$upward-projected"/>
+		      </xsl:if>
+		    </xsl:for-each-group>
+  		</xsl:document>
     </xsl:variable>
-  	<xsl:apply-templates select="$processed-content" mode="hub:postprocess-splitted-tabs">
+  	<xsl:apply-templates select="$processed-content/node()" mode="hub:postprocess-splitted-tabs">
   		<xsl:with-param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" select="key('hub:element-by-srcpath', $processed-content//@srcpath, $processed-content)"/>
   	</xsl:apply-templates>
   </xsl:template>
@@ -1795,7 +1797,7 @@
 		<xsl:param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" />
 			<xsl:copy>
 				<xsl:copy-of select="@* except @srcpath" />
-				<xsl:attribute name="srcpath" select="if (count(for $vorkommen in $elements-with-srcpaths return $vorkommen[@srcpath = current()/@srcpath]) gt 1) then concat(@srcpath, ';n=', index-of($elements-with-srcpaths[@srcpath = current()/@srcpath], .)) else @srcpath"/>
+				<xsl:attribute name="srcpath" select="if (count(for $elt in $elements-with-srcpaths return $elt[@srcpath = current()/@srcpath]) gt 1) then concat(@srcpath, ';n=', index-of($elements-with-srcpaths[@srcpath = current()/@srcpath], .)) else @srcpath"/>
 				<xsl:apply-templates mode="#current" />
 			</xsl:copy>
 	</xsl:template>
