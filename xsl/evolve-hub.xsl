@@ -1797,7 +1797,7 @@
 		<xsl:param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" />
 			<xsl:copy>
 				<xsl:copy-of select="@* except @srcpath" />
-				<xsl:attribute name="srcpath" select="if (count(for $elt in $elements-with-srcpaths return $elt[@srcpath = current()/@srcpath]) gt 1) then concat(@srcpath, ';n=', index-of($elements-with-srcpaths[@srcpath = current()/@srcpath], .)) else @srcpath"/>
+				<xsl:attribute name="srcpath" select="if (count(for $elt in $elements-with-srcpaths return $elt[@srcpath = current()/@srcpath]) gt 1) then concat(@srcpath, ';n=', position()) else @srcpath"/>
 				<xsl:apply-templates mode="#current" />
 			</xsl:copy>
 	</xsl:template>
