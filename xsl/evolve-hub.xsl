@@ -3476,17 +3476,17 @@
       <xsl:when test="$insert-sidebars">
         <xsl:for-each-group
           select="descendant::node()" group-starting-with="anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]">
-            <xsl:apply-templates select="current-group()/self::anchor" mode="#current">
-              <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
-            </xsl:apply-templates>
-          <xsl:variable name="upward-projected" as="element(*)">
-            <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
-              <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]])]" tunnel="yes"/>
-            </xsl:apply-templates>
-          </xsl:variable>
-          <xsl:if test="$upward-projected/node()">
-              <xsl:sequence select="$upward-projected"/>  
-          </xsl:if>
+              <xsl:apply-templates select="current-group()/self::anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]]" mode="#current">
+                <xsl:with-param name="insert-sidebars" as="xs:boolean" select="true()" tunnel="yes"/>
+              </xsl:apply-templates>
+              <xsl:variable name="upward-projected" as="element(*)">
+                <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
+                  <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::anchor[key('hub:linking-item-by-id', @xml:id)/self::sidebar[hub:is-marginal-note(.)]])]" tunnel="yes"/>
+                </xsl:apply-templates>
+              </xsl:variable>
+              <xsl:if test="$upward-projected/node()">
+                  <xsl:sequence select="$upward-projected"/>  
+              </xsl:if>
         </xsl:for-each-group>
       </xsl:when>
       <xsl:otherwise>
