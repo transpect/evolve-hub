@@ -56,6 +56,9 @@
   <p:input port="source" primary="true" sequence="true"/>
   <p:input port="paths" kind="parameter" primary="true"/>
   <p:output port="result" primary="true" sequence="true"/>
+  <p:output port="report" sequence="true">
+    <p:pipe port="report" step="dtp"/>
+  </p:output>
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.io/cascade/xpl/dynamic-transformation-pipeline.xpl"/>
@@ -73,7 +76,7 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </tr:simple-progress-msg>
   
-  <tr:dynamic-transformation-pipeline>
+  <tr:dynamic-transformation-pipeline name="dtp">
     <p:pipeinfo>
       <examples xmlns="http://transpect.io" option-value="evolve-hub/fallback">
         <file href="fallback.xpl"/>
