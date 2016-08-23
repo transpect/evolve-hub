@@ -13,7 +13,9 @@
   version="2.0">
   
   <xsl:import href="http://transpect.io/xslt-util/lengths/xsl/lengths.xsl"/>
-  
+
+  <xsl:variable name="continuation-regex" as="xs:string" select="'\(fortgesetzt\)'"/>
+
   <xsl:template match="*[*[hub:is-continued-table(.)][preceding-sibling::*:table[not(hub:is-continued-table(.))]]]" mode="hub:table-merge">
     <xsl:call-template name="merge-tables">
       <xsl:with-param name="context" select="."/>
@@ -22,7 +24,7 @@
   
   <xsl:template name="merge-tables">
     <xsl:param name="context" as="node()"/>
-    
+          
     <xsl:variable name="temp" as="node()">
       <xsl:element name="{$context/name()}">
         <xsl:copy-of select="$context/@*"/>
@@ -37,7 +39,7 @@
                       self::*[hub:is-continued-table(.)] or 
                       self::*:para[not(child::node()[not(self::*:anchor)])] or 
                       self::*:table[not(hub:is-continued-table(.))] or 
-                      self::*:para[matches(.,'\(fortgesetzt\)')]
+                      self::*:para[matches(., $continuation-regex)]
                       ) 
                       then true() 
                       else false()">
@@ -46,7 +48,7 @@
                           <xsl:choose>
                             <xsl:when test="string-join(current-group()[1]/*:title/*:phrase[@role='hub:caption-number']/*:phrase[@role='hub:identifier']/text(), '') = hub:get-continued-table-identifier(current-group()[last()])">
                               <table>
-                                <xsl:apply-templates select="current-group()[self::*[matches(name(),'table$')]]/@css:orientation" mode="#current"/>
+                                <xsl:apply-templates select="current-group()[self::*[matches(name(),'table$')]][1]/@*" mode="#current"/>
                                 <xsl:apply-templates
                                   select="((current-group()[self::*[matches(name(),'table$')]]/*:title)[1] | current-group()[self::*[matches(name(),'table$')]]/*:titleabbrev), current-group()[self::*[matches(name(),'table$')]]/*:info, (current-group()[self::*[matches(name(),'table$')]]/*:alt | current-group()[self::*[matches(name(),'table$')]]/*:indexterm | current-group()[self::*[matches(name(),'table$')]]/*:textobject)"
                                   mode="#current"/>
@@ -133,7 +135,7 @@
                                     <xsl:otherwise>
                                       <xsl:copy-of select="current-group()"/>
                                     </xsl:otherwise>
-                                  </xsl:choose>          
+                                  </xsl:choose>
                                 </xsl:for-each-group>
                                 <xsl:apply-templates
                                   select="current-group()[self::*[matches(name(),'table$')]]/*:caption"
@@ -184,11 +186,11 @@
         <xsl:value-of select="true()"/>
       </xsl:when>
       <xsl:when
-        test="$item[self::*:informaltable[preceding-sibling::*[1][self::*:para[matches(.,concat('^(',$hub:table-caption-start-regex,').*\(fortgesetzt\)'))]]]]">
+        test="$item[self::*:informaltable[preceding-sibling::*[1][self::*:para[matches(.,concat('^(',$hub:table-caption-start-regex,').*', $continuation-regex))]]]]">
         <xsl:value-of select="true()"/>
       </xsl:when>
       <xsl:when
-        test="$item[self::*:table[*:title[matches(.,concat('^(',$hub:table-caption-start-regex,').*\(fortgesetzt\)'))]]]">
+        test="$item[self::*:table[*:title[matches(.,concat('^(',$hub:table-caption-start-regex,').*', $continuation-regex))]]]">
         <xsl:value-of select="true()"/>
       </xsl:when>
       <xsl:otherwise>
@@ -207,13 +209,13 @@
         />
       </xsl:when>
       <xsl:when
-        test="$item[self::*:informaltable[preceding-sibling::*[1][self::*:para[matches(.,concat('^(',$hub:table-caption-start-regex,').*\(fortgesetzt\)'))]]]]">
+        test="$item[self::*:informaltable[preceding-sibling::*[1][self::*:para[matches(.,concat('^(',$hub:table-caption-start-regex,').*', $continuation-regex))]]]]">
         <xsl:value-of
           select="replace(string-join($item/preceding-sibling::*[1][self::*:para]//text(),''),concat('^(',$hub:table-caption-start-regex,')[\s&#160;]+([A-Z0-9_\.-]+).*$'),'$2')"
         />
       </xsl:when>
       <xsl:when
-        test="$item[self::*:table[*:title[matches(.,concat('^(',$hub:table-caption-start-regex,').*\(fortgesetzt\)'))]]]">
+        test="$item[self::*:table[*:title[matches(.,concat('^(',$hub:table-caption-start-regex,').*', $continuation-regex))]]]">
         <xsl:value-of
           select="replace(string-join($item/*:title//text(),''),concat('^(',$hub:table-caption-start-regex,')[\s&#160;]+([A-Z0-9_\.-]+).*$'),'$2')"
         />
@@ -253,7 +255,7 @@
     <xsl:choose>
       <xsl:when
         test="$item[count(*:entry[descendant::node()[self::text() or self::*:imageobject[not(matches(@role,'Equation'))]]])=1]
-                           [matches(.,concat('^(',$hub:table-caption-start-regex,').*\(fortgesetzt\)'))]">
+                           [matches(.,concat('^(',$hub:table-caption-start-regex,').*', $continuation-regex))]">
         <xsl:value-of select="true()"/>
       </xsl:when>
       <xsl:otherwise>
