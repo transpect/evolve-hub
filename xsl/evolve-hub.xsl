@@ -3596,6 +3596,7 @@
     <xsl:variable name="context" select="." as="element(*)" />
     <xsl:variable name="prelim" as="element(*)+">
       <linegroup remap="{name()}">
+        <xsl:apply-templates select="@* except @remap" mode="#current"/>
         <xsl:for-each-group select="descendant::node()[
                                       not(node())
                                       or local-name() = $hub:same-scope-element-names
