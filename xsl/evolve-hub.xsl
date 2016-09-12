@@ -2026,7 +2026,7 @@
                 <xsl:choose>
                   <xsl:when test="current-grouping-key()">
                     <thead>
-                      <xsl:apply-templates select="$existing-thead/node()" mode="#current"/>
+                      <!--<xsl:apply-templates select="$existing-thead/node()" mode="#current"/>-->
                       <xsl:apply-templates select="current-group()" mode="#current"/>
                     </thead>
                   </xsl:when>
