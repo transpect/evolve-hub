@@ -199,6 +199,7 @@
                         if (hub:is-variable-list-listitem-without-phrase-identifier(para[1]))
                         then 'variablelist'
                         else 'nolist'">
+<!--      <xsl:message select="'+#####', current-grouping-key(), para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]//text(), '###', count(distinct-values(for $para in current-group()/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])), '++', count(for $para in current-group()/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])"/>-->
       <xsl:choose>
         <xsl:when test="current-grouping-key() = 'itemizedlist'">
           <xsl:for-each-group select="current-group()" group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">                
@@ -212,9 +213,9 @@
         </xsl:when>
         <xsl:when test="current-grouping-key() = 'variablelist' 
                         or
-                        (current-grouping-key() = 'orderedlist' and 
+                       (current-grouping-key() = 'orderedlist' and 
                         (
-                          count(distinct-values(for $para in current-group()/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
+                          count(distinct-values(for $para in current-group()/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])) 
                           ne 
                           count(for $para in current-group()/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
                          )
