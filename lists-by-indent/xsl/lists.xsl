@@ -214,9 +214,9 @@
                         or
                         (current-grouping-key() = 'orderedlist' and 
                         (
-                          count(distinct-values(for $para in current-group()//para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
+                          count(distinct-values(for $para in current-group()/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
                           ne 
-                          count(for $para in current-group()//para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
+                          count(for $para in current-group()/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
                          )
                         )">
           <variablelist>
