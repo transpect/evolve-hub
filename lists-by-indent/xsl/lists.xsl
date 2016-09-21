@@ -186,20 +186,13 @@
   <!-- Mischung aus Folgeabsätzen und Unterpunkten oder Listen verschiedenen Typs, die zerschnitten werden müssen -->
   <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
                        and not(hub:is-ordered-list(.)) and not(hub:is-itemized-list(.)) and not(hub:is-variable-list(.))]" mode="hub:lists">
-    <xsl:variable name="context" select="." as="element(orderedlist)"/>
     <xsl:for-each-group select="*" 
       group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]])
                       then 
                         if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:itemizedlist-mark-regex))
                         then 'itemizedlist' 
                         else 
-                          if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
-                                and (
-                                    count(distinct-values(for $para in $context/listitem/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
-                                    eq 
-                                    count(for $para in $context/listitem/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
-                                )
-                              )
+                          if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex))
                           then 'orderedlist' 
                           else 'variablelist'
                       else 
@@ -217,18 +210,15 @@
             </itemizedlist>
           </xsl:for-each-group>
         </xsl:when>
-        <xsl:when test="current-grouping-key() = 'orderedlist'">
-          <xsl:for-each-group select="current-group()" 
-            group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">
-            <orderedlist numeration="{current-grouping-key()}">
-              <xsl:apply-templates select="current-group()" mode="#current">
-                <xsl:with-param name="set-override" select="'yes'" tunnel="yes"/>
-                <xsl:with-param name="identifier-needed" tunnel="yes" select="'no'"/>
-              </xsl:apply-templates>
-            </orderedlist>
-          </xsl:for-each-group>
-        </xsl:when>
-        <xsl:when test="current-grouping-key() = 'variablelist'">
+        <xsl:when test="current-grouping-key() = 'variablelist' 
+                        or
+                        (current-grouping-key() = 'orderedlist' and 
+                        (
+                          count(distinct-values(for $para in current-group()//para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
+                          ne 
+                          count(for $para in current-group()//para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
+                         )
+                        )">
           <variablelist>
             <xsl:for-each select="current-group()">
               <xsl:variable name="li" select="." as="element(listitem)"/>
@@ -266,6 +256,17 @@
               </varlistentry>
             </xsl:for-each>
           </variablelist>
+        </xsl:when>
+        <xsl:when test="current-grouping-key() = 'orderedlist'">
+          <xsl:for-each-group select="current-group()" 
+            group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">
+            <orderedlist numeration="{current-grouping-key()}">
+              <xsl:apply-templates select="current-group()" mode="#current">
+                <xsl:with-param name="set-override" select="'yes'" tunnel="yes"/>
+                <xsl:with-param name="identifier-needed" tunnel="yes" select="'no'"/>
+              </xsl:apply-templates>
+            </orderedlist>
+          </xsl:for-each-group>
         </xsl:when>
         <xsl:otherwise>
           <!--
