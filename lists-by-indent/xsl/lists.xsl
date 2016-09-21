@@ -186,13 +186,20 @@
   <!-- Mischung aus Folgeabsätzen und Unterpunkten oder Listen verschiedenen Typs, die zerschnitten werden müssen -->
   <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
                        and not(hub:is-ordered-list(.)) and not(hub:is-itemized-list(.)) and not(hub:is-variable-list(.))]" mode="hub:lists">
+    <xsl:variable name="context" select="." as="element(orderedlist)"/>
     <xsl:for-each-group select="*" 
       group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]])
                       then 
                         if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:itemizedlist-mark-regex))
                         then 'itemizedlist' 
                         else 
-                          if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex))
+                          if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
+                                and (
+                                    count(distinct-values(for $para in $context/listitem/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
+                                    eq 
+                                    count(for $para in $context/listitem/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
+                                )
+                              )
                           then 'orderedlist' 
                           else 'variablelist'
                       else 
@@ -388,6 +395,11 @@
                                     for $para in $list/listitem/para[1] 
                                     return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
                                   ) = $hub:known-ordered-list-types
+                                )
+                                and (
+                                    count(distinct-values(for $para in $list/listitem/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
+                                    eq 
+                                    count(for $para in $list/listitem/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
                                 )
                               )
                               or hub:is-ordered-list-because-we-know-better($list)
