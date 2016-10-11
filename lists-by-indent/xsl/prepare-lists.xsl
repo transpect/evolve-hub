@@ -135,17 +135,18 @@
     <xsl:variable name="is-list-item" as="xs:boolean" 
       select="((key('hub:style-by-role', ../@role), ..)/@css:display)[last()] = 'list-item'"/>
   	 <xsl:variable name="all-list-styles" as="xs:string*"
-      select="key('hub:list-styles', $list-style-type)[@hub:numbering-continue = 'true'][@hub:numbering-level = key('hub:style-by-role', current()/../@role)/@hub:numbering-level]/@name">
+      select="key('hub:list-styles', $list-style-type)[@hub:numbering-level = key('hub:style-by-role', current()/../@role)/@hub:numbering-level]/@name">
   	 	<!-- same style type and same level -->
   	 </xsl:variable>
 
   	<xsl:variable name="override" as="xs:integer?">
-  		<xsl:for-each-group select="/*//orderedlist/listitem[some $p in para satisfies $p/@role = $all-list-styles]" group-starting-with=".[para[@hub:numbering-continue[. = 'false']]]">
+  		<xsl:for-each-group select="/*//orderedlist/listitem[some $p in para satisfies $p/@role = $all-list-styles]" group-starting-with=".[para[@role = $all-list-styles][@hub:numbering-continue[. = 'false'] or exists(key('hub:style-by-role', @role)[not(@hub:numbering-continue) or @hub:numbering-continue = 'false'])]]">
   		<xsl:if test="current-group()[some $elt in descendant::* satisfies $elt is $context]">
   			<xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath)"/>
   		</xsl:if>
   	</xsl:for-each-group>
   	</xsl:variable>
+<!--   <xsl:message select="'####', $all-list-styles, $override"/>-->
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:if test="$is-list-item">
@@ -159,7 +160,11 @@
                     ]
                   ) + 1"/>
         <xsl:number format="{hub:numbering-format($list-style-type)}" value="($override, $list-item-position)[1]"/>
+      	    	<xsl:message>
+    		 <xsl:number format="{hub:numbering-format($list-style-type)}" value="($override, $list-item-position)[1]"/>
+    	</xsl:message>
       </xsl:if>
+
     </xsl:copy>
   </xsl:template>
 
