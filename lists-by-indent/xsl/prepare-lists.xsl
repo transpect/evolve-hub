@@ -145,7 +145,7 @@
   		                                                                                  [@css:list-style-type = $list-style-type]
   		                                                                                  [not(@hub:numbering-level) or @hub:numbering-level = key('hub:style-by-role', $context/../@role)/@hub:numbering-level]))]" 
   		                    group-starting-with=".[para[@role = $all-list-styles or @css:list-style-type = $list-style-type]
-  		                                               [@hub:numbering-continue = 'false' or key('hub:style-by-role', @role)[not(@hub:numbering-continue and not(css:attic/@hub:numbering-continue)) or @hub:numbering-continue = 'false']]]">
+  		                                               [@hub:numbering-continue = 'false' or (key('hub:style-by-role', @role)[not(@hub:numbering-continue and not(css:attic/@hub:numbering-continue)) or @hub:numbering-continue = 'false'] and not(@hub:numbering-continue = 'true'))]]">
   		<xsl:if test="current-group()[some $elt in descendant::* satisfies $elt is $context]">
   		  <xsl:variable name="list-start" as="xs:string" select="(current-group()[1]/para[1]/@hub:numbering-starts-at, key('hub:style-by-role', current-group()[1]/para[1]/@role)//@hub:numbering-starts-at[last()], '1')[1]"/>
   			<xsl:choose>
@@ -156,7 +156,7 @@
   			    <xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath)"/>
   			  </xsl:when>
   			  <xsl:otherwise>
-  			    <xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath) + xs:integer($list-start)"/>
+  			    <xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath) + xs:integer($list-start) - 1"/>
   			  </xsl:otherwise>
   			</xsl:choose>
   		</xsl:if>
