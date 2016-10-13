@@ -16,4 +16,5 @@
   <symbol number="F0FC" entity="&#252;" char="&#x2713;"/><!-- CHECK MARK -->
   <symbol number="F0FD" entity="" char="☒"/><!-- BALLOT BOX WITH X -->
   <symbol number="F0FE" entity="" char="☑"/><!-- BALLOT BOX WITH CHECK -->
+  <symbol number="F044" entity="" char="&#x21c6;"/><!-- LEFTWARDS ARROW OVER RIGHTWARDS ARROW -->
 </symbols>
