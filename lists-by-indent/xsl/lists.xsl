@@ -350,20 +350,20 @@
     <xsl:value-of select="if ( 
                               (
                                 matches(
-                                  $list/listitem[1]/para[1]/descendant::phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)][1], 
+                                  $list/listitem[1]/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)][1], 
                                   $hub:itemizedlist-mark-regex
                                 )
                                 and (
                                   every $first-para-in-listitem in $list/listitem/para[1]
                                   satisfies exists(
-                                    $first-para-in-listitem/descendant::phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
+                                    $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
                                   )
                                 )
                                 and (
                                   every $first-para-in-listitem in $list/listitem/para[1]
                                   satisfies (
                                     every $first-identifier 
-                                    in $first-para-in-listitem/descendant::phrase[
+                                    in $first-para-in-listitem//phrase[
                                       hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)
                                     ][1]
                                     satisfies matches($first-identifier, $hub:itemizedlist-mark-regex)
