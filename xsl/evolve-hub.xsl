@@ -3679,7 +3679,8 @@
 
   <xsl:template match="linegroup/*[local-name() = $hub:split-at-br-element-names]" mode="hub:apres-split-at-br">
     <line>
-      <xsl:apply-templates select="@*, node()" mode="#current" />
+      <!-- @* are on linegroup already and make problems, e.g. margins of wohole para are given to each line. If some attributes are needed a call-template might be useful -->
+      <xsl:apply-templates select="node()" mode="#current" />
     </line>
   </xsl:template>
   
