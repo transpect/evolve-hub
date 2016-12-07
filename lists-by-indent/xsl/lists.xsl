@@ -341,7 +341,7 @@
 
   <xsl:function name="hub:has-no-identifiers" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
-    <xsl:value-of select="if (every $x in $list/listitem/para[1] satisfies not($x//phrase[hub:is-identifier(.)]))
+    <xsl:value-of select="if (every $x in $list/listitem/para[1] satisfies not($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)]))
                           then true() else false()"/>
   </xsl:function>
   
