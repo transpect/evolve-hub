@@ -2876,7 +2876,8 @@
   <!-- remove attributes wearing source path values (useful option to diff conversion results) -->
   <xsl:template match="@xml:base[hub:boolean-param($clean-hub_remove-attributes-with-paths)]" mode="hub:clean-hub"/>
   <xsl:template match="keyword[matches(@role, 'uri')][hub:boolean-param($clean-hub_remove-attributes-with-paths)]" mode="hub:clean-hub"/>
-  
+  <xsl:template match="@idml2xml:layer" mode="hub:clean-hub"/>
+	
   <xsl:template match="formalpara[title][every $c in * satisfies ($c/self::title)]" mode="hub:clean-hub">
     <para>
       <xsl:apply-templates select="@*, title/node()" mode="#current" />
