@@ -127,7 +127,7 @@
 
 	<xsl:key name="hub:list-styles" match="css:rule" use="@css:list-style-type"/>
 	
-  <!-- for IDML -->
+  <!-- for IDML. may be superfluos now, due to changes in idml2xml -->
   <xsl:template match="phrase[@role eq 'hub:identifier'][not(node())]" mode="hub:prepare-lists">
   	<xsl:variable name="context" select="." as="element()"/>
     <xsl:variable name="list-style-type" as="xs:string" 
@@ -138,31 +138,6 @@
       select="key('hub:list-styles', $list-style-type)[@hub:numbering-level = key('hub:style-by-role', current()/../@role)/@hub:numbering-level]/@name">
   	 	<!-- same style type and same level -->
   	 </xsl:variable>
-
-  	<xsl:variable name="override" as="xs:integer?">
-  		<xsl:for-each-group select="/*//orderedlist/listitem[some $p in para satisfies ($p/@role = $all-list-styles or 
-  		                                                                               ($p[@css:list-style-type]
-  		                                                                                  [@css:list-style-type = $list-style-type]
-  		                                                                                  [not(@hub:numbering-level) or @hub:numbering-level = key('hub:style-by-role', $context/../@role)/@hub:numbering-level]))]" 
-  		                    group-starting-with=".[para[@role = $all-list-styles or @css:list-style-type = $list-style-type]
-  		                                               [@hub:numbering-continue = 'false' or (key('hub:style-by-role', @role)[not(@hub:numbering-continue and not(css:attic/@hub:numbering-continue)) or @hub:numbering-continue = 'false'] and not(@hub:numbering-continue = 'true'))]]">
-  		<xsl:if test="current-group()[some $elt in descendant::* satisfies $elt is $context]">
-  		  <xsl:variable name="list-start" as="xs:string" select="(current-group()[1]/para[1]/@hub:numbering-starts-at, key('hub:style-by-role', current-group()[1]/para[1]/@role)//@hub:numbering-starts-at[last()], '1')[1]"/>
-  			<xsl:choose>
-  			  <xsl:when test="$list-start = '0'">
-  			    <xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath) - 1"/>
-  			  </xsl:when>
-  			  <xsl:when test="$list-start = '1'">
-  			    <xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath)"/>
-  			  </xsl:when>
-  			  <xsl:otherwise>
-  			    <xsl:sequence select="index-of(current-group()/*/@srcpath, $context/../@srcpath) + xs:integer($list-start) - 1"/>
-  			  </xsl:otherwise>
-  			</xsl:choose>
-  		</xsl:if>
-  	</xsl:for-each-group>
-  	</xsl:variable>
-<!--    <xsl:message select="'####',  $all-list-styles, ' || ', $override,  ' || ', $list-style-type"/> -->
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:if test="$is-list-item">
@@ -175,7 +150,7 @@
                       )[1] eq $list-style-type
                     ]
                   ) + 1"/>
-        <xsl:number format="{hub:numbering-format($list-style-type)}" value="($override, $list-item-position)[1]"/>
+      	 <xsl:number format="{hub:numbering-format($list-style-type)}" value="$list-item-position"/>
       </xsl:if>
 
     </xsl:copy>
@@ -192,7 +167,7 @@
       <xsl:otherwise><xsl:sequence select="$list-style-type"/></xsl:otherwise>
     </xsl:choose>
   </xsl:function>
-	
+
   <xsl:template match="css:rule" mode="hub:prepare-lists">
     <xsl:call-template name="css:move-to-attic">
       <xsl:with-param name="atts" select="@css:list-style-type, @css:display[. = 'list-item'], 
