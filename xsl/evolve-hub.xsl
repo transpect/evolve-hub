@@ -56,6 +56,7 @@
   <xsl:param name="map-phrase-with-css-vertical-pos-to-super-or-subscript" select="'no'"/>
   <xsl:param name="collect-continued-floats" select="'no'"/>
   <xsl:param name="clean-hub_remove-attributes-with-paths" select="'no'"/>
+  <xsl:param name="split-at-br-also-for-non-br-paras" select="'yes'"/>
 
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
@@ -3617,7 +3618,11 @@
     <xsl:sequence select="true()"/>
   </xsl:function>
   
-  <xsl:template match="*[local-name() = $hub:split-at-br-element-names][not(../local-name() = $hub:same-scope-element-names)][
+  <xsl:variable name="hub:split-at-br-also-for-non-br-paras" as="xs:boolean" select="$split-at-br-also-for-non-br-paras = 'yes'"/>
+  
+  <xsl:template match="*[$hub:split-at-br-also-for-non-br-paras]
+                        [local-name() = $hub:split-at-br-element-names]
+                        [not(../local-name() = $hub:same-scope-element-names)][
                          not(.//br[
                            hub:same-scope(., current())
                          ])
