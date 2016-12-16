@@ -1718,8 +1718,10 @@
   <xsl:variable name="hub:blockquote-heading-role-regex" as="xs:string"
     select="'^Headline[-_\s]Special-2$'" />
   
-  <xsl:template match="*[not(self::blockquote)][para[matches(@role, $hub:blockquote-role-regex)]]" mode="hub:blockquotes">
-    <xsl:copy>
+  <xsl:template match="*[not(self::blockquote)][para[matches(@role, $hub:blockquote-role-regex)]]" 
+    name="build-blockquotes" mode="hub:blockquotes" xmlns="http://docbook.org/ns/docbook">
+    <xsl:param name="wrapper-element-name" select="name()" as="xs:string" tunnel="no"/>
+    <xsl:element name="{$wrapper-element-name}">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" group-adjacent="exists(self::para[matches(@role, $hub:blockquote-role-regex)])">
         <xsl:choose>
@@ -1727,8 +1729,7 @@
             <blockquote>
               <xsl:if test="current-group()[1]/preceding-sibling::node()[1]/self::para[matches(@role, $hub:blockquote-heading-role-regex)]">
                 <title>
-                  <xsl:apply-templates select="current-group()[1]/preceding-sibling::node()[1]/node()" mode="#current">
-                  </xsl:apply-templates>
+                  <xsl:apply-templates select="current-group()[1]/preceding-sibling::node()[1]/node()" mode="#current"/>
                 </title>
               </xsl:if>
               <xsl:apply-templates select="current-group()" mode="#current"/>
@@ -1739,7 +1740,7 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:for-each-group>
-    </xsl:copy>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="para[
