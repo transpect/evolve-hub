@@ -1286,87 +1286,96 @@
 
   <xsl:variable name="hub:eyecatcher-formalpara-list-role-regex" as="xs:string"
     select="'^EyeCatcher_Item$'" />
+  
+  <xsl:variable name="hub:casestudy-formalpara-heading-role-regex" as="xs:string"
+    select="'^Case[-]?Study_Headline.*$'" />
+
+  <xsl:variable name="hub:casestudy-formalpara-para-role-regex" as="xs:string"
+    select="'^Case[-]?Study_Text.*$'" />
+
+  <xsl:variable name="hub:casestudy-formalpara-list-role-regex" as="xs:string"
+    select="'^Case[-]?Study_List.*$'" />
 
 
-	<!-- regex-containers -->
+  <!-- regex-containers -->
 
-	<xsl:variable name="hub:answers-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:answers-formalpara-heading-role-regex}" role="Answers" heading="yes"/>
-			<hub:regex-map regex="{$hub:answers-formalpara-para-role-regex}" role="Answers" heading="no"/>
-			<hub:regex-map regex="{$hub:answers-formalpara-list-role-regex}" role="Answers" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:answers-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:answers-formalpara-heading-role-regex}" role="Answers" heading="yes"/>
+      <hub:regex-map regex="{$hub:answers-formalpara-para-role-regex}" role="Answers" heading="no"/>
+      <hub:regex-map regex="{$hub:answers-formalpara-list-role-regex}" role="Answers" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:definition-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:definition-formalpara-heading-role-regex}" role="Definition" heading="yes"/>
-			<hub:regex-map regex="{$hub:definition-formalpara-para-role-regex}" role="Definition" heading="no"/>
-			<hub:regex-map regex="{$hub:definition-formalpara-list-role-regex}" role="Definition" heading="no" list="yes" />
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:definition-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:definition-formalpara-heading-role-regex}" role="Definition" heading="yes"/>
+      <hub:regex-map regex="{$hub:definition-formalpara-para-role-regex}" role="Definition" heading="no"/>
+      <hub:regex-map regex="{$hub:definition-formalpara-list-role-regex}" role="Definition" heading="no" list="yes" />
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:important-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:important-formalpara-heading-role-regex}" role="Important" heading="yes"/>
-			<hub:regex-map regex="{$hub:important-formalpara-para-role-regex}" role="Important" heading="no"/>
-			<hub:regex-map regex="{$hub:important-formalpara-list-role-regex}" role="Important" heading="no" list="yes" />
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:important-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:important-formalpara-heading-role-regex}" role="Important" heading="yes"/>
+      <hub:regex-map regex="{$hub:important-formalpara-para-role-regex}" role="Important" heading="no"/>
+      <hub:regex-map regex="{$hub:important-formalpara-list-role-regex}" role="Important" heading="no" list="yes" />
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:warning-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:warning-formalpara-heading-role-regex}" role="Warning" heading="yes"/>
-			<hub:regex-map regex="{$hub:warning-formalpara-para-role-regex}" role="Warning" heading="no"/>
+  <xsl:variable name="hub:warning-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:warning-formalpara-heading-role-regex}" role="Warning" heading="yes"/>
+      <hub:regex-map regex="{$hub:warning-formalpara-para-role-regex}" role="Warning" heading="no"/>
       <hub:regex-map regex="{$hub:warning-formalpara-list-role-regex}" role="Warning" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:overview-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:overview-formalpara-heading-role-regex}" role="Overview" heading="yes"/>
-			<hub:regex-map regex="{$hub:overview-formalpara-para-role-regex}" role="Overview" heading="no"/>
-			<hub:regex-map regex="{$hub:overview-formalpara-list-role-regex}" role="Overview" heading="no" list="yes" />
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:overview-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:overview-formalpara-heading-role-regex}" role="Overview" heading="yes"/>
+      <hub:regex-map regex="{$hub:overview-formalpara-para-role-regex}" role="Overview" heading="no"/>
+      <hub:regex-map regex="{$hub:overview-formalpara-list-role-regex}" role="Overview" heading="no" list="yes" />
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:recipe-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:recipe-formalpara-heading-role-regex}" role="Recipe" heading="yes"/>
-			<hub:regex-map regex="{$hub:recipe-formalpara-para-role-regex}" role="Recipe" heading="no"/>
-			<hub:regex-map regex="{$hub:recipe-formalpara-list-role-regex}" role="Recipe" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:recipe-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:recipe-formalpara-heading-role-regex}" role="Recipe" heading="yes"/>
+      <hub:regex-map regex="{$hub:recipe-formalpara-para-role-regex}" role="Recipe" heading="no"/>
+      <hub:regex-map regex="{$hub:recipe-formalpara-list-role-regex}" role="Recipe" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:trailer-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:trailer-formalpara-heading-role-regex}" role="Trailer" heading="yes"/>
-			<hub:regex-map regex="{$hub:trailer-formalpara-para-role-regex}" role="Trailer" heading="no"/>
-			<hub:regex-map regex="{$hub:trailer-formalpara-list-role-regex}" role="Trailer" heading="no" list="yes" />
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:trailer-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:trailer-formalpara-heading-role-regex}" role="Trailer" heading="yes"/>
+      <hub:regex-map regex="{$hub:trailer-formalpara-para-role-regex}" role="Trailer" heading="no"/>
+      <hub:regex-map regex="{$hub:trailer-formalpara-list-role-regex}" role="Trailer" heading="no" list="yes" />
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:example-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:example-formalpara-heading-role-regex}" role="Example" heading="yes"/>
-			<hub:regex-map regex="{$hub:example-formalpara-para-role-regex}" role="Example" heading="no"/>
-			<hub:regex-map regex="{$hub:example-formalpara-list-role-regex}" role="Example" heading="no" list="yes" />
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:example-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:example-formalpara-heading-role-regex}" role="Example" heading="yes"/>
+      <hub:regex-map regex="{$hub:example-formalpara-para-role-regex}" role="Example" heading="no"/>
+      <hub:regex-map regex="{$hub:example-formalpara-list-role-regex}" role="Example" heading="no" list="yes" />
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:motto-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:motto-formalpara-para-role-regex}" role="Motto" heading="no"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:motto-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:motto-formalpara-para-role-regex}" role="Motto" heading="no"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:learninggoals-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:learninggoals-formalpara-heading-role-regex}" role="LearningGoals" heading="yes"/>
-			<hub:regex-map regex="{$hub:learninggoals-formalpara-para-role-regex}" role="LearningGoals" heading="no"/>
-			<hub:regex-map regex="{$hub:learninggoals-formalpara-list-role-regex}" role="LearningGoals" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:learninggoals-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:learninggoals-formalpara-heading-role-regex}" role="LearningGoals" heading="yes"/>
+      <hub:regex-map regex="{$hub:learninggoals-formalpara-para-role-regex}" role="LearningGoals" heading="no"/>
+      <hub:regex-map regex="{$hub:learninggoals-formalpara-list-role-regex}" role="LearningGoals" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
   
   <xsl:variable name="hub:legaltext-role-regex-container" as="element(hub:regex-container)">
     <hub:regex-container>
@@ -1376,13 +1385,13 @@
     </hub:regex-container>
   </xsl:variable>
 
-	<xsl:variable name="hub:question-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:question-formalpara-heading-role-regex}" role="Questions" heading="yes"/>
-			<hub:regex-map regex="{$hub:question-formalpara-para-role-regex}" role="Questions" heading="no"/>
-			<hub:regex-map regex="{$hub:question-formalpara-list-role-regex}" role="Questions" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:question-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:question-formalpara-heading-role-regex}" role="Questions" heading="yes"/>
+      <hub:regex-map regex="{$hub:question-formalpara-para-role-regex}" role="Questions" heading="no"/>
+      <hub:regex-map regex="{$hub:question-formalpara-list-role-regex}" role="Questions" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
   
   <xsl:variable name="hub:questionnaire-role-regex-container" as="element(hub:regex-container)">
     <hub:regex-container>
@@ -1392,69 +1401,77 @@
     </hub:regex-container>
   </xsl:variable>
 
-	<xsl:variable name="hub:backgroundinformation-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:backgroundinformation-formalpara-heading-role-regex}" role="BackgroundInformation" heading="yes"/>
-			<hub:regex-map regex="{$hub:backgroundinformation-formalpara-para-role-regex}" role="BackgroundInformation" heading="no"/>
-			<hub:regex-map regex="{$hub:backgroundinformation-formalpara-list-role-regex}" role="BackgroundInformation" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:backgroundinformation-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:backgroundinformation-formalpara-heading-role-regex}" role="BackgroundInformation" heading="yes"/>
+      <hub:regex-map regex="{$hub:backgroundinformation-formalpara-para-role-regex}" role="BackgroundInformation" heading="no"/>
+      <hub:regex-map regex="{$hub:backgroundinformation-formalpara-list-role-regex}" role="BackgroundInformation" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:procedure-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:procedure-formalpara-heading-role-regex}" role="Procedure" heading="yes"/>
-			<hub:regex-map regex="{$hub:procedure-formalpara-para-role-regex}" role="Procedure" heading="no"/>
-			<hub:regex-map regex="{$hub:procedure-formalpara-list-role-regex}" role="Procedure" heading="no" list="yes" />
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:procedure-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:procedure-formalpara-heading-role-regex}" role="Procedure" heading="yes"/>
+      <hub:regex-map regex="{$hub:procedure-formalpara-para-role-regex}" role="Procedure" heading="no"/>
+      <hub:regex-map regex="{$hub:procedure-formalpara-list-role-regex}" role="Procedure" heading="no" list="yes" />
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:programcode-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:programcode-formalpara-heading-role-regex}" role="Programcode" heading="yes" is-last-in-group="yes"/>
-			<hub:regex-map regex="{$hub:programcode-formalpara-para-role-regex}" role="Programcode" heading="no"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:programcode-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:programcode-formalpara-heading-role-regex}" role="Programcode" heading="yes" is-last-in-group="yes"/>
+      <hub:regex-map regex="{$hub:programcode-formalpara-para-role-regex}" role="Programcode" heading="no"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:tip-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:tip-formalpara-heading-role-regex}" role="Tip" heading="yes"/>
-			<hub:regex-map regex="{$hub:tip-formalpara-para-role-regex}" role="Tip" heading="no"/>
-			<hub:regex-map regex="{$hub:tip-formalpara-list-role-regex}" role="Tip" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:tip-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:tip-formalpara-heading-role-regex}" role="Tip" heading="yes"/>
+      <hub:regex-map regex="{$hub:tip-formalpara-para-role-regex}" role="Tip" heading="no"/>
+      <hub:regex-map regex="{$hub:tip-formalpara-list-role-regex}" role="Tip" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:conclusion-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:conclusion-formalpara-heading-role-regex}" role="Conclusion" heading="yes"/>
-			<hub:regex-map regex="{$hub:conclusion-formalpara-para-role-regex}" role="Conclusion" heading="no"/>
-			<hub:regex-map regex="{$hub:conclusion-formalpara-list-role-regex}" role="Conclusion" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:conclusion-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:conclusion-formalpara-heading-role-regex}" role="Conclusion" heading="yes"/>
+      <hub:regex-map regex="{$hub:conclusion-formalpara-para-role-regex}" role="Conclusion" heading="no"/>
+      <hub:regex-map regex="{$hub:conclusion-formalpara-list-role-regex}" role="Conclusion" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:result-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:result-formalpara-heading-role-regex}" role="Results" heading="yes"/>
-			<hub:regex-map regex="{$hub:result-formalpara-para-role-regex}" role="Results" heading="no"/>
-			<hub:regex-map regex="{$hub:result-formalpara-list-role-regex}" role="Results" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:result-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:result-formalpara-heading-role-regex}" role="Results" heading="yes"/>
+      <hub:regex-map regex="{$hub:result-formalpara-para-role-regex}" role="Results" heading="no"/>
+      <hub:regex-map regex="{$hub:result-formalpara-list-role-regex}" role="Results" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
+  
+  <xsl:variable name="hub:casestudy-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:casestudy-formalpara-heading-role-regex}" role="CaseStudy" heading="yes"/>
+      <hub:regex-map regex="{$hub:casestudy-formalpara-para-role-regex}" role="CaseStudy" heading="no"/>
+      <hub:regex-map regex="{$hub:casestudy-formalpara-list-role-regex}" role="CaseStudy" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="hub:eyecatcher-role-regex-container" as="element(hub:regex-container)">
-		<hub:regex-container>
-			<hub:regex-map regex="{$hub:eyecatcher-formalpara-heading-role-regex}" role="EyeCatcher" heading="yes"/>
-			<hub:regex-map regex="{$hub:eyecatcher-formalpara-para-role-regex}" role="EyeCatcher" heading="no"/>
-			<hub:regex-map regex="{$hub:eyecatcher-formalpara-list-role-regex}" role="EyeCatcher" heading="no" list="yes"/>
-		</hub:regex-container>
-	</xsl:variable>
+  <xsl:variable name="hub:eyecatcher-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container>
+      <hub:regex-map regex="{$hub:eyecatcher-formalpara-heading-role-regex}" role="EyeCatcher" heading="yes"/>
+      <hub:regex-map regex="{$hub:eyecatcher-formalpara-para-role-regex}" role="EyeCatcher" heading="no"/>
+      <hub:regex-map regex="{$hub:eyecatcher-formalpara-list-role-regex}" role="EyeCatcher" heading="no" list="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
 
-	<xsl:variable name="special-regex-containers" as="element(*)*"
-								select="($hub:answers-role-regex-container,
-												 $hub:definition-role-regex-container,
-												 $hub:important-role-regex-container,
-												 $hub:warning-role-regex-container,
-												 $hub:overview-role-regex-container,
-												 $hub:recipe-role-regex-container,
-												 $hub:trailer-role-regex-container,
+  <xsl:variable name="special-regex-containers" as="element(*)*"
+                select="($hub:answers-role-regex-container,
+                         $hub:definition-role-regex-container,
+                         $hub:important-role-regex-container,
+                         $hub:warning-role-regex-container,
+                         $hub:overview-role-regex-container,
+                         $hub:recipe-role-regex-container,
+                         $hub:trailer-role-regex-container,
                          $hub:example-role-regex-container,
                          $hub:motto-role-regex-container,
                          $hub:learninggoals-role-regex-container,
@@ -1467,56 +1484,60 @@
                          $hub:conclusion-role-regex-container,
                          $hub:result-role-regex-container,
                          $hub:eyecatcher-role-regex-container,
-                         $hub:questionnaire-role-regex-container
-												)"/>
+                         $hub:questionnaire-role-regex-container,
+                         $hub:casestudy-role-regex-container
+                        )"/>
 
-	<xsl:template match="*[some $re in $special-regex-containers/* satisfies (some $e in * satisfies (matches($e/@role, $re/@regex)))][not(self::para)]" mode="hub:special-paras">
-		<xsl:copy copy-namespaces="no">
-			<xsl:apply-templates select="@*" mode="#current" />
-			<xsl:call-template name="hub:handle-special-paras">
-				<xsl:with-param name="context" select="." />
-				<xsl:with-param name="regex-container-pos" select="1" />
-			</xsl:call-template>
-		</xsl:copy>
-	</xsl:template>
+  <xsl:template match="*[some $re in $special-regex-containers/* satisfies (some $e in * satisfies (matches($e/@role, $re/@regex)))][not(self::para)]" mode="hub:special-paras">
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*" mode="#current" />
+      <xsl:call-template name="hub:handle-special-paras">
+        <xsl:with-param name="context" select="." />
+        <xsl:with-param name="regex-container-pos" select="1" />
+      </xsl:call-template>
+    </xsl:copy>
+  </xsl:template>
 
-	<xsl:template name="hub:handle-special-paras">
-		<xsl:param name="context" as="element(*)" />
-		<xsl:param name="regex-container-pos" as="xs:integer" />
-		<xsl:variable name="regex-container" select="$special-regex-containers[$regex-container-pos]" as="element(hub:regex-container)*" />
-		<xsl:for-each-group select="$context/node()" group-adjacent="some $u in $regex-container/hub:regex-map/@regex satisfies matches(@role, $u)">
-		  <xsl:choose>
-                    <xsl:when test="current-grouping-key()  and 
-                                    current-group()
-                                      [last()]
-                                      [some $u 
-                                       in $regex-container/hub:regex-map[@heading='yes'][@is-last-in-group='yes']/@regex
-                                       satisfies matches(@role, $u)
-                                      ]  and  
-                                    count(current-group()) gt 1">
-                      <xsl:for-each-group select="current-group()" group-ending-with="*[some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]">
-                        <formalpara role="{$regex-container/*[1]/@role}">
-                          <title>
-                            <xsl:apply-templates select="current-group()[last()]/@srcpath, node()" mode="#current" />
-                          </title>
-                          <xsl:apply-templates select="current-group()[position() lt last()]" mode="#current" />
-                        </formalpara>
-                      </xsl:for-each-group>
-                    </xsl:when>
-				<xsl:when test="current-grouping-key()  and  current-group()[1][some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]  and  count(current-group()) gt 1">
+  <xsl:template name="hub:handle-special-paras">
+    <xsl:param name="context" as="element(*)" />
+    <xsl:param name="regex-container-pos" as="xs:integer" />
+    <xsl:variable name="regex-container" select="$special-regex-containers[$regex-container-pos]" as="element(hub:regex-container)*" />
+    <xsl:for-each-group select="$context/node()" group-adjacent="some $u in $regex-container/hub:regex-map/@regex satisfies matches(@role, $u)">
+      <xsl:choose>
+        <xsl:when test="current-grouping-key()  and 
+                        current-group()
+                          [last()]
+                          [some $u 
+                           in $regex-container/hub:regex-map[@heading='yes'][@is-last-in-group='yes']/@regex
+                           satisfies matches(@role, $u)
+                          ]  and  
+                        count(current-group()) gt 1">
+          <xsl:for-each-group select="current-group()" group-ending-with="*[some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]">
+            <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
+              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              <title>
+                <xsl:apply-templates select="current-group()[last()]/@srcpath, node()" mode="#current" />
+              </title>
+              <xsl:apply-templates select="current-group()[position() lt last()]" mode="#current" />
+            </xsl:element>
+          </xsl:for-each-group>
+        </xsl:when>
+        <xsl:when test="current-grouping-key()  and  current-group()[1][some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]  and  count(current-group()) gt 1">
           <xsl:for-each-group select="current-group()" group-starting-with="*[some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]">
-            <formalpara role="{$regex-container/*[1]/@role}">
+            <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
+              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
               <title>
                 <xsl:apply-templates select="current-group()[1]/@srcpath, node()" mode="#current" />
               </title>
               <xsl:apply-templates select="current-group()[position() gt 1]" mode="#current" />
-            </formalpara>
+            </xsl:element>
           </xsl:for-each-group>
-		</xsl:when>
-		<xsl:when test="current-grouping-key()">
-          <formalpara role="{$regex-container/*[1]/@role}">
+        </xsl:when>
+        <xsl:when test="current-grouping-key()">
+          <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
+            <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
             <xsl:apply-templates select="current-group()" mode="#current" />
-          </formalpara>
+          </xsl:element>
         </xsl:when>
         <!-- no node in current-group conforms to the current hub:regex-container -->
         <xsl:otherwise>
