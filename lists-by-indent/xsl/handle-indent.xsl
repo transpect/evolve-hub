@@ -28,7 +28,8 @@
   <xsl:variable name="hub:list-by-indent-exception-role-regex" select="'^TOC'" as="xs:string"/>
   
   <!-- For some people it might be useful if paras with tables inside are not indented. Or empty paras. Those can be given here. 
-    Also a possibility to define that only certain paras (with a list style format for instance) are processed. -->
+    Also a possibility to define that only certain paras (with a list style format for instance) are processed. 
+    The result should be false(), if its input should not be indented. -->
   <xsl:function name="hub:condition-that-stops-indenting-apart-from-role-regex" as="xs:boolean">
     <xsl:param name="input" as="element(*)*"/>
     <!-- to allow other conversions to stay unaffected. Override in adaptions -->
