@@ -2943,14 +2943,15 @@
   in order to attache the dissolved phrases’ srcpath to it, or adapt the message rendering so that it uses 
   ancestor paths if it doesn’t find an immediate matching element. -->
   <!-- very dangerous template! semantic information like metadata tagging can be removed -->
+
   <xsl:template match="phrase[@role and not(matches(@role, $hub:clean-hub-ignored-generated-phrase-role-regex))]
                              [$hub:dissolve-phrases-with-same-formatting-as-parent]
                              [exists(
                                 key('hub:style-by-role', @role)
                                   /@*[not(name() = ('layout-type', 'name', 'native-name'))]
                               )  and  (
-                              every $prop in key('hub:style-by-role', @role)
-                                /@*[not(name() = ('layout-type', 'name', 'native-name'))]
+                              every $prop in (key('hub:style-by-role', @role)
+                                /@*[not(name() = ('layout-type', 'name', 'native-name'))] union current()/@*[not(name() = ('role', 'srcpath'))])
                               satisfies (exists(
                                 hub:equiv-props(
                                   $prop,
