@@ -29,6 +29,9 @@
                | Table
               )$'"/>
 
+  <xsl:variable name="hub:table-caption-start-regex" as="xs:string"
+    select="'Tab\.|Tabellen?|Tabel|Tables?'"/>
+
   <xsl:variable name="hub:table-caption-must-begin-with-table-caption-start-regex"  as="xs:boolean"
     select="true()" />
 
