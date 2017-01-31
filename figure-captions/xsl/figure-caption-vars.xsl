@@ -36,7 +36,7 @@
   
   <xsl:variable name="hub:figure-title-further-paras-role-regex-x" as="xs:string" select="'figure_title_2'"/>
   
-  <xsl:variable name="hub:figure-caption-start-regex"  as="xs:string" select="'Bild|Abbildung|Abbildungen|Abb\.|Figures?|Figs?\.?'"/>
+  <xsl:variable name="hub:figure-caption-start-regex"  as="xs:string" select="'Bild|Abbildung|Abbildungen|Abb\.|Figuu?res?|Figs?\.?'"/>
 
   <xsl:variable name="hub:figure-note-role-regex"  as="xs:string" select="'^figure_note$'" />
   

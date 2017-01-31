@@ -2112,11 +2112,11 @@
 
   <!-- do not use brackets '(', ')' or change templates using this regex -->
   <xsl:variable name="hub:figure-caption-start-regex" as="xs:string"
-     select="'Bild|Abbildung|Abbildungen|Abb\.|Figures?|Figs?\.?'"/>
+     select="'Bild|Abbildung|Abbildungen|Abb\.|Figuu?res?|Figs?\.?'"/>
 
   <!-- do not use brackets '(', ')' or change templates using this regex -->
   <xsl:variable name="hub:table-caption-start-regex" as="xs:string"
-     select="'Tab\.|Tabellen?|Tables?'"/>
+     select="'Tab\.|Tabellen?|Tabel|Tables?'"/>
 
   <!-- do not use brackets '(', ')' or change templates using this regex -->
   <xsl:variable name="hub:listing-caption-start-regex" as="xs:string"
