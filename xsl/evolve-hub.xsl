@@ -1829,7 +1829,7 @@
     <xsl:param name="restricted-to" as="node()+" tunnel="yes" />
     <xsl:if test="exists(. intersect $restricted-to)">
       <xsl:copy>
-        <xsl:copy-of select="@*" />
+        <xsl:apply-templates select="@*" mode="hub:split-at-tab" />
         <xsl:apply-templates mode="#current" />
       </xsl:copy>
     </xsl:if>
