@@ -52,7 +52,8 @@
              'figure', 
              'footnote', 
              'listitem', 
-             'table')"/>
+             'table',
+             'sidebar')"/>
 
   <xsl:function name="hub:escape-for-regex" as="xs:string">
     <xsl:param name="input" as="xs:string"/>
