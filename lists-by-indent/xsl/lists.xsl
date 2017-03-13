@@ -15,10 +15,11 @@
   xmlns:saxon="http://saxon.sf.net/"
   xmlns:tr="http://transpect.io"
   xmlns:hub="http://transpect.io/hub"
+  xmlns:css="http://www.w3.org/1996/css"
   xmlns="http://docbook.org/ns/docbook"
   version="2.0"
   xpath-default-namespace="http://docbook.org/ns/docbook"
-  exclude-result-prefixes = "w o v wx xs dbk pkg r rel word200x exsl saxon fn tr">
+  exclude-result-prefixes = "w o v wx xs dbk pkg r rel word200x exsl saxon fn tr css">
 
   <xsl:variable name="hub:itemizedlist-mark-chars-regex" as="xs:string"
     select="'([&#xb7;&#x25aa;&#x25a1;&#x25b6;&#x25cf;&#x2212;&#x2022;\p{So}\p{Pd}&#x23af;&#xF0B7;&#xF0BE;&#61485;-])'"/>
@@ -192,7 +193,8 @@
                         if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:itemizedlist-mark-regex))
                         then 'itemizedlist' 
                         else 
-                          if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex))
+                          if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
+                              and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1][not(.//*)])
                           then 'orderedlist' 
                           else 'variablelist'
                       else 
