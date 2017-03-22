@@ -158,8 +158,8 @@
     <xsl:variable name="css-rule" as="element()*"
       select="(key('hub:style-by-role', parent::*/@role))[1]"/>
     <xsl:if test="not(
-                    $css-rule/@*[name() eq current()/name()] eq current() or
-                    $css-rule/css:attic/@*[name() eq current()/name()] eq current()
+                    $css-rule/@*[name() = current()/name()] = current() or
+                    $css-rule/css:attic/@*[name() = current()/name()] = current()
                   )">
       <xsl:copy/>
     </xsl:if>
