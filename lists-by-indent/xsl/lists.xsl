@@ -309,17 +309,28 @@
 
 
   <!-- identifier im listitem entfernen, wenn durch itemizedlist oder orderedlist erfasst -->
+  <xsl:function as="xs:boolean" name="hub:is-identifier-in-listitem">
+    <xsl:param name="node" as="element(phrase)"/>
+    <xsl:sequence select="boolean($node[@role = 'hub:identifier' and ancestor::listitem and not(ancestor::footnote) and not(ancestor::remark[@role = 'endnote'])])"/>
+  </xsl:function>
 
-  <xsl:template match="phrase[@role = 'hub:identifier' and ancestor::listitem and not(ancestor::footnote) and not(ancestor::remark[@role = 'endnote'])]" mode="hub:lists">
+  <xsl:template match="phrase[hub:is-identifier-in-listitem(.)]//node()
+                       | phrase[hub:is-identifier-in-listitem(.)]" mode="hub:lists">
     <xsl:param name="identifier-needed" select="'yes'" tunnel="yes"/>
-    <xsl:if test="$identifier-needed = 'yes'">
-      <xsl:next-match/>
-    </xsl:if>
-  <xsl:if test="not($identifier-needed = 'yes') and descendant::anchor">
-      <xsl:apply-templates select=".//anchor" mode="#current"/>
-    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="$identifier-needed = 'no'">
+        <xsl:apply-templates mode="#current"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
-
+  
+  <xsl:template match="phrase[hub:is-identifier-in-listitem(.)]//processing-instruction()
+                       | phrase[hub:is-identifier-in-listitem(.)]//anchor" mode="hub:lists" priority="1.5">
+    <xsl:copy-of select="."/>
+  </xsl:template>
 
   <!-- identifier-needed (tunnel) zuruecksetzen -->
   
