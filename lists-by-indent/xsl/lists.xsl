@@ -300,9 +300,19 @@
         <xsl:apply-templates select="listitem/node()" mode="#current"/>
       </xsl:when>
       <xsl:otherwise>
-        <blockquote role="hub:lists">
-          <xsl:apply-templates select="listitem/node()" mode="#current"/>
-        </blockquote>
+        <xsl:choose>
+          <xsl:when test="listitem[1][count(node()) eq 1][orderedlist]">
+            <xsl:apply-templates select="listitem[1]/node()" mode="#current"/>
+            <blockquote role="hub:lists">
+              <xsl:apply-templates select="listitem[position() gt 1]/node()" mode="#current"/>
+            </blockquote>
+          </xsl:when>
+          <xsl:otherwise>
+            <blockquote role="hub:lists">
+              <xsl:apply-templates select="listitem/node()" mode="#current"/>
+            </blockquote>
+          </xsl:otherwise>
+        </xsl:choose>        
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
