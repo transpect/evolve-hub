@@ -29,7 +29,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="variablelist[every $x in varlistentry/term satisfies matches($x, '^[a-z]\)?$')]" mode="hub:postprocess-lists">
+  <xsl:template match="variablelist[every $x in varlistentry/term satisfies (matches($x, '^[a-z]\)?$') and not($x/phrase[@role = 'hub:identifier'][*]))]" mode="hub:postprocess-lists">
     <orderedlist numeration="loweralpha">
       <xsl:apply-templates select="varlistentry/listitem" mode="#current">
         <xsl:with-param name="set-override" select="'term'"/>
@@ -37,7 +37,7 @@
     </orderedlist>
   </xsl:template>
 
-  <xsl:template match="variablelist[every $x in varlistentry/term satisfies matches($x, '^[0-9]+[.\)]?$')]" mode="hub:postprocess-lists">
+  <xsl:template match="variablelist[every $x in varlistentry/term satisfies (matches($x, '^[0-9]+[.\)]?$') and not($x/phrase[@role = 'hub:identifier'][*]))]" mode="hub:postprocess-lists">
     <orderedlist numeration="arabic">
       <xsl:apply-templates select="varlistentry/listitem" mode="#current">
         <xsl:with-param name="set-override" select="'term'"/>

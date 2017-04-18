@@ -194,7 +194,7 @@
                         then 'itemizedlist' 
                         else 
                           if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
-                              and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1][not(.//*)])
+                              and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1][not(.//* except anchor)])
                           then 'orderedlist' 
                           else 'variablelist'
                       else 
