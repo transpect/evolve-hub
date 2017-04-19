@@ -23,7 +23,7 @@
 
   <xsl:template match="keywordset[@role eq 'hub']" mode="hub:postprocess-lists">
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:apply-templates select="keyword except keyword[@role eq 'processed-lists']" mode="#current" />
       <keyword role="processed-lists">true</keyword>
     </xsl:copy>

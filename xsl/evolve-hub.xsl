@@ -144,7 +144,7 @@
 
   <!-- Pull anchors out of links -->
   <xsl:template match="*:link[.//anchor]" mode="hub:hierarchy">
-    <xsl:copy-of select=".//*:anchor"/>
+    <xsl:sequence select=".//*:anchor"/>
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:apply-templates select="node()" mode="#current">
@@ -762,7 +762,7 @@
                          ($caption/following-sibling::*[1][hub:is-figure(.)])
                         ]" mode="hub:sort-figure-captions">
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:for-each-group select="*" group-starting-with="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]">
         <xsl:variable name="mediaobjects" select="current-group() 
                                                   intersect
@@ -770,7 +770,7 @@
         <!-- since figures can also be figures without titles, we may only resort those with a title here -->
         <xsl:choose>
           <xsl:when test="current-group()[1][self::para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]">
-            <xsl:copy-of select="$mediaobjects" />
+            <xsl:sequence select="$mediaobjects" />
             <xsl:apply-templates select="current-group() except $mediaobjects" mode="#current"/>
           </xsl:when>
           <xsl:otherwise>
@@ -791,7 +791,7 @@
                      ]" 
     mode="hub:sort-figure-captions">
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:apply-templates select="keyword except keyword[@role eq 'figure-captions-moved-below-mediaobjects']" mode="#current" />
       <keyword role="figure-captions-moved-below-mediaobjects">true</keyword>
     </xsl:copy>
@@ -808,15 +808,15 @@
                          (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))
                         ]" mode="hub:sort-table-captions">
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:for-each-group select="*" group-starting-with="*[hub:is-table-not-in-table-env(.)]">
         <xsl:variable name="captions" select="current-group() 
                                               intersect
                                               following-sibling::para[matches(@role, $hub:table-title-role-regex-x, 'x')]" />
         <xsl:choose>
           <xsl:when test="current-group()[1][self::*[hub:is-table-not-in-table-env(.)]]">
-            <xsl:copy-of select="$captions" />
-            <xsl:copy-of select="current-group() except $captions" />
+            <xsl:sequence select="$captions" />
+            <xsl:sequence select="current-group() except $captions" />
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
@@ -836,7 +836,7 @@
                      ]" 
     mode="hub:sort-table-captions">
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:apply-templates select="keyword except keyword[@role eq 'table-captions-moved-above-tables']" mode="#current" />
       <keyword role="table-captions-moved-above-tables">true</keyword>
     </xsl:copy>
@@ -863,7 +863,7 @@
               <xsl:if test="hub:boolean-param($srcpaths) and (current-group()/@srcpath)[. ne ''][1]">
                 <xsl:attribute name="srcpath" select="current-group()/@srcpath[. ne '']" separator=" "/>
               </xsl:if>
-              <xsl:copy-of select="@* except @srcpath" />
+              <xsl:sequence select="@* except @srcpath" />
               <xsl:apply-templates select="current-group()" mode="hub:join-phrases-unwrap" />
             </xsl:copy>
           </xsl:when>
@@ -1551,7 +1551,7 @@
               <xsl:call-template name="hub:handle-special-paras">
                 <xsl:with-param name="context" as="element(*)">
                   <tmp>
-                    <xsl:copy-of select="current-group()"/>
+                    <xsl:sequence select="current-group()"/>
                   </tmp>
                 </xsl:with-param>
                 <xsl:with-param name="regex-container-pos" select="$regex-container-pos + 1" />
@@ -1568,7 +1568,7 @@
   </xsl:template>
 
   <xsl:template match="styles" mode="hub:special-paras" priority="10">
-    <xsl:copy-of select="."  />
+    <xsl:sequence select="."  />
   </xsl:template>
   
   <!-- If a paragraph contains only one inlineequation, then it should be a regular equation. -->
@@ -1797,7 +1797,7 @@
 		                                    or self::tabs 
 		                                    ][hub:same-scope(., current()/..)]"
 		      group-starting-with="tab">
-		      <xsl:copy-of select="current-group()/self::tab"/>
+		      <xsl:sequence select="current-group()/self::tab"/>
 		      <xsl:variable name="upward-projected" as="element(*)">
 		        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
 		          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
@@ -1819,7 +1819,7 @@
 	<xsl:template match="*[@srcpath]" mode="hub:postprocess-splitted-tabs">
 		<xsl:param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" />
 			<xsl:copy>
-				<xsl:copy-of select="@* except @srcpath" />
+				<xsl:sequence select="@* except @srcpath" />
 				<xsl:attribute name="srcpath" select="if (count(for $elt in $elements-with-srcpaths return $elt[@srcpath = current()/@srcpath]) gt 1) then concat(@srcpath, ';n=', position()) else @srcpath"/>
 				<xsl:apply-templates mode="#current" />
 			</xsl:copy>
@@ -1840,7 +1840,7 @@
   </xsl:template>
 
   <xsl:template match="tabs" mode="hub:upward-project-tab">
-    <xsl:copy-of select="."/>
+    <xsl:sequence select="."/>
   </xsl:template>
     
   <!-- mode: hub:right-tab-to-tables -->
@@ -1884,7 +1884,7 @@
     <xsl:choose>
       <xsl:when test="$set-post-identifier">
         <xsl:copy copy-namespaces="no">
-          <xsl:copy-of select="@*"/>
+          <xsl:sequence select="@*"/>
           <xsl:apply-templates select="tab[@role = 'right'][last()]/preceding-sibling::node()" mode="#current"/>
         <xsl:element name="phrase">
             <xsl:attribute name="role" select="'hub:post-identifier'"/>
@@ -1896,7 +1896,7 @@
         <row>
           <entry colname="c1" >
             <simpara>
-              <xsl:copy-of select="@srcpath"/>
+              <xsl:sequence select="@srcpath"/>
               <xsl:apply-templates select="tab[@role = 'right'][last()]/preceding-sibling::node()" mode="#current"/>
             </simpara>
           </entry>
@@ -1922,7 +1922,7 @@
     <xsl:if test="$bad-section/following-sibling::node()">
       <xsl:message>
         Cannot move nested sidebar up because it is not its parent element's last node.
-        <xsl:copy-of select="$bad-section"/>
+        <xsl:sequence select="$bad-section"/>
       </xsl:message>
     </xsl:if>
     <xsl:copy>
@@ -1964,7 +1964,7 @@
   <xsl:template match="title[not(parent::*[matches(local-name(),$dont-repair-hierarchy-elements-regex)]) and not(@role)][../@role]" mode="hub:repair-hierarchy">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
-      <xsl:copy-of select="../@role"/>
+      <xsl:sequence select="../@role"/>
       <xsl:apply-templates mode="#current" />
     </xsl:copy>
   </xsl:template>
@@ -2035,8 +2035,8 @@
     <xsl:variable name="colspecs" select="colspec"/>
     <xsl:variable name="existing-thead" select="thead"/>
     <tgroup>
-      <xsl:copy-of select="$attribs"/>
-      <xsl:copy-of select="$colspecs"/>
+      <xsl:sequence select="$attribs"/>
+      <xsl:sequence select="$colspecs"/>
       <xsl:for-each-group select="tbody/row" group-starting-with="row[hub:is-first-thead-row(.)]">
         <xsl:choose>
           <xsl:when test="self::row[hub:is-first-thead-row(.)]">
@@ -2204,7 +2204,7 @@
 
   <xsl:template match="keywordset[@role eq 'hub']" mode="hub:identifiers">
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:apply-templates select="keyword except keyword[@role eq 'marked-identifiers']" mode="#current" />
       <keyword role="marked-identifiers">true</keyword>
     </xsl:copy>
@@ -2613,7 +2613,7 @@
           </phrase>
           <xsl:message>
             couldn't determine caption number in
-            <xsl:copy-of select="."/>
+            <xsl:sequence select="."/>
           </xsl:message>
         </xsl:otherwise>
       </xsl:choose>
@@ -2785,7 +2785,7 @@
   <xsl:template mode="hub:twipsify-lengths hub:expand-css-properties"
     match="keywordset[@role eq 'hub'][hub:boolean-param($expand-css-properties)]" >
     <xsl:copy>
-      <xsl:copy-of select="@*" />
+      <xsl:sequence select="@*" />
       <xsl:apply-templates select="keyword except keyword[@role eq 'formatting-deviations-only']" mode="#current" />
       <keyword role="formatting-deviations-only">false</keyword>
     </xsl:copy>
@@ -3221,7 +3221,7 @@
     that match other patterns but should do the same things -->
   <xsl:template match="link[@role = $hub:internalref-all-roles]" name="hub:cross-link" mode="hub:cross-link">
     <xsl:if test="*">
-      <xsl:message>Link <xsl:copy-of select="."/> contains markup. The markup will be discarded.
+      <xsl:message>Link <xsl:sequence select="."/> contains markup. The markup will be discarded.
       </xsl:message>
     </xsl:if>
     <xsl:variable name="context" select="." as="element(link)" />
@@ -3393,11 +3393,11 @@
         select="hub:resolve-target('section', ( (title, self::tocentry)//phrase[@role eq 'hub:identifier'], '')[1], root(.))" />
       <xsl:choose>
         <xsl:when test="count($resolution) eq 0">
-          <xsl:message>No link resolution for <xsl:copy-of select="." />
+          <xsl:message>No link resolution for <xsl:sequence select="." />
           </xsl:message>
         </xsl:when>
         <xsl:when test="count($resolution) gt 1">
-          <xsl:message>Ambiguous link resolution for <xsl:copy-of select="." />
+          <xsl:message>Ambiguous link resolution for <xsl:sequence select="." />
           </xsl:message>
         </xsl:when>
         <xsl:otherwise>
@@ -3688,7 +3688,7 @@
     <xsl:param name="restricted-to" as="node()+" tunnel="yes" />
     <xsl:if test="exists(. intersect $restricted-to)">
       <xsl:copy>
-        <xsl:copy-of select="@*" />
+        <xsl:sequence select="@*" />
         <xsl:apply-templates mode="#current" />
       </xsl:copy>
     </xsl:if>

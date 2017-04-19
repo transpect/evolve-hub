@@ -111,11 +111,11 @@
     	  <xsl:variable name="first-tab" select="($first-para//tab[not(parent::tabs)][hub:same-scope(., current())])[1]" as="element(tab)"/>
         <varlistentry>
           <term>
-            <xsl:copy-of select="hub:split-term-at-tab($first-para,$first-tab)"/>
+            <xsl:sequence select="hub:split-term-at-tab($first-para,$first-tab)"/>
           </term>
           <xsl:copy>
             <xsl:apply-templates select="node()[. &lt;&lt; $first-para]" mode="#current"/>
-            <xsl:copy-of select="hub:split-listitem-at-tab($first-para,$first-tab)"/>
+            <xsl:sequence select="hub:split-listitem-at-tab($first-para,$first-tab)"/>
             <xsl:apply-templates select="node()[. &gt;&gt; $first-para]" mode="#current"/>
           </xsl:copy>
         </varlistentry>
@@ -230,7 +230,7 @@
                 <xsl:choose>
                   <xsl:when test="$first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]">
                     <term>
-                      <xsl:copy-of select="$first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]"/>
+                      <xsl:sequence select="$first-para//phrase[hub:same-scope(., $li/$first-para)][hub:is-identifier(.)]"/>
                     </term>
                     <xsl:copy>
                       <para>
@@ -339,7 +339,7 @@
   
   <xsl:template match="phrase[hub:is-identifier-in-listitem(.)]//processing-instruction()
                        | phrase[hub:is-identifier-in-listitem(.)]//anchor" mode="hub:lists" priority="1.5">
-    <xsl:copy-of select="."/>
+    <xsl:sequence select="."/>
   </xsl:template>
 
   <!-- identifier-needed (tunnel) zuruecksetzen -->

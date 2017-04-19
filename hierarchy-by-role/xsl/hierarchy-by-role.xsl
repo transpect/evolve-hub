@@ -119,7 +119,7 @@
                   <section>
                     <xsl:variable name="anchor" as="element(anchor)?" select="(.//anchor[@xml:id][not(matches(@xml:id, 'page(end)?_'))][hub:same-scope(., current())])[1]"/>
                     <xsl:if test="$hub:anchor-ids-to-section">
-                      <xsl:copy-of select="$anchor/@xml:id"/>
+                      <xsl:sequence select="$anchor/@xml:id"/>
                     </xsl:if>
                     <xsl:apply-templates select="@role" mode="hub:hierarchy"/>
                     <xsl:if test="$top-level gt $starting-level">

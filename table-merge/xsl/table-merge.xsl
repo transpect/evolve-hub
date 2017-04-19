@@ -27,7 +27,7 @@
           
     <xsl:variable name="temp" as="node()">
       <xsl:element name="{$context/name()}">
-        <xsl:copy-of select="$context/@*"/>
+        <xsl:sequence select="$context/@*"/>
         <xsl:for-each-group select="$context/node()" group-starting-with="*:table[not(hub:is-continued-table(.))]">
           <xsl:choose>
             <xsl:when test="current-group()[1][self::*:table[not(hub:is-continued-table(.))]]">
@@ -110,7 +110,7 @@
                                                 </xsl:when>
                                                 <xsl:otherwise>
                                                   <xsl:element name="{current-group()[1]/name()}">
-                                                    <xsl:copy-of select="current-group()/@*"/>
+                                                    <xsl:sequence select="current-group()/@*"/>
                                                     <xsl:apply-templates
                                                   select="current-group()/node()" mode="#current">
                                                       <xsl:with-param name="merge" select="true()"/>
@@ -122,7 +122,7 @@
                                           </xsl:when>
                                           <xsl:otherwise>
                                             <xsl:element name="{current-group()[1]/name()}">
-                                              <xsl:copy-of select="current-group()/@*"/>
+                                              <xsl:sequence select="current-group()/@*"/>
                                               <xsl:apply-templates select="current-group()/node()"
                                                 mode="#current">
                                                 <xsl:with-param name="merge" select="true()"/>
@@ -133,7 +133,7 @@
                                       </xsl:for-each-group>
                                     </xsl:when>
                                     <xsl:otherwise>
-                                      <xsl:copy-of select="current-group()"/>
+                                      <xsl:sequence select="current-group()"/>
                                     </xsl:otherwise>
                                   </xsl:choose>
                                 </xsl:for-each-group>
@@ -168,7 +168,7 @@
     </xsl:variable>
     <xsl:choose>
       <xsl:when test="deep-equal($temp, $context)">
-        <xsl:copy-of select="$temp"/>
+        <xsl:sequence select="$temp"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:call-template name="merge-tables">

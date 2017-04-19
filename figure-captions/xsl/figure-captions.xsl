@@ -168,7 +168,7 @@
                           select="if($hub:use-title-child-anchor-id-for-figure-id) 
                           then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
                                   else ()"/>
-              <xsl:copy-of select="$anchor/@xml:id"/>
+              <xsl:sequence select="$anchor/@xml:id"/>
               <title>
                 <xsl:if test="$title[not(hub:is-figure(.))]">
                   <xsl:apply-templates select="$title/@*" mode="#current"/>
@@ -231,9 +231,9 @@
     <xsl:param name="discard-image" tunnel="yes" as="xs:boolean?"/>
     <xsl:variable name="number-para" select="preceding-sibling::*[1]" as="element(para)"/>
     <xsl:copy>
-      <xsl:copy-of select="@*"/>
+      <xsl:sequence select="@*"/>
       <phrase>
-        <xsl:copy-of select="
+        <xsl:sequence select="
           ( key('hub:style-by-role', $number-para/@role), $number-para )/@*[name() = ('srcpath', 'css:font-weight', 'css:font-family')], 
           $number-para/node()"/>
       </phrase>

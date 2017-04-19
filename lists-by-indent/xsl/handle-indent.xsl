@@ -158,11 +158,11 @@
       <xsl:choose>
         <xsl:when test="current-group()[1][self::listitem]">
           <orderedlist>
-            <xsl:copy-of select="current-group()"/>
+            <xsl:sequence select="current-group()"/>
           </orderedlist>
         </xsl:when>
         <xsl:when test="current-group()[1][self::orderedlist]">
-          <xsl:copy-of select="current-group()"/>
+          <xsl:sequence select="current-group()"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:message terminate="yes">

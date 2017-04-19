@@ -116,7 +116,7 @@
     <xsl:param name="restricted-to" as="node()+" tunnel="yes" />
     <xsl:if test="exists(. intersect $restricted-to)">
       <xsl:copy>
-        <xsl:copy-of select="@*" />
+        <xsl:sequence select="@*" />
         <xsl:apply-templates mode="#current" />
       </xsl:copy>
     </xsl:if>

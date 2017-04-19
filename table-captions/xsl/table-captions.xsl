@@ -34,7 +34,7 @@
                 <xsl:apply-templates select="current-group()[1]/@*[not(name() = 'role')]" mode="#current"/>
                 <xsl:apply-templates select="current-group()[1]/node()" mode="#current"/>
               </title>
-              <xsl:copy-of select="current-group()[2]/mediaobject"/>
+              <xsl:sequence select="current-group()[2]/mediaobject"/>
             </table>
             <xsl:apply-templates select="current-group()[position() &gt; 2]" mode="hub:process-informaltables"/>
           </xsl:when>
@@ -141,14 +141,14 @@
                            [preceding-sibling::*[1]/self::para[matches(@role, $hub:table-number-role-regex-x, 'x')]]" mode="hub:table-captions-preprocess-merge">
     <xsl:variable name="number-para" select="preceding-sibling::*[1]" as="element(para)"/>
     <xsl:copy>
-      <xsl:copy-of select="@*"/>
+      <xsl:sequence select="@*"/>
       <phrase>
-        <xsl:copy-of select="
+        <xsl:sequence select="
           ( key('hub:style-by-role', $number-para/@role), $number-para )/@*[name() = ('srcpath', 'css:font-weight', 'css:font-family')], 
           $number-para/node()"/>
       </phrase>
       <xsl:text>&#x2002;</xsl:text>
-      <xsl:copy-of select="node()"/>
+      <xsl:sequence select="node()"/>
     </xsl:copy>
   </xsl:template>
 
