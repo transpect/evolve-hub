@@ -42,7 +42,9 @@
     <xsl:sequence select="if ($input[    not(self::footnote) 
                                  and not(ancestor-or-self::toc) 
                                  and not(ancestor-or-self::bibliography) 
-                                 and not(ancestor-or-self::info) 
+                                 and not(ancestor-or-self::info[
+                                   not($input/local-name() = ('abstract', 'formalpara', 'legalnotice', 'printhistory'))
+                                 ])
                                  and not(self::remark[@role = 'endnote'])
                                  ]) then true() else false()"/>
   </xsl:function>
