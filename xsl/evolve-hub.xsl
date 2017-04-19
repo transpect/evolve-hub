@@ -2269,13 +2269,24 @@
                                )
                                and following-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::tab
                              ]" mode="hub:identifiers">
-    <phrase role="hub:identifier">
-      <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet')"/>
-      <xsl:copy>
-        <xsl:apply-templates select="@*" mode="#current"/>
-        <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
-      </xsl:copy>
-    </phrase>
+    <xsl:choose>
+      <xsl:when test="not(@*) or (every $a in @* satisfies $a/name() = ('srcpath', 'xml:lang'))">
+        <phrase role="hub:identifier">
+          <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-1')"/>
+          <xsl:apply-templates select="@*" mode="#current"/>
+          <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
+        </phrase>
+      </xsl:when>
+      <xsl:otherwise>
+        <phrase role="hub:identifier">
+          <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-o')"/>
+          <xsl:copy>
+            <xsl:apply-templates select="@*" mode="#current"/>
+            <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
+          </xsl:copy>
+        </phrase>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <!-- Example(s): <para>1.<tab/>Text</para>
