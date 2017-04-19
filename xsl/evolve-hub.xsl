@@ -2574,20 +2574,20 @@
           <xsl:apply-templates select="$tab | node()[ . &gt;&gt; $tab]" mode="#current"/>
         </xsl:when>
 
-        <!-- example Abb. A.1 -->
+        <!-- input examples: ^Abb. A.1$, ^Table K.1. - .*$ -->
         <xsl:when test="matches(
                           $cleaned-text, 
-                          concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, 'A\.([0-9]+))\p{Zs}.*')
+                          concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, '[A-Z]\.[0-9]+)\.?\p{Zs}.*')
                         ) 
                         and not(parent::*/@label)">
           <xsl:variable name="caption-number" 
             select="replace(
                       node()[not(self::tabs or self::info)][1], 
-                      concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, 'A\.([0-9]+))\p{Zs}.*$'),
+                      concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, '[A-Z]\.[0-9]+)\.?\p{Zs}.*$'),
                       '$1'
                     )" as="xs:string" />
           <phrase role="hub:caption-number">
-            <xsl:analyze-string select="$caption-number" regex="[0-9]+">
+            <xsl:analyze-string select="$caption-number" regex="[A-Z]\.[0-9]+">
               <xsl:matching-substring>
                 <phrase role="hub:identifier">
                   <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'float-cap-start-identifier')"/>
