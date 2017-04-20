@@ -2289,6 +2289,44 @@
     </xsl:choose>
   </xsl:template>
   
+  <xsl:template match="link[every $n in node() 
+                            satisfies ($n
+                                        [self::phrase[not(@role eq 'hub:identifier')]]
+                                        [not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope(current(), .)])]
+                                        [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
+                                        [
+                                          (
+                                            matches(., $hub:orderedlist-mark-regex)
+                                            or
+                                            matches(., $hub:itemizedlist-mark-regex)
+                                          )
+                                          and (
+                                            ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon]
+                                            or
+                                            ancestor::tocentry
+                                          )
+                                          and (
+                                            (. is (ancestor::*[self::para or self::tocentry][1]//node())[1]) 
+                                            or (
+                                           (: preceding-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::anchor[. is ancestor::*[self::para or self::tocentry][1]//node()[not(self::text()[matches(., '^\s+$')])][1]] :) 
+                                            every $item in preceding-sibling::node() satisfies ($item/self::text()[matches(., '^\s+$')] or $item[self::anchor or self::tabs])
+                                            
+                                            )
+                                          )
+                                       ]
+                                    )
+                          ]
+                          [following-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::tab]" mode="hub:identifiers">
+    <phrase role="hub:identifier">
+      <xsl:copy>
+      <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-with-link')"/>
+        <xsl:apply-templates select="@*" mode="#current"/>
+        <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
+      </xsl:copy>
+    </phrase>
+  </xsl:template>
+
+
   <!-- Example(s): <para>1.<tab/>Text</para>
                    <para><phrase>1.<tab/></phrase>Text</para>
   -->
