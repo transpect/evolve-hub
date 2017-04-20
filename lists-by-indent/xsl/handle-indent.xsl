@@ -36,17 +36,19 @@
     <xsl:sequence select="true()"/>
   </xsl:function>
   
-  <xsl:function name="hub:elements-no-list-are-created-in" as="xs:boolean">
+  <xsl:function name="hub:lists-permitted-here" as="xs:boolean">
     <xsl:param name="input" as="element(*)"/>
     <!-- had to be refactorized. In some cases lists in bibliodivs are needed for example-->
-    <xsl:sequence select="if ($input[    not(self::footnote) 
-                                 and not(ancestor-or-self::toc) 
-                                 and not(ancestor-or-self::bibliography) 
-                                 and not(ancestor-or-self::info[
-                                   not($input/local-name() = ('abstract', 'formalpara', 'legalnotice', 'printhistory'))
-                                 ])
-                                 and not(self::remark[@role = 'endnote'])
-                                 ]) then true() else false()"/>
+    <xsl:sequence select="exists(
+                            $input[    
+                                  not(self::footnote) 
+                              and not(ancestor-or-self::toc) 
+                              and not(ancestor-or-self::bibliography) 
+                              and not(ancestor-or-self::info[
+                                not($input/local-name() = ('abstract', 'formalpara', 'legalnotice', 'printhistory'))
+                              ])
+                             and not(self::remark[@role = 'endnote'])
+                          ])"/>
   </xsl:function>
   
   <!-- phrase/@role='hub:identifier' have been marked in mode hub:identifiers -->
@@ -57,8 +59,7 @@
                           ]
                        ]" mode="hub:handle-indent">
     <xsl:choose>
-      <xsl:when test="hub:elements-no-list-are-created-in(.)">
-       
+      <xsl:when test="hub:lists-permitted-here(.)">
         <xsl:copy>
           <xsl:apply-templates select="@*" mode="#current"/>
           <xsl:for-each-group select="node()" 
