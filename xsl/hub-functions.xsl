@@ -30,14 +30,26 @@
   </xsl:function>
 
 
-  <!-- Tests whether $elt is immediately contained in $ancestor-elt 
-       (that is, in the same Story, in the same Cell, etc.). 
-       Or phrased differently: whether $elt is in a paragraph
-       where $ancestor-elt's ParagraphStyleRange is still in force.
-       This function works with IDML input and with extracted XML,
-       provided that @aid:table and @idml2xml:story are conserved 
-       in the extracted XML.
-       -->
+  <!-- 
+    There are situations when you don’t want to select the
+    text nodes of an embedded footnote when selecting the text
+    nodes of a paragraph.
+    A footnote, for example, constitutes a so called “scope.”
+    Other scope-establishing elements are table cells that
+    may contain paragraphs, or figures/tables whose captions 
+    may contain paragraphs. But also indexterms, elements that 
+    do not contain paragraphs, may establish a new scope. 
+    This concept allows you to select only the main narrative 
+    text of a given paragraph (or phrase, …), excluding any 
+    content of embedded notes, figures, list items, or index 
+    terms.
+    Example:
+<para><emphasis>Outer</emphasis> para text<footnote><para>Footnote text</para></footnote>.</para>
+    Typical invocation (context: outer para):
+    .//text()[hub:same-scope(., current())]
+    Result: The three text nodes with string content
+    'Outer', ' para text', and '.'
+    -->
   <xsl:function name="hub:same-scope" as="xs:boolean">
     <xsl:param name="node" as="node()" />
     <xsl:param name="ancestor-elt" as="element(*)*" />
@@ -50,7 +62,8 @@
              'entry', 
              'blockquote', 
              'figure', 
-             'footnote', 
+             'footnote',
+             'indexterm',
              'listitem', 
              'table',
              'sidebar')"/>
