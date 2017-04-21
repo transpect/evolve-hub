@@ -1801,8 +1801,9 @@
 		      <xsl:variable name="upward-projected" as="element(*)">
 		        <xsl:apply-templates select="$context" mode="hub:upward-project-tab">
 		          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
-		        </xsl:apply-templates>  
+		        </xsl:apply-templates>
 		      </xsl:variable>
+		      <xsl:comment select="'hurz'"></xsl:comment>
 		      <xsl:if test="$upward-projected/node()">
 		        <xsl:sequence select="$upward-projected"/>
 		      </xsl:if>
@@ -1834,9 +1835,12 @@
       </xsl:copy>
     </xsl:if>
   </xsl:template>
-
-  <xsl:template match="entry | footnote | listitem | figure | indexterm" mode="hub:upward-project-tab">
-    <xsl:apply-templates select="." mode="hub:split-at-tab" />
+  
+  <xsl:template match="*[local-name() = $hub:same-scope-element-names]" mode="hub:upward-project-tab">
+    <xsl:param name="restricted-to" as="node()+" tunnel="yes" />
+    <xsl:if test="exists(. intersect $restricted-to)">
+      <xsl:apply-templates select="." mode="hub:split-at-tab" />
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="tabs" mode="hub:upward-project-tab">
