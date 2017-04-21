@@ -1791,11 +1791,11 @@
   		<xsl:document>
 		    <xsl:for-each-group
 		      select="descendant::node()[
-		                                    not(node())
-		                                    or self::tab[not(parent::tabs)]
-		                                    or local-name() = $hub:same-scope-element-names
-		                                    or self::tabs 
-		                                    ][hub:same-scope(., current()/..)]"
+                                not(node())
+                                or self::tab[not(parent::tabs)]
+                                or local-name() = $hub:same-scope-element-names
+                                or self::tabs 
+                                ][hub:same-scope(., current()/..)]"
 		      group-starting-with="tab">
 		      <xsl:sequence select="current-group()/self::tab"/>
 		      <xsl:variable name="upward-projected" as="element(*)">
