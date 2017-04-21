@@ -1803,7 +1803,6 @@
 		          <xsl:with-param name="restricted-to" select="current-group()/ancestor-or-self::node()[not(self::tab)]" tunnel="yes"/>
 		        </xsl:apply-templates>
 		      </xsl:variable>
-		      <xsl:comment select="'hurz'"></xsl:comment>
 		      <xsl:if test="$upward-projected/node()">
 		        <xsl:sequence select="$upward-projected"/>
 		      </xsl:if>
