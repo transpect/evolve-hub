@@ -1835,7 +1835,7 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="entry | footnote | listitem | figure" mode="hub:upward-project-tab">
+  <xsl:template match="entry | footnote | listitem | figure | indexterm" mode="hub:upward-project-tab">
     <xsl:apply-templates select="." mode="hub:split-at-tab" />
   </xsl:template>
 
