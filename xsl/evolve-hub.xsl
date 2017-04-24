@@ -2927,6 +2927,8 @@
     <xsl:message select="'StoryRef/StoryID element ', local-name(.), ' discarded'"/>
   </xsl:template>
   
+ <xsl:template match="tabs/tab/@alignment-char[. = '']" mode="hub:clean-hub"/>
+
   <!-- set language attribute: project-specific? -->
   <xsl:template match="/*" mode="hub:clean-hub">
     <xsl:variable name="lang" as="xs:string"
