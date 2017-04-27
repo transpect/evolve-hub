@@ -96,10 +96,13 @@
   </xsl:template>
 
   <!-- IDML, consecutive list paras in listitems -->
-  <xsl:template match="orderedlist[listitem/para[1][not(descendant::phrase[@role = 'hub:identifier'])]
-                       and listitem/para[1][descendant::phrase[@role = 'hub:identifier']]
-                       and (every $x in listitem/para[1] satisfies exists($x/@margin-left))
-                       and (every $x in listitem/para[1]/@margin-left satisfies $x = listitem[1]/para[1]/@margin-left)]" mode="hub:prepare-lists">
+  <xsl:template match="orderedlist
+                       [some $p in listitem/para[1] satisfies ($p[descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., $p)]])] (:for the very special case of unordered list without any identifier:)
+                       [  some $p in listitem/para[1] satisfies ($p[not(descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., $p)])])
+                          and (some $p in listitem/para[1] satisfies ($p[descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., $p)]]))
+                          and (every $x in listitem/para[1] satisfies exists($x/@margin-left))
+                          and (every $x in listitem/para[1]/@margin-left satisfies $x = listitem[1]/para[1]/@margin-left)
+                        ]" mode="hub:prepare-lists">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" group-starting-with="listitem[para[1][
@@ -109,7 +112,7 @@
                                                                ]]">
         <xsl:choose>
           <xsl:when test="current-group()[1][self::listitem[para[1][
-                            descendant::phrase[@role = 'hub:identifier']
+                            descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., ancestor::para[last()])]
                             or
                             hub:is-variable-list-listitem-without-phrase-identifier(.)
                           ]]]">
