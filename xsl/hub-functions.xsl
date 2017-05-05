@@ -256,5 +256,18 @@
     <xsl:param name="token" as="xs:string"/>
     <xsl:sequence select="tokenize($string, '\s+') = $token"/>
   </xsl:function>
+  
+  <xsl:function name="hub:is-valid-attr-name" as="xs:boolean">
+    <xsl:param name="attr-name" as="xs:string?"/>
+    <xsl:variable name="attribute-start-char-regex" as="xs:string"
+      select="'[:A-Z_a-z&#x00C0;-&#x00D6;&#x00D8;-&#x00F6;&#x00F8;-&#x02FF;&#x0370;-&#x037D;&#x037F;-&#x1FFF;&#x200C;-&#x200D;&#x2070;-&#x218F;&#x2C00;-&#x2FEF;&#x3001;-&#xD7FF;&#xF900;-&#xFDCF;&#xFDF0;-&#xFFFD;&#x10000;-&#xEFFFF;]'"/>
+    <xsl:sequence select="matches($attr-name, concat(
+                            '^', 
+                            $attribute-start-char-regex, 
+                            '([-\.0-9&#x00B7;&#x0300;-&#x036F;&#x203F;-&#x2040;]|', 
+                            $attribute-start-char-regex, 
+                            ')+$'
+                          ))"/>
+  </xsl:function>
 
 </xsl:stylesheet>
