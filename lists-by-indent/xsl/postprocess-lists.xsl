@@ -116,6 +116,7 @@
         <xsl:when test="$set-override = 'term'">
           <xsl:attribute name="override" select="preceding-sibling::term"/>
           <xsl:apply-templates select="@* except @override" mode="#current"/>
+          <xsl:apply-templates select="preceding-sibling::term/processing-instruction() | preceding-sibling::term/anchor" mode="#current"/>
           <xsl:apply-templates mode="#current"/>
         </xsl:when>
         <xsl:otherwise>
