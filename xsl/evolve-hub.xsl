@@ -2803,7 +2803,9 @@
 
   <xsl:template match="@*[name() = $twipsify-lengths-attribute-names]" mode="hub:twipsify-lengths">
     <xsl:copy/>
-    <xsl:attribute name="{local-name()}" select="hub:to-twips(.)" />
+    <xsl:if test="matches(xs:string(hub:to-twips(.)),'^[0-9\.-]+$')">
+      <xsl:attribute name="{local-name()}" select="hub:to-twips(.)" />
+    </xsl:if>
   </xsl:template>
 
   <!-- style is Hub 1.0, css:rule is Hub 1.1 or later -->
