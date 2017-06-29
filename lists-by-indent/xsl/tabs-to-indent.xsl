@@ -89,7 +89,7 @@
   <xsl:template match="*[self::figure | self::table][title/(. | key('hub:style-by-role', @role))/@css:margin-left]"
                 mode="hub:tabs-to-indent" priority="2.5">
     <xsl:copy>
-      <xsl:if test="exists(title/(.| key('hub:style-by-role', @role))/@css:margin-left)">
+      <xsl:if test="exists(title/(.| key('hub:style-by-role', @role))/@css:margin-left) and matches(xs:string(hub:to-twips((title/@css:margin-left, key('hub:style-by-role', title/@role)/@css:margin-left)[1])),'^[0-9\.-]+$')">
         <xsl:attribute name="margin-left" 
           select="hub:to-twips((title/@css:margin-left, key('hub:style-by-role', title/@role)/@css:margin-left)[1])"/>
       </xsl:if>
@@ -101,7 +101,7 @@
                         [(. | key('hub:style-by-role', @role))/@css:margin-left]"
                 mode="hub:tabs-to-indent">
     <xsl:copy>
-      <xsl:if test="exists((.| key('hub:style-by-role', @role))/@css:margin-left)">
+      <xsl:if test="exists((.| key('hub:style-by-role', @role))/@css:margin-left) and matches(xs:string(hub:to-twips((@css:margin-left, key('hub:style-by-role', @role)/@css:margin-left)[1])),'^[0-9\.-]+$')">
         <xsl:attribute name="margin-left" 
           select="hub:to-twips((@css:margin-left, key('hub:style-by-role', @role)/@css:margin-left)[1])"/>
       </xsl:if>
