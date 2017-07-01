@@ -112,13 +112,18 @@
     <xsl:param name="count" select="1" as="xs:integer"/>
     <!-- looping auf Ebene 20 abbrechen -->
     <xsl:if test="$count gt 20">
+      <!--<error>
+        <para>Named template 'create-list' in evolve-hub/lists-by-indent/xsl/handle-indent.xsl 
+  terminated at list nesting depth 20. The list detection template is probably looping.</para>
+        <xsl:sequence select="$nodes"/>
+      </error>-->
       <xsl:message terminate="yes">Terminated at list nesting depth 20. This list detection stylesheet is probably looping.</xsl:message>
     </xsl:if>
     <!--<xsl:variable name="indent" select="($nodes[1]/@margin-left, 0)[1] + ($nodes[1]/@text-indent, 0)[1]"/>-->
-<xsl:variable name="indent" select="min( for $n in $nodes 
+    <xsl:variable name="indent" select="min( for $n in $nodes 
                                              return (($n/@margin-left, 0)[1] + ($n/@text-indent, 0)[1])
                                            )"/>
-<xsl:variable name="temporary-list" as="node()*">
+    <xsl:variable name="temporary-list" as="node()*">
         <xsl:for-each-group select="$nodes"
           group-adjacent="abs($indent - (@margin-left, 0)[1] - (@text-indent, 0)[1]) &lt;= $hub:indent-epsilon">
           <xsl:choose>
@@ -157,7 +162,7 @@
           </xsl:choose>
         </xsl:for-each-group>
     </xsl:variable>
-<xsl:for-each-group select="$temporary-list" group-adjacent="local-name()">
+    <xsl:for-each-group select="$temporary-list" group-adjacent="local-name()">
       <xsl:choose>
         <xsl:when test="current-group()[1][self::listitem]">
           <orderedlist>
