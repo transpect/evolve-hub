@@ -106,7 +106,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" group-starting-with="listitem[para[1][
-                                                                 descendant::phrase[@role = 'hub:identifier']
+                                                                 descendant::phrase[@role = 'hub:identifier'][hub:same-scope(.,ancestor::para[last()])]
                                                                  or
                                                                  hub:is-variable-list-listitem-without-phrase-identifier(.)
                                                                ]]">
