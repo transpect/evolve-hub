@@ -3240,10 +3240,60 @@
 
 
   <!-- mode: hub:cross-link -->
-  
-  <xsl:variable name="hub:url-regex" as="xs:string"
-    select="'^((https?://)|www\.)([-_.a-zA-Z0-9]+)(/[-+_.=&amp;%/?;,a-zA-Z0-9]+)?'" />
 
+  <xsl:variable name="hub:url-regex" as="xs:string"
+    select="'(www\.[a-zA-Z][-a-zA-Z0-9.]+\.[-a-zA-Z0-9+&amp;@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|])|(doi\s?:\s*)?((https?|ftp|file|rtsp)://[-a-zA-Z0-9+&amp;@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|])'"/>
+
+  <xsl:variable name="hub:doi-regex" as="xs:string"
+    select="'(^|\s)(doi\s?:\s*)?(10\.\d\d\d\d(\.|\d+)*/[&quot;&amp;&lt;&gt;\S]+)(\s|$)'"/>
+
+  <xsl:variable name="hub:doi-link-starting-string" as="xs:string?"
+    select="'http://doi.org/'"/>
+
+  <xsl:variable name="hub:remove-doi-text-prefix" as="xs:boolean"
+    select="false()"/>
+  
+  <xsl:variable name="hub:create-helper-attr-for-created-cross-links" as="xs:boolean"
+    select="false()"/>
+
+  <xsl:template match="para//text()[not(ancestor::link)]" mode="hub:cross-link">
+    <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)">
+      <xsl:matching-substring>
+        <link xlink:href="{replace(., '[,.;]$', '')}">
+          <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
+            <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
+          </xsl:if>
+          <xsl:value-of select="replace(., '[,.;]$', '')"/>
+        </link>
+        <xsl:if test="matches(., '[,.;]$')">
+          <xsl:value-of select="replace(., '^(.+)([,.;])$', '$2')"/>
+        </xsl:if>
+      </xsl:matching-substring>
+      <xsl:non-matching-substring>
+        <xsl:analyze-string select="." regex="{$hub:doi-regex}" flags="i">
+          <xsl:matching-substring>
+            <xsl:variable name="address" as="xs:string"
+              select="replace(regex-group(3), '[,.;]$', '')"/>
+            <xsl:value-of select="regex-group(1)"/>
+            <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
+              <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
+                <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
+              </xsl:if>
+              <xsl:value-of select="$address"/>
+            </link>
+            <xsl:if test="matches(., '^.+([,.;])$')">
+              <xsl:value-of select="replace(regex-group(3), '^.+([,.;])$', '$1')"/>
+            </xsl:if>
+            <xsl:value-of select="regex-group(5)"/>
+          </xsl:matching-substring>
+          <xsl:non-matching-substring>
+            <xsl:value-of select="."/>
+          </xsl:non-matching-substring>
+        </xsl:analyze-string>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
+  </xsl:template>
+  
   <!-- never mind the link's role if it looks like a URL: -->
   <xsl:template match="link[matches(., $hub:url-regex)]" mode="hub:cross-link" priority="2">
     <xsl:copy>
