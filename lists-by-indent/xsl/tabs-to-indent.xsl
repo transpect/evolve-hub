@@ -59,11 +59,6 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:function name="hub:is-equation-para" as="xs:boolean">
-    <xsl:param name="para" as="element(*)"/>
-    <xsl:sequence select="$para/@role = $hub:equation-roles"/>
-  </xsl:function>
-  
   <!-- Paras that start with a tab -->
   <xsl:template match="dbk:para[not(@role = $hub:equation-roles)]
                                [

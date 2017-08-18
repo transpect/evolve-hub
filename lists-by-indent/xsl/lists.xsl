@@ -290,9 +290,7 @@
                                   [not(hub:is-variable-list(.))]
                                   [hub:has-no-identifiers(.)]
                                   [if (parent::listitem/para[1]/@margin-left) then not(hub:same-margin-left(., parent::listitem/para[1]/@margin-left)) else true()]
-                                  [not(every $n in listitem/node() satisfies $n/self::para[@role = $hub:equation-roles 
-                                                                                           or (count(node()) = 1 and inlineequation)
-                                                                                          ]
+                                  [not(every $n in listitem/node() satisfies $n/self::para[hub:is-equation-para(.)]
                                       )]"
                 mode="hub:lists">
     <xsl:choose>
@@ -453,7 +451,7 @@
                                   every $first-para-in-listitem in $list/listitem/para[1] satisfies (
                                     hub:is-variable-list-listitem-with-phrase-identifier($first-para-in-listitem)
                                     and 
-                                    not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
+                                    not($first-para-in-listitem/@role = 'Note' or $first-para-in-listitem/self::para/hub:is-equation-para(.))
                                   )
                                 )
                               or
@@ -461,7 +459,7 @@
                                 every $first-para-in-listitem in $list/listitem/para[1] satisfies (
                                   hub:is-variable-list-listitem-without-phrase-identifier($first-para-in-listitem)
                                   and
-                                  not($first-para-in-listitem/@role = ('Note', $hub:equation-roles))
+                                  not($first-para-in-listitem/@role = 'Note' or $first-para-in-listitem/self::para/hub:is-equation-para(.))
                                 )
                               )
                             )
@@ -499,6 +497,12 @@
                             ($para//tab[not(parent::tabs)][hub:same-scope(., $para)])[1]
                               /preceding::node()[. &gt;&gt; $para]
                           )"/>
+  </xsl:function>
+
+  <xsl:function name="hub:is-equation-para" as="xs:boolean">
+    <xsl:param name="para" as="element(*)"/>
+    <xsl:sequence select="   $para/@role = $hub:equation-roles
+                          or (count($para/node()) = 1 and $para/inlineequation)"/>
   </xsl:function>
 
   <xsl:function name="hub:get-list-type-with-warning" as="xs:string">
