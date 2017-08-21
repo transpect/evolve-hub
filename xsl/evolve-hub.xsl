@@ -57,6 +57,7 @@
   <xsl:param name="collect-continued-floats" select="'no'"/>
   <xsl:param name="clean-hub_remove-attributes-with-paths" select="'no'"/>
   <xsl:param name="split-at-br-also-for-non-br-paras" select="'yes'"/>
+  <xsl:param name="create-ulinks-from-text" select="'no'"/>
 
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
@@ -3257,41 +3258,48 @@
     select="false()"/>
 
   <xsl:template match="para//text()[not(ancestor::link)]" mode="hub:cross-link">
-    <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)">
-      <xsl:matching-substring>
-        <link xlink:href="{replace(., '[,.;]$', '')}">
-          <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
-            <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
-          </xsl:if>
-          <xsl:value-of select="replace(., '[,.;]$', '')"/>
-        </link>
-        <xsl:if test="matches(., '[,.;]$')">
-          <xsl:value-of select="replace(., '^(.+)([,.;])$', '$2')"/>
-        </xsl:if>
-      </xsl:matching-substring>
-      <xsl:non-matching-substring>
-        <xsl:analyze-string select="." regex="{$hub:doi-regex}" flags="i">
+    <xsl:choose>
+      <xsl:when test="$create-ulinks-from-text='yes'">
+        <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)">
           <xsl:matching-substring>
-            <xsl:variable name="address" as="xs:string"
-              select="replace(regex-group(3), '[,.;]$', '')"/>
-            <xsl:value-of select="regex-group(1)"/>
-            <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
+            <ulink url="{replace(., '[,.;]$', '')}">
               <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
                 <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
               </xsl:if>
-              <xsl:value-of select="$address"/>
-            </link>
-            <xsl:if test="matches(., '^.+([,.;])$')">
-              <xsl:value-of select="replace(regex-group(3), '^.+([,.;])$', '$1')"/>
+              <xsl:value-of select="replace(., '[,.;]$', '')"/>
+            </ulink>
+            <xsl:if test="matches(., '[,.;]$')">
+              <xsl:value-of select="replace(., '^(.+)([,.;])$', '$2')"/>
             </xsl:if>
-            <xsl:value-of select="regex-group(5)"/>
           </xsl:matching-substring>
           <xsl:non-matching-substring>
-            <xsl:value-of select="."/>
+            <xsl:analyze-string select="." regex="{$hub:doi-regex}" flags="i">
+              <xsl:matching-substring>
+                <xsl:variable name="address" as="xs:string"
+                  select="replace(regex-group(3), '[,.;]$', '')"/>
+                <xsl:value-of select="regex-group(1)"/>
+                <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
+                  <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
+                    <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
+                  </xsl:if>
+                  <xsl:value-of select="$address"/>
+                </link>
+                <xsl:if test="matches(., '^.+([,.;])$')">
+                  <xsl:value-of select="replace(regex-group(3), '^.+([,.;])$', '$1')"/>
+                </xsl:if>
+                <xsl:value-of select="regex-group(5)"/>
+              </xsl:matching-substring>
+              <xsl:non-matching-substring>
+                <xsl:value-of select="."/>
+              </xsl:non-matching-substring>
+            </xsl:analyze-string>
           </xsl:non-matching-substring>
         </xsl:analyze-string>
-      </xsl:non-matching-substring>
-    </xsl:analyze-string>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <!-- never mind the link's role if it looks like a URL: -->
