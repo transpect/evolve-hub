@@ -3243,10 +3243,10 @@
   <!-- mode: hub:cross-link -->
 
   <xsl:variable name="hub:url-regex" as="xs:string"
-    select="'(www\.[a-zA-Z][-a-zA-Z0-9.]+\.[-a-zA-Z0-9+&amp;@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|])|(doi\s?:\s*)?((https?|ftp|file|rtsp)://[-a-zA-Z0-9+&amp;@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|])'"/>
+    select="'(www\.[a-zA-Z][-a-zA-Z0-9.]+\.[-a-zA-Z0-9+&amp;@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|])|(doi\s?:\s*)?((https?|ftp|file|rtsp)://[-a-zA-Z0-9+&amp;@#/%?=~_|!:,.;\(\)]*[-a-zA-Z0-9+&amp;@#/%=~_|])'"/>
 
   <xsl:variable name="hub:doi-regex" as="xs:string"
-    select="'(^|\s)(doi\s?:\s*)?(10\.\d\d\d\d(\.|\d+)*/[&quot;&amp;&lt;&gt;\S]+)(\s|$)'"/>
+    select="'(^|\s)(doi\s?:\s*)?(10\.\d\d\d\d(\.|\d+)*/[&quot;&amp;&lt;&gt;\S\(\)]+)(\s|$)'"/>
 
   <xsl:variable name="hub:doi-link-starting-string" as="xs:string?"
     select="'http://doi.org/'"/>
