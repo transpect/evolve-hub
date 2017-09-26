@@ -57,7 +57,10 @@
                                or 
                                (
                                  $node/self::para[ 
-                                   matches( ., concat('^(', $hub:table-caption-start-regex, ')')) 
+                                   matches(
+                                     string-join(descendant::text()[hub:same-scope(., $node)], ''), 
+                                     concat('^(', $hub:table-caption-start-regex, ')')
+                                   ) 
                                    and
                                    (
                                      $node/following-sibling::node()[1][
