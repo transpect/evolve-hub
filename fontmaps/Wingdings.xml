@@ -9,12 +9,13 @@
   <symbol number="006E" entity="" char="&#x25A0;"/><!-- BLACK SQUARE -->
   <symbol number="006F" entity="o" char="&#x25A1;"/><!-- WHITE SQUARE -->
   <symbol number="F0A7" entity="" char="▪"/><!-- BLACK SMALL SQUARE -->
-  <symbol number="F0A8" entity="" char="&#x25FB;"/><!-- WHITE MEDIUM SQUARE -->
+  <symbol number="F0A8" entity="" char="&#x2610;"/><!--  -->
   <symbol number="F0DF" entity="" char="←"/><!-- LEFTWARDS ARROW -->
   <symbol number="F0E0" entity="" char="→"/><!-- RIGHTWARDS ARROW -->
   <symbol number="F0FA" entity="" char="▫"/><!-- WHITE SMALL SQUARE -->
   <symbol number="F0FC" entity="&#252;" char="&#x2713;"/><!-- CHECK MARK -->
   <symbol number="F0FD" entity="" char="☒"/><!-- BALLOT BOX WITH X -->
+  <symbol number="F054" entity="" char="☒"/><!-- wingdings 2: BALLOT BOX WITH X -->
   <symbol number="F0FE" entity="" char="☑"/><!-- BALLOT BOX WITH CHECK -->
   <symbol number="F044" entity="" char="&#x21c6;"/>
   <symbol number="F0F0" entity="&#xf0f0;" char="&#x21d2;"/><!-- LEFTWARDS ARROW OVER RIGHTWARDS ARROW -->
