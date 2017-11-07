@@ -313,10 +313,11 @@
   </xsl:template>
   
   <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]]" mode="hub:join-tables">
+    <xsl:variable name="testi" select="if (ancestor::para[contains(@srcpath, 'Stories/Story_uede.xml?xpath=/idPkg:Story[1]/Story[1]/ParagraphStyleRange[419]')]) then true() else false()"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="row" group-starting-with="*[self::row][entry[matches(@role, $hub:split-style-regex)][not(parent::*/preceding-sibling::*[1][entry[matches(@role, $hub:split-style-regex)]])]]">
-         <xsl:for-each-group select="current-group()" group-adjacent="exists(entry[matches(@role, $hub:split-style-regex)] | entry[parent::*/preceding-sibling::*[1]/entry[matches(@role, $hub:split-style-regex)]])">
+         <xsl:for-each-group select="current-group()" group-adjacent="exists(entry[matches(@role, $hub:split-style-regex)] | entry[parent::*/preceding-sibling::*[1][self::row][entry[matches(@role, $hub:split-style-regex)]]])">
           <xsl:choose>
             <xsl:when test="current-grouping-key()">
               <xsl:copy>
@@ -325,19 +326,32 @@
                   <xsl:copy>
                     <xsl:variable name="pos" select="position()"/>
                     <xsl:apply-templates select="@* except @css:border-bottom-width, (../following-sibling::row[1]/entry[position() eq $pos]/@css:border-bottom-width, key('hub:style-by-role',../following-sibling::row[1]/entry[position() eq $pos]/@role)/@css:border-bottom-width)[1]" mode="#current"/>
-                    <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" 
-                      group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) or 
-                                             (not(exists(preceding-sibling::*)) and 
-                                             parent::*[self::entry[parent::*[self::row[preceding-sibling::*[1][self::row[entry[position() = last()][matches(@role, $hub:split-style-regex)]/para[position() = last()][matches(@role, $hub:split-style-regex)]]]]]]])])">
-
+                    <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()[normalize-space()]" 
+                      group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) 
+                                                          or 
+                                                          (
+                                                           not(exists(preceding-sibling::*)) 
+                                                          and 
+                                                        parent::*[self::*:entry[parent::*[self::*:row[preceding-sibling::*[1][self::*:row[*:entry[position() = $pos]
+                                                                                                                                                 [matches(@role, $hub:split-style-regex)]
+                                                                                                                                                 [*:para[position() = last()]
+                                                                                                                                                        [matches(@role, $hub:split-style-regex)]]]
+                                                                                                                                    ]
+                                                                                                                           ]
+                                                                                                   ]
+                                                                                        ]
+                                                                             ]
+                                                         )
+                                                        ]
+                                            )">
                       <xsl:choose>
                         <xsl:when test="current-grouping-key()">
-                         
+
                           <xsl:copy>
                             <xsl:call-template name="hub:merge-srcpaths">
                               <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
                             </xsl:call-template>
-                          <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
+                            <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
                           </xsl:copy>
                           </xsl:when>
                           <xsl:otherwise>
