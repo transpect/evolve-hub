@@ -2369,11 +2369,15 @@
                        ]" mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:variable name="context" select="." as="text()" />
+    <xsl:variable name="no-identifier-but-simple-equation-starts" select="matches(., concat($hub:orderedlist-mark-at-start-regex, '[=\-\+÷]'))" as="xs:boolean"/>
     <xsl:variable name="parent" select="parent::*[1]" as="element()"/>
     <xsl:analyze-string select="." regex="{$hub:orderedlist-mark-at-start-regex}">
       <xsl:matching-substring>
         <xsl:choose>
-          <xsl:when test="$context/following-sibling::node()[1]/self::tab and matches($context, concat($hub:orderedlist-mark-at-start-regex, '[A-Za-z]')) or $hub:already-identified">
+          <xsl:when test="$context/following-sibling::node()[1]/self::tab 
+                          and matches($context, concat($hub:orderedlist-mark-at-start-regex, '[A-Za-z]')) 
+                          or $hub:already-identified
+                          or $no-identifier-but-simple-equation-starts">
             <xsl:value-of select="." />
           </xsl:when>
           <xsl:otherwise>
