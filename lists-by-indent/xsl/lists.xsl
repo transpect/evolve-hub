@@ -494,9 +494,9 @@
                               //phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
                           )
                           and exists(
-                            ($para//tab[not(parent::tabs)][hub:same-scope(., $para)])[1]
-                              /preceding::node()[. &gt;&gt; $para]
-                          )"/>
+                                     ($para//tab[not(parent::tabs or position() eq last())]
+                                                [hub:same-scope(., $para)])[1]/preceding::node()[. &gt;&gt; $para]
+                                     )"/>
   </xsl:function>
 
   <xsl:function name="hub:is-equation-para" as="xs:boolean">
