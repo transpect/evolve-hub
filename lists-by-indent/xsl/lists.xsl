@@ -494,7 +494,8 @@
                               //phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
                           )
                           and exists(
-                                     ($para//tab[not(parent::tabs or position() eq last())]
+                                     ($para//tab[not(parent::tabs)]
+                                                [following-sibling::node()[normalize-space()]]
                                                 [hub:same-scope(., $para)])[1]/preceding::node()[. &gt;&gt; $para]
                                      )"/>
   </xsl:function>
