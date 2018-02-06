@@ -22,7 +22,7 @@
   exclude-result-prefixes = "w o v wx xs dbk pkg r rel word200x exsl saxon fn tr css">
 
   <xsl:variable name="hub:itemizedlist-mark-chars-regex" as="xs:string"
-    select="'([&#xb7;&#x25aa;&#x25a1;&#x25b6;&#x25cf;&#x2212;&#x2022;\p{So}\p{Pd}&#x23af;&#xF0B7;&#xF0BE;&#61485;-])'"/>
+    select="'([&#xb7;&#x336;&#x25aa;&#x25a1;&#x25b6;&#x25cf;&#x2212;&#x2022;\p{So}\p{Pd}&#x23af;&#xF0B7;&#xF0BE;&#61485;-])'"/>
   <!-- [A-Z] not followed by dot: confusion with people’s initials in indented paras -->
   <xsl:variable name="hub:orderedlist-mark-chars-regex" as="xs:string"
     select="'[\(\[]?(([ivx]+|[IVX]+|[a-z]|[A-Z]|\p{Zs}*[0-9]+)(\.\d+)*)[.:]?[\)\]]?'"/>
