@@ -214,16 +214,7 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
-  <!-- drop alternate text, it would cause the function hub:is-figure() to always return false()
-  GI 2016-06-21: Umm, why not rewrite hub_is-figure() so that it ignores alt? -->
-  <xsl:template match="mediaobject/alt" mode="hub:figure-captions-preprocess-merge">
-    <xsl:comment>
-      <xsl:apply-templates mode="#current"/>
-    </xsl:comment>
-  </xsl:template>
-  
-  
+
   <!-- MODE: hub:figure-captions-preprocess-merge -->
   <!-- Optional mode for preprocessing figure captions where the number is in a paragraph on its own. -->
   <xsl:template match="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]
