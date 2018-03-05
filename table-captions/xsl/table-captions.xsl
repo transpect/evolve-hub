@@ -121,7 +121,8 @@
   
   <xsl:template match="entry" mode="hub:table-captions">
     <xsl:element name="{name(.)}">
-      <xsl:apply-templates select="ancestor::informaltable/@css:*[not(matches(local-name(), '^(margin|orientation)'))]" mode="#current"/>
+      <!--      <xsl:apply-templates select="ancestor::informaltable/@css:*[not(matches(local-name(), '^(margin|orientation)'))]" mode="#current"/>-->
+      <!-- commented out 2018-03-05 to avoid inheriting border information. -->
       <xsl:apply-templates select="ancestor::row/@css:*" mode="#current"/>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:apply-templates mode="#current"/>
