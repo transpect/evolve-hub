@@ -313,7 +313,6 @@
   </xsl:template>
   
   <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]]" mode="hub:join-tables">
-    <xsl:variable name="testi" select="if (ancestor::para[contains(@srcpath, 'Stories/Story_uede.xml?xpath=/idPkg:Story[1]/Story[1]/ParagraphStyleRange[419]')]) then true() else false()"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="row" group-starting-with="*[self::row][entry[matches(@role, $hub:split-style-regex)][not(parent::*/preceding-sibling::*[1][entry[matches(@role, $hub:split-style-regex)]])]]">
@@ -326,39 +325,24 @@
                   <xsl:copy>
                     <xsl:variable name="pos" select="position()"/>
                     <xsl:apply-templates select="@* except @css:border-bottom-width, (../following-sibling::row[1]/entry[position() eq $pos]/@css:border-bottom-width, key('hub:style-by-role',../following-sibling::row[1]/entry[position() eq $pos]/@role)/@css:border-bottom-width)[1]" mode="#current"/>
-                    <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" 
-                      group-adjacent="boolean(self::para[matches(@role, $hub:split-style-regex) 
-                                                          or 
-                                                          (
-                                                           not(exists(preceding-sibling::*)) 
-                                                          and 
-                                                        parent::*[self::*:entry[parent::*[self::*:row[preceding-sibling::*[1][self::*:row[*:entry[position() = $pos]
-                                                                                                                                                 [matches(@role, $hub:split-style-regex)]
-                                                                                                                                                 [*:para[position() = last()]
-                                                                                                                                                        [matches(@role, $hub:split-style-regex)]]]
-                                                                                                                                    ]
-                                                                                                                           ]
-                                                                                                   ]
-                                                                                        ]
-                                                                             ]
-                                                         )
-                                                        ]
-                                            )">
-                      <xsl:choose>
-                        <xsl:when test="current-grouping-key()">
-
-                          <xsl:copy>
-                            <xsl:call-template name="hub:merge-srcpaths">
-                              <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
-                            </xsl:call-template>
-                            <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
-                          </xsl:copy>
+                    <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" group-starting-with="*[hub:split-start-para(., $pos)]">
+                      <xsl:for-each-group select="current-group()" group-adjacent="hub:to-be-grouped-with-split(., $pos)">
+                        <xsl:choose>
+                          <xsl:when test="current-grouping-key()">
+                            
+                            <xsl:copy>
+                              <xsl:call-template name="hub:merge-srcpaths">
+                                <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
+                              </xsl:call-template>
+                              <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
+                            </xsl:copy>
                           </xsl:when>
                           <xsl:otherwise>
                             <xsl:apply-templates select="current-group()" mode="#current"/>
                           </xsl:otherwise>
                         </xsl:choose>
-                     </xsl:for-each-group>
+                      </xsl:for-each-group>
+                    </xsl:for-each-group>
                   </xsl:copy>
                 </xsl:for-each>
               </xsl:copy>
@@ -372,7 +356,53 @@
     </xsl:copy>
   </xsl:template>
   
-
+  <xsl:function name="hub:split-start-para" as="xs:boolean">
+    <xsl:param name="context" as="node()"/>
+    <xsl:param name="pos" as="xs:integer"/>
+    <xsl:choose>
+      <xsl:when test="$context[self::para[matches(@role, $hub:split-style-regex)]]
+                             [every $preceding in (preceding-sibling::*[1], parent::*[self::*:entry[parent::*[self::*:row[preceding-sibling::*[1]
+                                                                                                                                              [self::*:row[*:entry[position() = $pos]
+                                                                                                                                                          [matches(@role, $hub:split-style-regex)]]]]]]]/*:para[position() = last()])[1]
+                              satisfies ($preceding[not(matches(@role,  $hub:split-style-regex))])]">
+        <xsl:sequence select="true()"/>
+      </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="false()"/>
+        </xsl:otherwise>                                           
+    </xsl:choose>
+  </xsl:function>
+  
+  <xsl:function name="hub:to-be-grouped-with-split" as="xs:boolean">
+    <xsl:param name="context" as="node()"/>
+    <xsl:param name="pos" as="xs:integer"/>
+    <xsl:choose>
+      <xsl:when test="$context[self::para[matches(@role, $hub:split-style-regex)]]">
+        <xsl:sequence select="true()"/>
+      </xsl:when>
+        <xsl:when test="$context[not(exists(preceding-sibling::*)) 
+                                  and 
+                                 parent::*[self::*:entry[parent::*[self::*:row[preceding-sibling::*[1][self::*:row[*:entry[position() = $pos]
+                                                                                                                          [matches(@role, $hub:split-style-regex)]
+                                                                                                                          [*:para[position() = last()]
+                                                                                                                          [matches(@role, $hub:split-style-regex)]
+                                                                                                                   ]
+                                                                                                        ]
+                                                                              ]
+                                                                   ]
+                                                        ]
+                                              ]
+                                           ]
+                                           ]">
+          <xsl:sequence select="true()"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="false()"/>
+        </xsl:otherwise>                                           
+    </xsl:choose>
+  </xsl:function>
+  
+  
   <!-- mode: simplify-complex-float-sidebars
        Resolve IDML-specific float anchorings
        Note that idml2xml doesn't know whether there are floats in the text frames (all anchored frames become sidebars first).
