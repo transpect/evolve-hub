@@ -44,7 +44,7 @@
 
   <xsl:param name="debug" select="'yes'"/>
   <xsl:param name="debug-path" select="concat($stylesheet-dir, 'debug')"/>
-  <xsl:param name="set-debugging-info-origin" select="'false'"/>
+  <xsl:param name="set-debugging-info-origin" select="'no'"/>
   <xsl:param name="srcpaths" select="'no'"/>
   <xsl:param name="create-caption-numtext-separator" select="'no'"/>
   <xsl:param name="expand-css-properties" select="'yes'"/>
@@ -296,7 +296,7 @@
                             ]
                             [../*[1] is .]" mode="hub:join-tables">
     <xsl:param name="merged-sidebar" as="xs:string?"/>
-    <xsl:if test="$merged-sidebar != 'yes'">
+    <xsl:if test="not($merged-sidebar = 'yes')">
       <xsl:next-match/>
     </xsl:if>
   </xsl:template>
@@ -329,12 +329,11 @@
                       <xsl:for-each-group select="current-group()" group-adjacent="hub:to-be-grouped-with-split(., $pos)">
                         <xsl:choose>
                           <xsl:when test="current-grouping-key()">
-                            
                             <xsl:copy>
                               <xsl:call-template name="hub:merge-srcpaths">
-                                <xsl:with-param name="srcpaths" select="current-group()/@srcpath"/>
+                                <xsl:with-param name="srcpaths" select="current-group()/@srcpath" as="attribute(srcpath)*"/>
                               </xsl:call-template>
-                              <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
+                              <xsl:apply-templates select="current-group()/@* except current-group()/@srcpath, current-group()/node()" mode="#current"/>
                             </xsl:copy>
                           </xsl:when>
                           <xsl:otherwise>
@@ -2500,7 +2499,6 @@
 
     <xsl:variable name="cleaned-text" as="xs:string?"
       select="string-join(.//text()[not(ancestor-or-self::indexterm)],'')"/>
-
     <xsl:copy>
       <xsl:apply-templates select="@*|processing-instruction()" mode="#current"/>
       <xsl:choose>
@@ -2529,6 +2527,7 @@
           </phrase>
           <xsl:apply-templates select="node()[position() gt 1]" mode="#current"/>
         </xsl:when>
+
         <!-- same case as above + first nodes are anchors, for example <anchor xml:id="page_27"><anchor xml:id="id_HyperlinkTextDestination_Table_3" annotations="Table_3"/> -->
         <xsl:when test="( node()/self::phrase[matches(., $hub:caption-number-without-sep-regex)]
                                              [not(phrase[@role = 'hub:identifier'])]
@@ -2591,68 +2590,9 @@
                           and not($hub:figure-caption-must-begin-with-figure-caption-start-regex)
                           and matches( $cleaned-text, concat( '^', $hub:caption-number-regex ) )
                         ) and not(parent::*/@label)">
-          <xsl:variable name="caption-number" as="xs:string">
-            <xsl:choose>
-              <!-- input examples: ^14.9$ -->
-              <xsl:when test="parent::figure and 
-                              not($hub:figure-caption-must-begin-with-figure-caption-start-regex) and 
-                              matches( 
-                                $cleaned-text, 
-                                concat('^', $hub:caption-number-regex)
-                              )">
-                <xsl:value-of 
-                  select="replace(
-                            $cleaned-text, 
-                            concat('(', $hub:caption-number-regex, ')(.+)$'), 
-                            '$1'
-                          )" />
-              </xsl:when>
-            
-              <!-- input examples: ^Fig. 4.1: bla .*$, ^Tab. 3[&#x2002;]bla .*$-->
-              <xsl:otherwise>
-                <xsl:value-of 
-                  select="replace(
-                            $cleaned-text, 
-                            concat($hub:caption-number-plus-sep-regex, '(.+)$'), 
-                            '$1$2$3'
-                          )" />
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:variable>
-          <xsl:apply-templates select="descendant::*[self::anchor | self::indexterm][matches(string-join(following-sibling::node(), ''), $hub:caption-number-without-sep-regex)]" mode="#current"/>
-          <phrase role="hub:caption-number">
-            <xsl:analyze-string select="$caption-number" regex="{$hub:number-and-suffix-id-regex}">
-              <xsl:matching-substring>
-                <phrase role="hub:identifier">
-                  <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'identifier-in-capnum-without-sep')"/>
-                  <xsl:value-of select="."/>
-                </phrase>
-              </xsl:matching-substring>
-              <xsl:non-matching-substring>
-                <xsl:value-of select="."/>
-              </xsl:non-matching-substring>
-            </xsl:analyze-string>
-          </phrase>
-          <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
-            <phrase role="hub:caption-text">
-              <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'numbering-only')"/>
-              <xsl:apply-templates mode="hub:insert-caption-num-to-text-separator">
-                <xsl:with-param name="caption-number" select="$caption-number" tunnel="yes"/>
-                <xsl:with-param name="parent" select="." tunnel="yes"/>
-              </xsl:apply-templates>
-            </phrase>
-          </xsl:variable>
-          <xsl:if test="$hub:create-caption-numtext-separator and 
-                        exists($caption-number-with-tagged-separator//hub:caption-separator/node())">
-            <phrase role="hub:caption-numtext-separator">
-              <xsl:sequence select="$caption-number-with-tagged-separator//hub:caption-separator/node()"/>
-            </phrase>
-          </xsl:if>
-        <xsl:apply-templates select="$caption-number-with-tagged-separator" mode="hub:fix-floats-strip-num">
-            <xsl:with-param name="insert-tab" tunnel="yes"
-              select="if(contains($cleaned-text, '&#x9;') or $hub:create-caption-numtext-separator) 
-                      then false() else true()"/>
-          </xsl:apply-templates>
+              <xsl:call-template name="create-identifier-x">
+                <xsl:with-param name="cleaned-text" as="xs:string" select="$cleaned-text"/>
+              </xsl:call-template>
         </xsl:when>
 
         <xsl:when test="tab">
@@ -2710,6 +2650,78 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template name="create-identifier-x">
+    <xsl:param name="cleaned-text" as="xs:string?"/>
+    <xsl:variable name="caption-number" as="xs:string">
+      <xsl:choose>
+        <!-- input examples: ^14.9$ -->
+        <xsl:when test="parent::figure and 
+          not($hub:figure-caption-must-begin-with-figure-caption-start-regex) and 
+          matches( 
+          $cleaned-text, 
+          concat('^', $hub:caption-number-regex)
+          )">
+          <xsl:value-of 
+            select="replace(
+            $cleaned-text, 
+            concat('(', $hub:caption-number-regex, ')(.+)$'), 
+            '$1'
+            )" />
+          
+        </xsl:when>
+        <!-- input examples: ^Fig. 4.1: bla .*$, ^Tab. 3[&#x2002;]bla .*$-->
+        <xsl:otherwise>
+          <xsl:value-of 
+                        select="replace(
+                        $cleaned-text, 
+                        concat($hub:caption-number-plus-sep-regex, '(.+)$'), 
+                        '$1$2$3'
+                        )" />
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:apply-templates select="descendant::*[self::anchor | self::indexterm][some $follower in following-sibling::node() satisfies (matches(string-join($follower, ''), $hub:caption-number-without-sep-regex))]" mode="#current"/>
+    <phrase role="hub:caption-number">
+      <xsl:analyze-string select="$caption-number" regex="{$hub:number-and-suffix-id-regex}">
+        <xsl:matching-substring>
+          <phrase role="hub:identifier">
+            <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'identifier-in-capnum-without-sep')"/>
+            <xsl:value-of select="."/>
+          </phrase>
+        </xsl:matching-substring>
+        <xsl:non-matching-substring>
+          <xsl:value-of select="."/>
+        </xsl:non-matching-substring>
+      </xsl:analyze-string>
+    </phrase>
+    <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
+      <phrase role="hub:caption-text">
+        <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'numbering-only')"/>
+        <xsl:apply-templates mode="hub:insert-caption-num-to-text-separator">
+          <xsl:with-param name="caption-number" select="$caption-number" tunnel="yes"/>
+          <xsl:with-param name="parent" select="." tunnel="yes"/>
+        </xsl:apply-templates>
+      </phrase>
+    </xsl:variable>
+    <xsl:if test="$hub:create-caption-numtext-separator and 
+      exists($caption-number-with-tagged-separator//hub:caption-separator/node())">
+      <phrase role="hub:caption-numtext-separator">
+        <xsl:sequence select="$caption-number-with-tagged-separator//hub:caption-separator/node()"/>
+      </phrase>
+    </xsl:if>
+    <xsl:apply-templates select="$caption-number-with-tagged-separator" mode="hub:fix-floats-strip-num">
+      <xsl:with-param name="insert-tab" tunnel="yes"
+        select="if(contains($cleaned-text, '&#x9;') or $hub:create-caption-numtext-separator) 
+        then false() else true()"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template match="*[self::anchor | self::indexterm]
+                        [some $follower in following-sibling::node() satisfies (matches(string-join($follower, ''), $hub:caption-number-without-sep-regex))]" 
+                        mode="hub:insert-caption-num-to-text-separator" priority="3">
+    <!-- if anchor or indexterms are pulled before caption number, they shouldnt be processed again -->
+  </xsl:template>
+  
   <!-- insert separator element between caption-number and caption-text
   input example:
   <title role="FigureLegend">Fig. 1.5a<phrase css:font-family="Arial">–</phrase>h Arthroscopic diagnosis. <phrase css:font-weight="bold">a</phrase> biceps tendon anchor [...]</title>
@@ -2717,12 +2729,11 @@
   <xsl:template match="node()" mode="hub:insert-caption-num-to-text-separator">
     <xsl:param name="caption-number" as="xs:string" tunnel="yes"/>
     <xsl:param name="parent" as="element(*)" tunnel="yes"/>
-   
     <xsl:variable name="context" select="." as="node()"/>
    
     <xsl:variable name="previous-text"
       select="replace(
-                string-join(preceding::text()[. &gt;&gt; $parent], ''),
+                string-join(preceding::text()[not(ancestor::*[self::indexterm])][. &gt;&gt; $parent], ''),
                 '&#x202f;+',
                 '&#x202f;'
               )" as="xs:string"/>
