@@ -333,7 +333,7 @@
                               <xsl:call-template name="hub:merge-srcpaths">
                                 <xsl:with-param name="srcpaths" select="current-group()/@srcpath" as="attribute(srcpath)*"/>
                               </xsl:call-template>
-                              <xsl:apply-templates select="current-group()/@* except current-group()/@srcpath, current-group()/node()" mode="#current"/>
+                              <xsl:apply-templates select="@* except @srcpath, current-group()/node()" mode="#current"/>
                             </xsl:copy>
                           </xsl:when>
                           <xsl:otherwise>
