@@ -206,20 +206,22 @@
   </xsl:template>
   
   <xsl:template match="@css:list-style-type" mode="hub:list-style-type">
-    <phrase role="hub:identifier">
-      <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tabs-to-indent_liststyletype')"/>
-      <xsl:choose>
-        <xsl:when test=". = 'box'"><xsl:value-of select="'&#x25fd;'"/></xsl:when>
-        <xsl:when test=". = 'check'"><xsl:value-of select="'&#x2713;'"/></xsl:when>
-        <xsl:when test=". = 'circle'"><xsl:value-of select="'&#x25e6;'"/></xsl:when>
-        <xsl:when test=". = 'diamond'"><xsl:value-of select="'&#x25c6;'"/></xsl:when>
-        <xsl:when test=". = 'disc'"><xsl:value-of select="'&#x2022;'"/></xsl:when>
-        <xsl:when test=". = 'dash'"><xsl:value-of select="'&#x2014;'"/></xsl:when>
-        <xsl:when test=". = 'square'"><xsl:value-of select="'&#x25fe;'"/></xsl:when>
-        <xsl:when test='matches(., "&apos;")'><xsl:value-of select='replace(., "&apos;","")'/></xsl:when>
-      </xsl:choose>
-    </phrase>
-    <tab>&#9;</tab>
+    <xsl:if test=". ne 'decimal'">
+      <phrase role="hub:identifier">
+        <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tabs-to-indent_liststyletype')"/>
+        <xsl:choose>
+          <xsl:when test=". = 'box'"><xsl:value-of select="'&#x25fd;'"/></xsl:when>
+          <xsl:when test=". = 'check'"><xsl:value-of select="'&#x2713;'"/></xsl:when>
+          <xsl:when test=". = 'circle'"><xsl:value-of select="'&#x25e6;'"/></xsl:when>
+          <xsl:when test=". = 'diamond'"><xsl:value-of select="'&#x25c6;'"/></xsl:when>
+          <xsl:when test=". = 'disc'"><xsl:value-of select="'&#x2022;'"/></xsl:when>
+          <xsl:when test=". = 'dash'"><xsl:value-of select="'&#x2014;'"/></xsl:when>
+          <xsl:when test=". = 'square'"><xsl:value-of select="'&#x25fe;'"/></xsl:when>
+          <xsl:when test='matches(., "&apos;")'><xsl:value-of select='replace(., "&apos;","")'/></xsl:when>
+        </xsl:choose>
+      </phrase>
+      <tab>&#9;</tab>
+    </xsl:if>
   </xsl:template>
 
 </xsl:stylesheet>
