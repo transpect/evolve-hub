@@ -33,7 +33,7 @@
           </xsl:if>
         </xsl:for-each-group>
       </xsl:variable>
-      <xsl:sequence select="hub:hierarchize-by-role(*, $all-headings, 1)" />
+      <xsl:sequence select="hub:hierarchize-by-role(node(), $all-headings, 1)" />
     </xsl:copy>
   </xsl:template>
   
@@ -91,8 +91,8 @@
   <xsl:function name="hub:hierarchize_level10" as="xs:integer"><xsl:param name="elt" as="element(*)"/>
     <xsl:sequence select="if ($hub:hierarchy-role-regexes-x[10]) then 10 * xs:integer(matches($elt/@role, $hub:hierarchy-role-regexes-x[10], 'x')) else 0"/></xsl:function>
   
-  <xsl:function name="hub:hierarchize-by-role" as="element(*)*" xmlns="http://docbook.org/ns/docbook">
-    <xsl:param name="elts" as="element(*)*"/>
+  <xsl:function name="hub:hierarchize-by-role" as="node()*" xmlns="http://docbook.org/ns/docbook">
+    <xsl:param name="elts" as="node()*"/>
     <xsl:param name="all-headings" as="element(hub:headings)*"/>
     <xsl:param name="starting-level" as="xs:integer"/>
     <xsl:choose>
