@@ -98,8 +98,9 @@
   <xsl:template match="listitem[parent::orderedlist[hub:is-variable-list(.)]]" mode="hub:lists">
     <xsl:param name="is-variable-list" select="false()"/>
     <xsl:variable name="first-para" select="para[1]" as="element(para)?"/>
+    <xsl:variable name="tabs" select="$first-para//tab[not(parent::tabs)][hub:same-scope(., current())]"/>
     <xsl:choose>
-      <xsl:when test="$is-variable-list and not($first-para)"><!-- for ex., informaltable in listitem -->
+      <xsl:when test="$is-variable-list and (not($first-para) or empty($tabs))"><!-- for ex., informaltable in listitem -->
       	<varlistentry>
           <term/>
           <xsl:copy>
@@ -108,7 +109,7 @@
         </varlistentry>
       </xsl:when>
     	<xsl:when test="$is-variable-list">
-    	  <xsl:variable name="first-tab" select="($first-para//tab[not(parent::tabs)][hub:same-scope(., current())])[1]" as="element(tab)"/>
+    	  <xsl:variable name="first-tab" select="$tabs[1]" as="element(tab)"/>
         <varlistentry>
           <term>
             <xsl:sequence select="hub:split-term-at-tab($first-para,$first-tab)"/>
