@@ -3319,13 +3319,18 @@
   <xsl:template match="para//text()[not(ancestor::link)]" mode="hub:cross-link">
     <xsl:choose>
       <xsl:when test="$create-ulinks-from-text='yes'">
-        <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)">
+        <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)" flags="i">
           <xsl:matching-substring>
-            <ulink url="{replace(., '[,.;]$', '')}">
+            <xsl:variable name="address" as="xs:string"
+              select="replace(replace(., '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
+            <xsl:if test="not($hub:remove-doi-text-prefix)">
+              <xsl:value-of select="replace(., '^(doi\s?:\s*).+$', '$1', 'i')"/>
+            </xsl:if>
+            <ulink url="{$address}">
               <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
                 <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
               </xsl:if>
-              <xsl:value-of select="replace(., '[,.;]$', '')"/>
+              <xsl:value-of select="$address"/>
             </ulink>
             <xsl:if test="matches(., '[,.;]$')">
               <xsl:value-of select="replace(., '^(.+)([,.;])$', '$2')"/>
@@ -3335,8 +3340,11 @@
             <xsl:analyze-string select="." regex="{$hub:doi-regex}" flags="i">
               <xsl:matching-substring>
                 <xsl:variable name="address" as="xs:string"
-                  select="replace(regex-group(3), '[,.;]$', '')"/>
+                  select="replace(replace(regex-group(3), '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
                 <xsl:value-of select="regex-group(1)"/>
+                <xsl:if test="not($hub:remove-doi-text-prefix)">
+                  <xsl:value-of select="replace(regex-group(3), '^(doi\s?:\s*).+$', '$1', 'i')"/>
+                </xsl:if>
                 <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
                   <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
                     <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
