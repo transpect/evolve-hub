@@ -16,12 +16,14 @@
   xmlns:tr="http://transpect.io"
   xmlns:hub="http://transpect.io/hub"
   xmlns:css="http://www.w3.org/1996/css"
+  xmlns:calstable="http://docs.oasis-open.org/ns/oasis-exchange/table"
   xmlns="http://docbook.org/ns/docbook"
   xpath-default-namespace="http://docbook.org/ns/docbook"
-  exclude-result-prefixes="w o v wx xs dbk pkg r rel word200x exsl saxon fn tr hub css"
+  exclude-result-prefixes="w o v wx xs dbk pkg r rel word200x exsl saxon fn tr hub css calstable"
   version="2.0">
 
   <xsl:import href="table-caption-vars.xsl"/>
+  <xsl:import href="http://transpect.io/xslt-util/calstable/xsl/functions.xsl"/>
 
   <xsl:template match="*[*[hub:is-table-title(.)]]" mode="hub:table-captions">
     <xsl:copy>
@@ -45,8 +47,18 @@
             <xsl:variable name="text" select="current-group()[position() &gt; 1 and . &lt;&lt; $table] except $note" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
             <table>
               <xsl:attribute name="frame" select="if ($table/name()='informaltable') 
-                                                  then hub:get-frame-attribute($table/@css:*[matches(name(.),'border\-.+\-style')]) 
-                                                  else  hub:get-frame-attribute($table/informaltable/@css:*[matches(name(.),'border\-.+\-style')])"/>
+                                                  then hub:get-frame-attribute(
+                                                    (
+                                                      $table/@css:*[matches(name(.),'border\-.+\-style')],
+                                                      hub:get-entry-outer-borders($table[@css:border-collapse = 'collapse']/tgroup)
+                                                    )
+                                                  ) 
+                                                  else  hub:get-frame-attribute(
+                                                    (
+                                                      $table/informaltable/@css:*[matches(name(.),'border\-.+\-style')],
+                                                      hub:get-entry-outer-borders($table[@css:border-collapse = 'collapse']/informaltable/tgroup)
+                                                    )
+                                                  )"/>
               <xsl:apply-templates select="$table/@*[not(some $i in (parent::*/descendant::*/@*) satisfies $i=.)] | ($table[self::para]/informaltable/@role, $table/@role)[1]" mode="#current"/>
               <xsl:apply-templates select="$table/self::informaltable/(@css:*)
                                            | $table/informaltable/(@css:*)" mode="#current"/>
@@ -89,7 +101,9 @@
   <xsl:template match="informaltable" priority="-5" mode="hub:table-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:attribute name="frame" select="hub:get-frame-attribute(./@css:*[matches(name(.),'border\-.+\-style')])"/>
+      <xsl:attribute name="frame"
+        select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"
+      />
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
@@ -97,11 +111,27 @@
   <xsl:template match="informaltable" mode="hub:process-informaltables">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="hub:table-captions"/>
-      <xsl:attribute name="frame" select="hub:get-frame-attribute(./@css:*[matches(name(.),'border\-.+\-style')])"/>
+      <xsl:attribute name="frame"
+        select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"
+      />
       <xsl:apply-templates select="@role" mode="hub:table-captions"/>
       <xsl:apply-templates mode="hub:table-captions"/>
     </xsl:copy>
   </xsl:template>
+  
+  <xsl:function name="hub:get-entry-outer-borders" as="attribute()*">
+    <xsl:param name="group" as="element(tgroup)*"/>
+    <xsl:sequence select="$group//row[1]/entry/@css:border-top-style"/>
+    <xsl:sequence
+      select="$group//entry[$group/colspec[@colnum = 1]/@colname = (@colname, @namest)]/@css:border-left-style"/>
+    <xsl:sequence
+      select="$group//entry[$group/colspec[@colnum = max(($group/colspec/@colnum))]/@colname = (@colname, @namest)]/@css:border-right-style"
+    />
+    <xsl:sequence select="
+      for $c in $group/colspec/@colnum return (
+        $group//entry[calstable:is-col-in-span($c, (@namest, @colname), (@namest, @colname), $group/colspec)][last()]/@css:border-bottom-style
+      )"/>
+  </xsl:function>
   
   <xsl:function name="hub:get-frame-attribute">
     <xsl:param name="border-style" as="attribute()*"/>
