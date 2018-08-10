@@ -17,6 +17,7 @@
   <xsl:import href="http://transpect.io/evolve-hub/catch-all/xsl/catch-all.xsl"/>
 
   <xsl:import href="http://transpect.io/evolve-hub/figure-captions/xsl/figure-captions.xsl"/>
+  <xsl:import href="http://transpect.io/evolve-hub/figure-captions/xsl/subfigure-captions.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/hierarchy-by-role/xsl/hierarchy-by-role.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/lists-by-indent/xsl/lists-main.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/table-captions/xsl/table-captions.xsl"/>
@@ -3022,7 +3023,6 @@
       <xsl:apply-templates select="@*, title/node()" mode="#current" />
     </para>
   </xsl:template>
-
 
   <xsl:template match="blockquote[parent::formalpara]" mode="hub:clean-hub">
     <para>

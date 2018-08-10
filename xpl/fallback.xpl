@@ -250,6 +250,13 @@
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
+  
+  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/11" mode="hub:subfigure-captions">
+    <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
+    <p:input port="models"><p:empty/></p:input>
+    <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+  </tr:xslt-mode>
 
   <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/12" mode="hub:figure-captions">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>

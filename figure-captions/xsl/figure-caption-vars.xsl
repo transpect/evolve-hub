@@ -27,12 +27,15 @@
     <!-- will create figure title consisting of all caption para nodes separated by <br/> so it can be split later on -->
   </xsl:param>
 
-  <xsl:variable name="hub:figure-title-role-regex-x"  as="xs:string"
+  <xsl:variable name="hub:figure-title-role-regex-x" as="xs:string"
     select="'^(
                  Figure_?title
                | figlegend
                | Figure_Legend
               )$'" />
+  
+  <xsl:variable name="hub:subfigure-caption-role-regex-x" as="xs:string"
+    select="'^this-should-be-overriden-by-a-custom-regex$'" />
   
   <xsl:variable name="hub:figure-title-further-paras-role-regex-x" as="xs:string" select="'figure_title_2'"/>
   
@@ -92,7 +95,7 @@
 
   <xsl:function name="hub:is-figure-title" as="xs:boolean">
     <xsl:param name="node" as="node()?"/>
-    <xsl:sequence select="if (
+    <xsl:sequence select="exists(
                                $node/self::para[
                                  matches(@role, $hub:figure-title-role-regex-x, 'x')
                                  and descendant::text()
@@ -102,9 +105,26 @@
                                    or not( $hub:figure-caption-must-begin-with-figure-caption-start-regex )
                                  )
                                ]
-                             )
-                          then true() 
-                          else false()"/>
+                             )"/>
+  </xsl:function>
+  
+  <xsl:function name="hub:is-subfigure" as="xs:boolean">
+    <xsl:param name="node" as="node()?"/>
+    <xsl:sequence select="
+      count($node/(mediaobject, inlinemediaobject, phrase/(mediaobject, inlinemediaobject))) = 1
+      and 
+        (
+          hub:is-subfigure-caption($node/following-sibling::element()[1])
+          or
+          hub:is-subfigure-caption(($node/mediaobject/caption/para)[1])
+        )"/>
+  </xsl:function>
+  
+  <xsl:function name="hub:is-subfigure-caption" as="xs:boolean">
+    <xsl:param name="node" as="node()?"/>
+    <xsl:sequence select="exists(
+                               $node/self::para[matches(@role, $hub:subfigure-caption-role-regex-x, 'x')]
+                             )"/>
   </xsl:function>
 
 </xsl:stylesheet>
