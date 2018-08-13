@@ -3327,7 +3327,7 @@
           <xsl:matching-substring>
             <xsl:variable name="address" as="xs:string"
               select="replace(replace(., '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
-            <xsl:if test="not($hub:remove-doi-text-prefix)">
+            <xsl:if test="not($hub:remove-doi-text-prefix) and matches(., '^(doi\s?:\s*)')">
               <xsl:value-of select="replace(., '^(doi\s?:\s*).+$', '$1', 'i')"/>
             </xsl:if>
             <ulink url="{$address}">
@@ -3346,7 +3346,7 @@
                 <xsl:variable name="address" as="xs:string"
                   select="replace(replace(regex-group(3), '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
                 <xsl:value-of select="regex-group(1)"/>
-                <xsl:if test="not($hub:remove-doi-text-prefix)">
+                <xsl:if test="not($hub:remove-doi-text-prefix) and matches(., '^(doi\s?:\s*)')">
                   <xsl:value-of select="replace(regex-group(3), '^(doi\s?:\s*).+$', '$1', 'i')"/>
                 </xsl:if>
                 <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
