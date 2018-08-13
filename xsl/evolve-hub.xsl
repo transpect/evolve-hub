@@ -801,11 +801,15 @@
 
   <!-- If every figure caption is followed by a mediaobject, we may assume that the captions are consistently above the figures.
        In order to make hub:figure-captions work properly, we pull the captions down, below each mediaobject. -->
+  <!-- There can be different variations of images with caption above and following images without caption. 
+       Therefore check if figure caption is also preceded by a mediaobject, then don't change order. -->
 
   <xsl:template match="*[para[matches(@role, $hub:figure-title-role-regex-x, 'x')]]
                         [every $caption in para[matches(@role, $hub:figure-title-role-regex-x, 'x')] satisfies
                          ($caption/following-sibling::*[1][hub:is-figure(.)])
-                        ]" mode="hub:sort-figure-captions">
+                        ]
+                        [not(every $caption in para[matches(@role, $hub:figure-title-role-regex-x, 'x')] satisfies
+                         ($caption/preceding-sibling::*[1][hub:is-figure(.)]))]" mode="hub:sort-figure-captions">
     <xsl:copy>
       <xsl:sequence select="@*" />
       <xsl:for-each-group select="*" group-starting-with="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]">
