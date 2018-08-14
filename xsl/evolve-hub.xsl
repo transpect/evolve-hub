@@ -837,6 +837,8 @@
                         [every $caption in para[matches(@role, $hub:figure-title-role-regex-x, 'x')] satisfies
                          ($caption/following-sibling::*[1][hub:is-figure(.)])
                         ]
+                        [not(every $caption in para[matches(@role, $hub:figure-title-role-regex-x, 'x')] satisfies
+                         ($caption/preceding-sibling::*[1][hub:is-figure(.)]))]
                      ]" 
     mode="hub:sort-figure-captions">
     <xsl:copy>
@@ -851,11 +853,13 @@
 
   <!-- If every informaltable is followed by a caption, we may assume that the captions are consistently below the tables.
        In order to make hub:table-captions work properly, we pull the captions up, above each informaltable. -->
+  <!-- Consider tables without caption, followed by normal paragraph -->
 
-  <xsl:template match="*[*[hub:is-table-not-in-table-env(.)]]
-                        [every $table in (*[hub:is-table-not-in-table-env(.)]) satisfies
-                         (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))
-                        ]" mode="hub:sort-table-captions">
+  <xsl:template match="*[*[hub:is-table-not-in-table-env(.)][every $table in (*[hub:is-table-not-in-table-env(.) and matches(following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x') 
+                                                                              or matches(preceding-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x')]
+                                           ) 
+                        satisfies (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))]]
+                        " mode="hub:sort-table-captions">
     <xsl:copy>
       <xsl:sequence select="@*" />
       <xsl:for-each-group select="*" group-starting-with="*[hub:is-table-not-in-table-env(.)]">
@@ -3319,27 +3323,23 @@
   
   <xsl:variable name="hub:create-helper-attr-for-created-cross-links" as="xs:boolean"
     select="false()"/>
-  
-  <xsl:variable name="hub:cross-link-ulink-element-name" as="xs:string"
-    select="'ulink'"/><!-- alternatives (i.e. DocBook 5.1): olink or link -->
 
-  <xsl:template match="para//text()[not(ancestor::*/name() = ('link', 'olink', 'ulink'))]" mode="hub:cross-link">
+  <xsl:template match="para//text()[not(ancestor::link)]" mode="hub:cross-link">
     <xsl:choose>
       <xsl:when test="$create-ulinks-from-text='yes'">
         <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)" flags="i">
           <xsl:matching-substring>
             <xsl:variable name="address" as="xs:string"
               select="replace(replace(., '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
-            <xsl:if test="not($hub:remove-doi-text-prefix) and matches(., '^(doi\s?:\s*).+$')">
+            <xsl:if test="not($hub:remove-doi-text-prefix)">
               <xsl:value-of select="replace(., '^(doi\s?:\s*).+$', '$1', 'i')"/>
             </xsl:if>
-            <xsl:element name="{$hub:cross-link-ulink-element-name}">
-              <xsl:attribute name="url" select="$address"/>
+            <ulink url="{$address}">
               <xsl:if test="$hub:create-helper-attr-for-created-cross-links">
                 <xsl:attribute name="hub:created-by-evolve-hub" select="'yes'"/>
               </xsl:if>
               <xsl:value-of select="$address"/>
-            </xsl:element>
+            </ulink>
             <xsl:if test="matches(., '[,.;]$')">
               <xsl:value-of select="replace(., '^(.+)([,.;])$', '$2')"/>
             </xsl:if>
@@ -3350,7 +3350,7 @@
                 <xsl:variable name="address" as="xs:string"
                   select="replace(replace(regex-group(3), '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
                 <xsl:value-of select="regex-group(1)"/>
-                <xsl:if test="not($hub:remove-doi-text-prefix) and matches(regex-group(3), '^(doi\s?:\s*).+$')">
+                <xsl:if test="not($hub:remove-doi-text-prefix)">
                   <xsl:value-of select="replace(regex-group(3), '^(doi\s?:\s*).+$', '$1', 'i')"/>
                 </xsl:if>
                 <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
