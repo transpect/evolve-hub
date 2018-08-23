@@ -101,7 +101,7 @@
                        [  some $p in listitem/para[1] satisfies ($p[not(descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., $p)])])
                           and (some $p in listitem/para[1] satisfies ($p[descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., $p)]]))
                           and (every $x in listitem/para[1] satisfies exists($x/@margin-left))
-                          and (every $x in listitem/para[1]/@margin-left satisfies $x = listitem[1]/para[1]/@margin-left)
+                          and (every $x in listitem/para[1]/@margin-left satisfies ($x + 11 &gt; listitem[1]/para[1]/@margin-left and $x - 11 &lt; listitem[1]/para[1]/@margin-left))
                         ]" mode="hub:prepare-lists">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
