@@ -855,11 +855,10 @@
        In order to make hub:table-captions work properly, we pull the captions up, above each informaltable. -->
   <!-- Consider tables without caption, followed by normal paragraph -->
 
-  <xsl:template match="*[*[hub:is-table-not-in-table-env(.)][every $table in (*[hub:is-table-not-in-table-env(.) and matches(following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x') 
-                                                                              or matches(preceding-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x')]
-                                           ) 
-                        satisfies (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))]]
-                        " mode="hub:sort-table-captions">
+  <xsl:template match="*[*[hub:is-table-not-in-table-env(.)]]
+                         [every $table in (*[hub:is-table-not-in-table-env(.) and matches(following-sibling::para[1]/@role, $hub:table-title-role-regex-x,'x') or matches(preceding-sibling::para[1]/@role, $hub:table-title-role-regex-x,'x')])
+                         satisfies (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))
+                         ]" mode="hub:sort-table-captions">
     <xsl:copy>
       <xsl:sequence select="@*" />
       <xsl:for-each-group select="*" group-starting-with="*[hub:is-table-not-in-table-env(.)]">
@@ -882,13 +881,14 @@
   <xsl:template 
     match="keywordset[@role eq 'hub']
                      (: The following match pattern should always the same as for the previous template :)
-                     [//*[*[hub:is-table-not-in-table-env]]
+                     [//*[*[hub:is-table-not-in-table-env(.)]]
                          [every $table in (*[hub:is-table-not-in-table-env(.)]) satisfies
                           (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))
                          ]
                      ]" 
     mode="hub:sort-table-captions">
     <xsl:copy>
+      <xsl:message select="'table-captions-moved-above-tables'"></xsl:message>
       <xsl:sequence select="@*" />
       <xsl:apply-templates select="keyword except keyword[@role eq 'table-captions-moved-above-tables']" mode="#current" />
       <keyword role="table-captions-moved-above-tables">true</keyword>
