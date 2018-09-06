@@ -439,35 +439,55 @@
     <xsl:param name="list" as="element(*)"/>
     <xsl:sequence select="false()"/>
   </xsl:function>
+  
+  <xsl:function name="hub:is-above-variable-list-threshold" as="xs:boolean">
+    <xsl:param name="total-list-para-count" as="xs:integer"/>
+    <xsl:param name="var-list-para-count" as="xs:integer"/>
+<!--    <xsl:message select="'TTTTTTTTTTTTTTTTTT ', $total-list-para-count, ' ', $var-list-para-count"></xsl:message>-->
+    <xsl:choose>
+      <xsl:when test="$total-list-para-count eq 0">
+        <xsl:sequence select="false()"/>
+      </xsl:when>
+      <xsl:when test="$total-list-para-count le 5">
+        <xsl:sequence select="$var-list-para-count ge 3"/>
+      </xsl:when>
+      <xsl:when test="$total-list-para-count le 20">
+        <xsl:sequence select="$var-list-para-count ge 16"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$var-list-para-count div $total-list-para-count gt 0.95"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
 
   <xsl:function name="hub:is-variable-list" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
+    <xsl:variable name="first-paras" as="element(para)*" select="$list/listitem/para[1]"/>
+    <xsl:variable name="first-para-count" as="xs:integer" select="count($first-paras)"/>
+    <xsl:variable name="variable-list-paras-with-phrase-identifier" as="element(para)*"
+      select="$first-paras[hub:is-variable-list-listitem-with-phrase-identifier(.)
+                           and 
+                           not(@role = 'Note' or hub:is-equation-para(.))]"/>
+    <xsl:variable name="variable-list-paras-without-phrase-identifier" as="element(para)*"
+      select="$first-paras[hub:is-variable-list-listitem-without-phrase-identifier(.)
+                           and 
+                           not(@role = 'Note' or hub:is-equation-para(.))]"/>
     <xsl:sequence select="(
-                            exists($list/listitem/para) (: we don’t require that every listitem needs a para 
+                            exists($first-paras) (: we don’t require that every listitem needs a para 
                                                          – there may be complete tables in listitem, for ex. :)
                             and 
                               (
                                 hub:get-list-type(
-                                  for $first-para-in-listitem in $list/listitem/para[1]
+                                  for $first-para-in-listitem in $first-paras
                                   return $first-para-in-listitem
                                     //phrase[hub:is-identifier(.)][hub:same-scope(., $first-para-in-listitem)][1]
                                 ) eq 'other'
                                 and
-                                (
-                                  every $first-para-in-listitem in $list/listitem/para[1] satisfies (
-                                    hub:is-variable-list-listitem-with-phrase-identifier($first-para-in-listitem)
-                                    and 
-                                    not($first-para-in-listitem/@role = 'Note' or $first-para-in-listitem/self::para/hub:is-equation-para(.))
-                                  )
-                                )
+                                hub:is-above-variable-list-threshold($first-para-count, 
+                                                                     count($variable-list-paras-with-phrase-identifier
+                                                                           | $variable-list-paras-without-phrase-identifier))
                               or
-                              (
-                                every $first-para-in-listitem in $list/listitem/para[1] satisfies (
-                                  hub:is-variable-list-listitem-without-phrase-identifier($first-para-in-listitem)
-                                  and
-                                  not($first-para-in-listitem/@role = 'Note' or $first-para-in-listitem/self::para/hub:is-equation-para(.))
-                                )
-                              )
+                              hub:is-above-variable-list-threshold($first-para-count, count($variable-list-paras-without-phrase-identifier))
                             )
                           )
                           or hub:is-variable-list-because-we-know-better($list)"/>
