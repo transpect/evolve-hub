@@ -189,6 +189,7 @@
   <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
                        and not(hub:is-ordered-list(.)) and not(hub:is-itemized-list(.)) and not(hub:is-variable-list(.))]" mode="hub:lists">
     <xsl:variable name="current" select="."/>
+    <xsl:variable name="list" select="." as="element(orderedlist)"/>
     <xsl:for-each-group select="*" 
       group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]])
                       then 
@@ -196,10 +197,12 @@
                         then 'itemizedlist' 
                         else 
                           if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
-                              and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1][not(.//* except anchor)]
+                              and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]
+                                                            [empty(.//*[not(name() = ('phrase', 'anchor'))])]
                               and (if (count($current/listitem) gt 1) 
                                    then count($current/listitem[matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
-                                                                and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1][not(.//* except anchor)]]) gt 1 
+                                                                and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]
+                                                                                              [empty(.//*[not(name() = ('phrase', 'anchor'))])] ]) gt 1 
                                    else true()))
                           then 'orderedlist' 
                           else 'variablelist'
