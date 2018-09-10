@@ -368,8 +368,14 @@
 
   <xsl:function name="hub:has-no-identifiers" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
-    <xsl:value-of select="if (every $x in $list/listitem/para[1] satisfies not($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)]))
-                          then true() else false()"/>
+    <xsl:sequence select="if (hub:is-variable-list($list)) (: GI 2018-09-10: due to recently introduced heuristics,
+                             a list may be identified as a variable list even if not every item contains an identifier :) 
+                          then false()
+                          else
+                          (
+                            every $x in $list/listitem/para[1] 
+                            satisfies empty($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
+                          )"/>
   </xsl:function>
   
   <xsl:function name="hub:is-itemized-list" as="xs:boolean">
@@ -443,19 +449,21 @@
   <xsl:function name="hub:is-above-variable-list-threshold" as="xs:boolean">
     <xsl:param name="total-list-para-count" as="xs:integer"/>
     <xsl:param name="var-list-para-count" as="xs:integer"/>
-<!--    <xsl:message select="'TTTTTTTTTTTTTTTTTT ', $total-list-para-count, ' ', $var-list-para-count"></xsl:message>-->
     <xsl:choose>
       <xsl:when test="$total-list-para-count eq 0">
         <xsl:sequence select="false()"/>
       </xsl:when>
       <xsl:when test="$total-list-para-count le 5">
-        <xsl:sequence select="$var-list-para-count ge 3"/>
+        <xsl:sequence select="$var-list-para-count ge 0.6 * $total-list-para-count"/>
       </xsl:when>
       <xsl:when test="$total-list-para-count le 20">
-        <xsl:sequence select="$var-list-para-count ge 16"/>
+        <xsl:sequence select="$var-list-para-count ge 0.8 * $total-list-para-count"/>
+      </xsl:when>
+      <xsl:when test="$total-list-para-count le 40">
+        <xsl:sequence select="$var-list-para-count ge 0.9 * $total-list-para-count"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:sequence select="$var-list-para-count div $total-list-para-count gt 0.95"/>
+        <xsl:sequence select="$var-list-para-count ge 0.95 * $total-list-para-count"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
@@ -472,6 +480,19 @@
       select="$first-paras[hub:is-variable-list-listitem-without-phrase-identifier(.)
                            and 
                            not(@role = 'Note' or hub:is-equation-para(.))]"/>
+    <!--<xsl:if test="contains($list, 'Momentanwert')">
+      <xsl:message select="'CCCCCCCCCCCCC ', count($variable-list-paras-with-phrase-identifier), ' ', count($variable-list-paras-without-phrase-identifier)
+, 'fp:', exists($first-paras), ' glt:',hub:get-list-type(
+                                  for $first-para-in-listitem in $first-paras
+                                  return $first-para-in-listitem
+                                    //phrase[hub:is-identifier(.)][hub:same-scope(., $first-para-in-listitem)][1]
+                                ), 
+                                ' above:', $first-para-count, count($variable-list-paras-with-phrase-identifier
+                                                                           | $variable-list-paras-without-phrase-identifier),hub:is-above-variable-list-threshold($first-para-count, 
+                                                                     count($variable-list-paras-with-phrase-identifier
+                                                                           | $variable-list-paras-without-phrase-identifier)), 
+' text:',normalize-space($list)"></xsl:message>
+    </xsl:if>-->
     <xsl:sequence select="(
                             exists($first-paras) (: we don’t require that every listitem needs a para 
                                                          – there may be complete tables in listitem, for ex. :)
@@ -558,14 +579,14 @@
       <xsl:apply-templates select="$marks" mode="hub:list-true-marks"/>
     </xsl:variable>
     <xsl:choose>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^[ivx]+$')">lowerroman</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^[IVX]+$')">upperroman</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^[a-z]$')">loweralpha</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^[A-Z]$')">upperalpha</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^\p{Zs}*[0-9]+$')">arabic</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^&#x2022;$')">bullet</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, '^&#xb7;$')">bullet</xsl:when>
-      <xsl:when test="every $x in $true-marks satisfies matches($x, $hub:itemizedlist-mark-chars-regex)">
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[ivx]+$'))">lowerroman</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[IVX]+$'))">upperroman</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[a-z]$'))">loweralpha</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[A-Z]$'))">upperalpha</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^\p{Zs}*[0-9]+$'))">arabic</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^&#x2022;$'))">bullet</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^&#xb7;$'))">bullet</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, $hub:itemizedlist-mark-chars-regex))">
         <xsl:value-of select="$marks" />
       </xsl:when>
       <xsl:otherwise>
