@@ -184,12 +184,13 @@
     <xsl:apply-templates select="listitem/node()" mode="#current"/>
   </xsl:template>
 
+  <!-- Set to ('phrase', 'anchor') if formatting around the marker shouldn’t impede marker recognition -->
+  <xsl:variable name="hub:ordered-list-marker-acceptable-markup" as="xs:string+" select="('anchor')"/>
 
   <!-- Mischung aus Folgeabsätzen und Unterpunkten oder Listen verschiedenen Typs, die zerschnitten werden müssen -->
   <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
                        and not(hub:is-ordered-list(.)) and not(hub:is-itemized-list(.)) and not(hub:is-variable-list(.))]" mode="hub:lists">
     <xsl:variable name="current" select="."/>
-    <xsl:variable name="list" select="." as="element(orderedlist)"/>
     <xsl:for-each-group select="*" 
       group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]])
                       then 
@@ -198,11 +199,11 @@
                         else 
                           if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
                               and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]
-                                                            [empty(.//*[not(name() = ('phrase', 'anchor'))])]
+                                                            [empty(.//*[not(name() = $hub:ordered-list-marker-acceptable-markup)])]
                               and (if (count($current/listitem) gt 1) 
                                    then count($current/listitem[matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
                                                                 and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]
-                                                                                              [empty(.//*[not(name() = ('phrase', 'anchor'))])] ]) gt 1 
+                                                                                              [empty(.//*[not(name() = $hub:ordered-list-marker-acceptable-markup)])] ]) gt 1 
                                    else true()))
                           then 'orderedlist' 
                           else 'variablelist'
