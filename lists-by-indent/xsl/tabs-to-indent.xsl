@@ -75,8 +75,10 @@
       select="(for $t in $tab-decl return hub:to-twips($t/@horizontal-position), $hub:default-tabstop)[1]"/>
     <xsl:copy>
       <xsl:apply-templates select="@* except @text-indent" mode="#current"/>
+      <!-- If there was no tab decl, the default tab stop was added to an existing text-indent. Hogrefe’s
+        101024_12345_DOC (search for '>oder<' after an item 3.) seems to suggest otherwise. -->
       <xsl:attribute name="text-indent" 
-        select="((@text-indent[. castable as xs:double], 0)[1] cast as xs:double) + $tabstop"/>
+        select="((@text-indent[. castable as xs:double], $tabstop)[1] cast as xs:double)"/>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
