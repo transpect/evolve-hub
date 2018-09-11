@@ -158,20 +158,38 @@
   <xsl:variable name="hub:non-empty-elements" as="xs:string+"
     select="('mediaobject','table','inlinemediaobject')" />
 
-    <xsl:template 
-      match="dbk:para[ ( hub:boolean-param($hub:remove-empty-paras) or 
-	                 matches(@role, $hub:empty-para-role-regex-x, 'x')
-		       ) and
-	               not(normalize-space(.)) and 
-		       not(.//*[local-name() = $hub:non-empty-elements])
-		     ]" 
-      mode="hub:preprocess-hierarchy">
+  <xsl:template 
+      match="dbk:para[( 
+                        hub:boolean-param($hub:remove-empty-paras) 
+                        or 
+                        matches(@role, $hub:empty-para-role-regex-x, 'x')
+                      ) 
+                      and
+                      not(normalize-space(.)) 
+                      and 
+                      not(.//*[local-name() = $hub:non-empty-elements])
+                      and
+                      (: If you want to discard whitespace-only paras with underlines, redefine hub:underlined()
+                      so that it always returns false() :)
+                      not(hub:underlined(.))
+                     ]" mode="hub:preprocess-hierarchy">
       <xsl:message select="'INFO: Removed empty para', 
                            if(@role ne '') then concat('with role ', xs:string(@role)) else '',
                            if(@srcpath ne '') then concat(' with srcpath ', xs:string(@srcpath)) else '',
                            if(*) then string-join(('; all descendant elements:', distinct-values(for $e in .//* return local-name($e))),' ') else ''"/>
-    </xsl:template>
-    
+  </xsl:template>
+  
+  <xsl:function name="hub:underlined" as="xs:boolean">
+    <xsl:param name="elt" as="element(*)"/><!-- typically a para or a phrase -->
+    <xsl:variable name="text-nodes" as="text()*" select="$elt//text()[hub:same-scope(., $elt)]"/>
+    <xsl:variable name="underlines" as="attribute(css:text-decoration-line)*" 
+      select="($text-nodes/ancestor::* intersect $elt/descendant-or-self::*)
+                /(. | key('hub:style-by-role', @role))/@*[name() = 'css:text-decoration-line']
+                                                         [. = 'underline']
+                                                         [../@css:text-decoration-width[not(matches(., '^0(pt)?$'))]]"/>
+    <xsl:sequence select="exists($underlines)"/>
+  </xsl:function>
+  
   <xsl:key name="natives" match="css:rule" use="@name"/> 
   
   <xsl:template match="css:rule[count(key('natives',current()/@name)) gt 1][not(@layout-type = ('table', 'cell'))][preceding-sibling::*[name() = 'css:rule'][@name = current()/@name]]" mode="hub:preprocess-hierarchy">
