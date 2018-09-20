@@ -33,7 +33,7 @@
           </xsl:if>
         </xsl:for-each-group>
       </xsl:variable>
-      <xsl:sequence select="hub:hierarchize-by-role(node(), $all-headings, 1)" />
+      <xsl:sequence select="hub:hierarchize-by-role(* | comment() | processing-instruction(), $all-headings, 1)" />
     </xsl:copy>
   </xsl:template>
   
