@@ -62,32 +62,8 @@
       <xsl:when test="hub:lists-permitted-here(.)">
         <xsl:copy>
           <xsl:apply-templates select="@*" mode="#current"/>
-          <xsl:for-each-group select="node()" 
-            group-adjacent="(
-                              (
-                                @margin-left 
-                                and @margin-left &gt; $hub:indent-epsilon
-                              )
-                              (: why should a positive text-indent indicate that there is a list?
-                              or 
-                              (
-                                @text-indent
-                                and @text-indent &gt; $hub:indent-epsilon
-                              )
-                              :)
-                            )
-                            (: cf. discussion in https://letexml.slack.com/archives/hub2app/p1426695436000042
-                              and not(
-                              exists(@text-indent) 
-                              and exists(@margin-left)
-                              and @text-indent + @margin-left = 0
-                              and not(.//tab)
-                            ):)
-                            and not(matches(@role, $hub:list-by-indent-exception-role-regex))
-                            and not(self::*[local-name() = ('title', 'subtitle', 'titleabbrev', 'bridgehead', 'entry')])
-                            and not(self::para[(@role = $hub:equation-roles) or starts-with(@role, 'heading')])
-                            and hub:condition-that-stops-indenting-apart-from-role-regex(.)
-                            and not(self::biblioentry[count(child::*)=1 and bibliomisc[not(child::node())]])">
+          <xsl:for-each-group select="* | comment() | processing-instruction()" 
+            group-adjacent="hub:is-list-member-candidate(.)">
             <xsl:choose>
               <xsl:when test="current-grouping-key()">
                 <xsl:call-template name="create-list">
@@ -106,30 +82,74 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:function name="hub:is-list-member-candidate" as="xs:boolean">
+    <xsl:param name="para" as="node()?"/>
+    <xsl:sequence 
+      select="exists(
+                $para/(self::processing-instruction() | self::comment())[hub:is-list-member-candidate(preceding-sibling::*[1])]
+                union
+                $para/self::*[
+                        (
+                         (
+                           @margin-left 
+                           and @margin-left &gt; $hub:indent-epsilon
+                         )
+                         (: why should a positive text-indent indicate that there is a list?
+                         or 
+                         (
+                           @text-indent
+                           and @text-indent &gt; $hub:indent-epsilon
+                         )
+                         :)
+                       )
+                       (: cf. discussion in https://letexml.slack.com/archives/hub2app/p1426695436000042
+                         and not(
+                         exists(@text-indent) 
+                         and exists(@margin-left)
+                         and @text-indent + @margin-left = 0
+                         and not(.//tab)
+                       ):)
+                       and not(matches(@role, $hub:list-by-indent-exception-role-regex))
+                       and not(self::*[local-name() = ('title', 'subtitle', 'titleabbrev', 'bridgehead', 'entry')])
+                       and not(self::para[(@role = $hub:equation-roles)]
+                                         [empty(preceding-sibling::*[1]/self::para[hub:is-list-member-candidate(.)]
+                                                                                  [$equations-after-list-paras-belong-to-list = 'yes']
+                                               )
+                                         ]
+                              )
+                       and not(self::para[starts-with(@role, 'heading')])
+                       and hub:condition-that-stops-indenting-apart-from-role-regex(.)
+                       and not(self::biblioentry[count(child::*)=1 and bibliomisc[not(child::node())]]
+                      )
+                    ]
+              )"/>
+  </xsl:function>
 
   <xsl:template name="create-list">
     <xsl:param name="nodes" as="node()+"/>
     <xsl:param name="count" select="1" as="xs:integer"/>
-    <!-- looping auf Ebene 20 abbrechen -->
     <xsl:if test="$count gt 20">
-      <!--<error>
-        <para>Named template 'create-list' in evolve-hub/lists-by-indent/xsl/handle-indent.xsl 
-  terminated at list nesting depth 20. The list detection template is probably looping.</para>
-        <xsl:sequence select="$nodes"/>
-      </error>-->
       <xsl:message terminate="yes">Terminated at list nesting depth 20. This list detection stylesheet is probably looping.</xsl:message>
     </xsl:if>
     <!--<xsl:variable name="indent" select="($nodes[1]/@margin-left, 0)[1] + ($nodes[1]/@text-indent, 0)[1]"/>-->
     <xsl:variable name="indent" select="min( for $n in $nodes 
                                              return (($n/@margin-left, 0)[1] + ($n/@text-indent, 0)[1])
-                                           )"/>
-    <xsl:variable name="temporary-list" as="node()*">
+                                           )" as="xs:double"/>
+    <xsl:variable name="temporary-list" as="document-node()">
+      <xsl:document>
         <xsl:for-each-group select="$nodes"
-          group-adjacent="abs($indent - (@margin-left, 0)[1] - (@text-indent, 0)[1]) &lt;= $hub:indent-epsilon">
+          group-adjacent="abs($indent - (@margin-left, 0)[1] - (@text-indent, 0)[1]) le $hub:indent-epsilon">
           <xsl:choose>
             <xsl:when test="current-grouping-key()">
               <xsl:for-each select="current-group()">
                 <listitem>
+                  <xsl:attribute name="hub:indent" select="$indent"/>
+                  <xsl:if test="abs((@margin-left, 0)[1] - (preceding-sibling::*[1]/@margin-left, 0)[1]) gt $hub:indent-epsilon
+                                (:and abs((@text-indent, 0)[1]) gt $hub:indent-epsilon
+                                and abs((preceding-sibling::*[1]/@text-indent, 0)[1]) gt $hub:indent-epsilon:)">
+                    <xsl:attribute name="hub:margin-shift" select="(@margin-left, 0)[1] - (preceding-sibling::*[1]/@margin-left, 0)[1]"/>
+                  </xsl:if>
                   <xsl:apply-templates select="." mode="#current"/>
                 </listitem>
               </xsl:for-each>
@@ -138,12 +158,12 @@
               <xsl:choose>
                 <xsl:when test="not($nodes[1]/@margin-left) and exists($nodes[1]/@text-indent) and ($nodes[1]/@text-indent = $indent)">
                   <xsl:for-each select="current-group()">
-                    <listitem>
+                    <listitem hub:indent="textindent">
                       <xsl:apply-templates select="." mode="#current"/>
                     </listitem>
                   </xsl:for-each>
                 </xsl:when>
-                <xsl:when test="$indent - (@margin-left, 0)[1] - (@text-indent, 0)[1] &gt; $hub:indent-epsilon">
+                <xsl:when test="$indent - (@margin-left, 0)[1] - (@text-indent, 0)[1] gt $hub:indent-epsilon">
                   <xsl:call-template name="create-list">
                     <xsl:with-param name="nodes" select="current-group()"/>
                     <xsl:with-param name="count" select="$count + 1"/>
@@ -161,25 +181,33 @@
             </xsl:otherwise>
           </xsl:choose>
         </xsl:for-each-group>
+      </xsl:document>
     </xsl:variable>
-    <xsl:for-each-group select="$temporary-list" group-adjacent="local-name()">
+<!--    <xsl:sequence select="$temporary-list"></xsl:sequence>-->
+    <xsl:for-each-group select="$temporary-list/node()" group-adjacent="local-name()">
       <xsl:choose>
-        <xsl:when test="current-group()[1][self::listitem]">
-          <orderedlist>
-            <xsl:sequence select="current-group()"/>
-          </orderedlist>
+        <xsl:when test="current-grouping-key() = 'listitem'">
+          <xsl:for-each-group select="current-group()" 
+            group-starting-with="*[@hub:margin-shift]
+                                  [@hub:indent = preceding-sibling::*[1]/self::listitem/@hub:indent]">
+            <orderedlist>
+              <xsl:attribute name="hub:margin-shift-group-position" select="position()"/>
+              <xsl:sequence select="current-group()"/>
+            </orderedlist>  
+          </xsl:for-each-group>
         </xsl:when>
-        <xsl:when test="current-group()[1][self::orderedlist]">
+        <xsl:when test="current-grouping-key() = 'orderedlist'">
           <xsl:sequence select="current-group()"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:message terminate="yes">
-            Falsches Element in create-list!
+            Unexpected node <xsl:value-of select="current-grouping-key()"/> in create-list!
           </xsl:message>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each-group>
   </xsl:template>
   
-  
+  <xsl:template match="@hub:margin-shift | @hub:indent | @hub:margin-shift-group-position" mode="hub:lists"/>
+
 </xsl:stylesheet>

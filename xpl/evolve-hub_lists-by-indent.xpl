@@ -16,7 +16,7 @@
   <p:option name="prefix" required="false" select="'evolve-hub/5'"/>
   
   <p:input port="source" primary="true"/>
-  <p:input port="parameters" kind="parameter" primary="true"/>
+  <p:input port="parameters" kind="parameter" primary="true" sequence="true"/>
   <p:input port="stylesheet"/>
   <p:output port="result" primary="true"/>
   <p:output port="report" sequence="true">
@@ -29,6 +29,13 @@
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.io/xproc-util/xslt-mode/xpl/xslt-mode.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
+
+  <p:parameters name="consolidate-params">
+    <p:input port="parameters">
+      <p:pipe port="parameters" step="lists-by-indent"/>
+    </p:input>
+  </p:parameters>
 
   <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:tabs-to-indent" name="tabs-to-indent">
     <p:input port="source">
@@ -36,6 +43,7 @@
     </p:input>
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
+    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
@@ -45,6 +53,7 @@
   <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:handle-indent" name="handle-indent">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
+    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
@@ -54,6 +63,7 @@
   <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:prepare-lists" name="prepare-lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
+    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
@@ -63,6 +73,7 @@
   <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:lists" name="lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
+    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
@@ -72,6 +83,7 @@
   <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:postprocess-lists" name="postprocess-lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
+    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>

@@ -59,29 +59,64 @@
     </xsl:copy>
   </xsl:template>
   
-  <!-- Paras that start with a tab -->
+  <!-- Remove leading and trailing tabs, add leading tab indent to @text-indent -->
   <xsl:template match="dbk:para[not(@role = $hub:equation-roles)]
                                [
-                                 .//dbk:tab[hub:same-scope(., current())]
+                                 .//dbk:tab[not(@role)]
+                                           [hub:same-scope(., current())]
                                            [not(parent::dbk:tabs)]
-                                           [every $text in current()//text()[hub:same-scope(., current())]
-                                                                            [matches(., '\S')]
-                                            satisfies ($text &gt;&gt; .)]
-                               ]" 
+                                           [every $text in current()//(text()[normalize-space()] | * except .)
+                                                                        [hub:same-scope(., current())]
+                                            satisfies ($text >> .)
+                                            or
+                                            (every $text in current()//(text()[normalize-space()] | * except .)
+                                                                        [hub:same-scope(., current())]
+                                            satisfies (. >> $text))]
+                               ]"
                 mode="hub:tabs-to-indent" priority="1.5">
     <xsl:variable name="tab-decl" as="element(dbk:tab)?"
                   select="(dbk:tabs/dbk:tab[1], key('hub:style-by-role', @role)/dbk:tabs/dbk:tab[1])[1]"/>
     <xsl:variable name="tabstop" as="xs:double"
       select="(for $t in $tab-decl return hub:to-twips($t/@horizontal-position), $hub:default-tabstop)[1]"/>
     <xsl:copy>
+      <xsl:attribute name="hub:tab-stop" select="string($tabstop)"/>
       <xsl:apply-templates select="@* except @text-indent" mode="#current"/>
       <!-- If there was no tab decl, the default tab stop was added to an existing text-indent. Hogrefe’s
         101024_12345_DOC (search for '>oder<' after an item 3.) seems to suggest otherwise. -->
       <xsl:attribute name="text-indent" 
-        select="((@text-indent[. castable as xs:double], $tabstop)[1] cast as xs:double)"/>
-      <xsl:apply-templates mode="#current"/>
+        select="(@text-indent[. castable as xs:double], 0)[1] + $tabstop">
+        <!-- A negative @text-indent may be compensated by a tab stop of the same width -->
+      </xsl:attribute>
+      <xsl:apply-templates mode="#current">
+        <xsl:with-param name="remove-nodes" as="node()*" tunnel="yes" 
+           select=".//dbk:tab[not(@role)]
+                             [hub:same-scope(., current())]
+                             [not(parent::dbk:tabs)]
+                             [every $text in current()//(text()[normalize-space()] | * except .)
+                                                                        [hub:same-scope(., current())]
+                              satisfies ($text >> .)
+                              or
+                              (every $text in current()//(text()[normalize-space()] | * except .)
+                                                                        [hub:same-scope(., current())]
+                              satisfies (. >> $text))
+                              (: Example for ($text &lt;&lt; .):
+                              http://svn.le-tex.de/svn/ltxbase/Difftestdata/evolve-hub-lists/idml/VDE-S.idml, 
+    	                        below chapter 5 heading: Tab at end of para, will become a varlistitem :)]"/>
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
+  
+  <xsl:template match="dbk:tab" mode="hub:tabs-to-indent">
+    <xsl:param name="remove-nodes" as="node()*" tunnel="yes"/>
+    <xsl:choose>
+      <xsl:when test="some $n in $remove-nodes satisfies ($n is current())"/>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="@hub:tab-stop" mode="hub:lists"/>
   
   <xsl:template match="*[self::figure | self::table][title/(. | key('hub:style-by-role', @role))/@css:margin-left]"
                 mode="hub:tabs-to-indent" priority="2.5">

@@ -59,6 +59,7 @@
   <xsl:param name="clean-hub_remove-attributes-with-paths" select="'no'"/>
   <xsl:param name="split-at-br-also-for-non-br-paras" select="'yes'"/>
   <xsl:param name="create-ulinks-from-text" select="'no'"/>
+  <xsl:param name="equations-after-list-paras-belong-to-list" select="'yes'"/>
 
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />

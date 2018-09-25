@@ -21,6 +21,7 @@
   xpath-default-namespace="http://docbook.org/ns/docbook"
   exclude-result-prefixes = "w o v wx xs dbk pkg r rel word200x exsl saxon fn tr css">
 
+  <xsl:variable name="hub:orderedlist-mark-open-quote-regex" as="xs:string" select="'[‚„«‹›»“‘]?'"/>
   <xsl:variable name="hub:itemizedlist-mark-chars-regex" as="xs:string"
     select="'([&#xb7;&#x336;&#x25aa;&#x25a1;&#x25b6;&#x25cf;&#x2212;&#x2022;\p{So}\p{Pd}&#x23af;&#xF0B7;&#xF0BE;&#61485;-])'"/>
   <!-- [A-Z] not followed by dot: confusion with people’s initials in indented paras -->
@@ -30,11 +31,11 @@
   <xsl:variable name="hub:itemizedlist-mark-regex" as="xs:string"
     select="concat('^', $hub:itemizedlist-mark-chars-regex, '$')"/>
   <xsl:variable name="hub:orderedlist-mark-regex" as="xs:string"
-    select="concat('^', $hub:orderedlist-mark-chars-regex, '$')"/>
+    select="concat('^', $hub:orderedlist-mark-open-quote-regex, $hub:orderedlist-mark-chars-regex, '$')"/>
   <xsl:variable name="hub:itemizedlist-mark-at-start-regex" as="xs:string"
     select="concat('^', $hub:itemizedlist-mark-chars-regex, '([\p{Zs}\s]+|$)')"/>
   <xsl:variable name="hub:orderedlist-mark-at-start-regex" as="xs:string"
-    select="concat('^(', $hub:orderedlist-mark-chars-regex, ')([\p{Zs}\s]+|$)')"/>
+    select="concat('^(', $hub:orderedlist-mark-open-quote-regex, $hub:orderedlist-mark-chars-regex, ')([\p{Zs}\s]+|$)')"/>
 
   <!-- var hub:equation-roles:
        List of paragraph role attribute values to exclude from list processing. 
@@ -98,7 +99,9 @@
   <xsl:template match="listitem[parent::orderedlist[hub:is-variable-list(.)]]" mode="hub:lists">
     <xsl:param name="is-variable-list" select="false()"/>
     <xsl:variable name="first-para" select="para[1]" as="element(para)?"/>
-    <xsl:variable name="tabs" select="$first-para//tab[not(parent::tabs)][hub:same-scope(., current())]"/>
+    <xsl:variable name="tabs" select="$first-para//tab[not(@role)]
+                                                      [not(parent::tabs)]
+                                                      [hub:same-scope(., current())]"/>
     <xsl:choose>
       <xsl:when test="$is-variable-list and (not($first-para) or empty($tabs))"><!-- for ex., informaltable in listitem -->
       	<varlistentry>
@@ -183,7 +186,7 @@
                 mode="hub:lists" priority="1.5"><!-- higher priority than 1, which is the priority of the itemizedlist template (around line 50) -->
     <xsl:apply-templates select="listitem/node()" mode="#current"/>
   </xsl:template>
-
+  
   <!-- Set to ('phrase', 'anchor') if formatting around the marker shouldn’t impede marker recognition -->
   <xsl:variable name="hub:ordered-list-marker-acceptable-markup" as="xs:string+" select="('anchor')"/>
 
@@ -366,10 +369,10 @@
     <xsl:param name="list" as="element(*)"/>
     <xsl:param name="margin" as="xs:string?"/>
     <xsl:variable name="margin-int" select="xs:integer(number(($margin, 0)[1]))" as="xs:integer"/>
-    <xsl:value-of select="if (every $x in $list/listitem/para[1]/@margin-left[. castable as xs:integer] 
-                              satisfies abs(xs:integer($x) - $margin-int) le $hub:indent-epsilon) then true() else false()"/>
+    <xsl:value-of select="every $x in $list/listitem/para[1]/@margin-left[. castable as xs:integer] 
+                          satisfies abs(xs:integer($x) - $margin-int) le $hub:indent-epsilon"/>
   </xsl:function>
-
+  
   <xsl:function name="hub:has-no-identifiers" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
     <xsl:sequence select="if (hub:is-variable-list($list)) (: GI 2018-09-10: due to recently introduced heuristics,
@@ -484,7 +487,7 @@
       select="$first-paras[hub:is-variable-list-listitem-without-phrase-identifier(.)
                            and 
                            not(@role = 'Note' or hub:is-equation-para(.))]"/>
-    <!--<xsl:if test="contains($list, 'Momentanwert')">
+    <!--<xsl:if test="contains($list, 'der Behälter würde sicherlich zerstört ')">
       <xsl:message select="'CCCCCCCCCCCCC ', count($variable-list-paras-with-phrase-identifier), ' ', count($variable-list-paras-without-phrase-identifier)
 , 'fp:', exists($first-paras), ' glt:',hub:get-list-type(
                                   for $first-para-in-listitem in $first-paras
@@ -514,6 +517,10 @@
                               or
                               hub:is-above-variable-list-threshold($first-para-count, count($variable-list-paras-without-phrase-identifier))
                             )
+                            and 
+                            (every $p in $first-paras (: http://svn.le-tex.de/svn/ltxbase/Difftestdata/evolve-hub-lists/idml/VDE-S.idml,
+                                                         's. dazu Beispiel im Anhang A 1.3' :) 
+                             satisfies (empty($p/@hub:tab-stop)))
                           )
                           or hub:is-variable-list-because-we-know-better($list)"/>
   </xsl:function>
@@ -585,9 +592,19 @@
     <xsl:choose>
       <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[ivx]+$'))">lowerroman</xsl:when>
       <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[IVX]+$'))">upperroman</xsl:when>
-      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[a-z]$'))">loweralpha</xsl:when>
-      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[A-Z]$'))">upperalpha</xsl:when>
-      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^\p{Zs}*[0-9]+$'))">arabic</xsl:when>
+      <xsl:when test="exists($true-marks) 
+                      and 
+                      (every $x in $true-marks satisfies matches($x, '^[a-z][a-z]?$'))
+                      and
+                      hub:is-incrementing-alpha-sequence($true-marks)">loweralpha</xsl:when>
+      <xsl:when test="exists($true-marks) 
+                      and 
+                      (every $x in $true-marks satisfies matches($x, '^[A-Z][A-Z]?$'))
+                      and
+                      hub:is-incrementing-alpha-sequence($true-marks)">upperalpha</xsl:when>
+      <xsl:when test="exists($true-marks) and 
+                      (every $x in $true-marks 
+                      satisfies matches($x, concat('^\p{Zs}*', $hub:orderedlist-mark-open-quote-regex, '[0-9]+$')))">arabic</xsl:when>
       <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^&#x2022;$'))">bullet</xsl:when>
       <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^&#xb7;$'))">bullet</xsl:when>
       <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, $hub:itemizedlist-mark-chars-regex))">
@@ -598,8 +615,8 @@
       </xsl:otherwise>
     </xsl:choose>    
   </xsl:function>
-
-  <xsl:template match="node()" mode="hub:list-true-marks" as="xs:string">
+  
+  <xsl:template match="node()" mode="hub:list-true-marks" as="xs:string" priority="10">
     <!-- If someone changed …|[a-z]|… to …|[a-z][.:\)]|… in $hub:orderedlist-mark-regex, we need the double replace
       because $1 then contains the punctuation. You might need to customize this template if you customized the regex further. -->
     <xsl:sequence select="replace(replace(normalize-space(.),  $hub:orderedlist-mark-regex, '$1'), '[.:\)\)]', '', 'i')"/>

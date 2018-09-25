@@ -245,7 +245,7 @@
     </xsl:choose>
   </xsl:function>
 
-<xsl:function name="hub:contains-tokens" as="xs:boolean">
+  <xsl:function name="hub:contains-tokens" as="xs:boolean">
     <xsl:param name="string" as="xs:string?"/>
     <xsl:param name="tokens" as="xs:string*"/>
     <xsl:sequence select="tokenize($string, '\s+') = $tokens"/>
@@ -268,6 +268,73 @@
                             $attribute-start-char-regex, 
                             ')+$'
                           ))"/>
+  </xsl:function>
+
+  <xsl:function name="hub:letters-to-number" as="xs:integer">
+    <xsl:param name="string" as="xs:string"/>
+    <xsl:variable name="offset" as="xs:integer">
+      <xsl:choose>
+        <xsl:when test="false()">
+          <xsl:sequence select="1"></xsl:sequence>
+        </xsl:when>
+        <xsl:when test="matches($string, '^[a-z][a-z]?$')">
+          <xsl:sequence select="96"/>
+        </xsl:when>
+        <xsl:when test="matches($string, '^[A-Z][A-Z]?$')">
+          <xsl:sequence select="64"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:sequence select="-1"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="$offset = -1">
+        <xsl:sequence select="0"/><!-- or throw an error? -->
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="nums" as="xs:integer+">
+          <xsl:for-each select="reverse(string-to-codepoints($string))">
+            <xsl:sequence select="(. - $offset) * hub:pow(26, position() - 1)"/>
+          </xsl:for-each>
+        </xsl:variable>
+        <xsl:sequence select="xs:integer(sum($nums))"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
+  <xsl:function name="hub:pow" as="xs:integer">
+    <xsl:param name="base" as="xs:integer"/>
+    <xsl:param name="power" as="xs:integer"/>
+    <xsl:choose>
+      <xsl:when test="$power eq 0">
+        <xsl:sequence select="1"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="$base * hub:pow($base, $power - 1)"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+    
+  <xsl:function name="hub:is-incrementing-alpha-sequence" as="xs:boolean">
+    <xsl:param name="marks" as="xs:string*"/>
+    <xsl:choose>
+      <xsl:when test="count($marks) = 0">
+        <xsl:sequence select="false()"/>
+      </xsl:when>
+      <xsl:when test="count($marks) = 1">
+        <xsl:sequence select="true()"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="tmp" as="xs:boolean+">
+          <xsl:for-each select="$marks[position() gt 1]">
+            <xsl:variable name="pos" as="xs:integer" select="position()"/>
+            <xsl:sequence select="hub:letters-to-number(.) = hub:letters-to-number($marks[position() = $pos ]) + 1"/>
+          </xsl:for-each>
+        </xsl:variable>
+        <xsl:sequence select="every $b in $tmp satisfies $b"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:function>
 
 </xsl:stylesheet>
