@@ -875,13 +875,17 @@
   <!-- Consider tables without caption, followed by normal paragraph -->
 
   <xsl:template match="*[*[hub:is-table-not-in-table-env(.)]]
-                         [every $table in (*[hub:is-table-not-in-table-env(.) 
-                                             and 
-                                             matches(following-sibling::para[1]/@role, $hub:table-title-role-regex-x,'x')
-                                             or 
-                                             matches(preceding-sibling::para[1]/@role, $hub:table-title-role-regex-x,'x')])
-                         satisfies (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))
-                         ]" mode="hub:sort-table-captions">
+                        [every $table in (*[hub:is-table-not-in-table-env(.) 
+                                            and 
+                                            (
+                                              matches(following-sibling::*[1]/self::para/@role, $hub:table-title-role-regex-x,'x')
+                                              or 
+                                              matches(preceding-sibling::*[1]/self::para/@role, $hub:table-title-role-regex-x,'x')
+                                            )
+                                           ]
+                                         )
+                         satisfies (matches($table/following-sibling::*[1]/self::para/@role, $hub:table-title-role-regex-x, 'x'))
+                        ]" mode="hub:sort-table-captions">
     <xsl:copy>
       <xsl:sequence select="@*" />
       <xsl:for-each-group select="*" group-starting-with="*[hub:is-table-not-in-table-env(.)]">
