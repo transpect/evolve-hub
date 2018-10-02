@@ -32,7 +32,7 @@
     The result should be false(), if its input should not be indented. -->
   <xsl:function name="hub:condition-that-stops-indenting-apart-from-role-regex" as="xs:boolean">
     <xsl:param name="input" as="element(*)*"/>
-    <!-- to allow other conversions to stay unaffected. Override in adaptions -->
+    <!-- to allow other conversions to stay unaffected. Override in adaptations -->
     <xsl:sequence select="true()"/>
   </xsl:function>
   

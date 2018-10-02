@@ -1937,7 +1937,7 @@
       <xsl:for-each-group select="*" 
         group-adjacent="exists(self::*[local-name() = $hub:split-at-tab-element-names][tab[@role = 'right'][not(preceding-sibling::*[local-name() = 'br'])]])">
         <xsl:choose>
-          <xsl:when test="current-grouping-key() and current-group()[every $tab in tab[@role = 'right']/following-sibling::node()[1] satisfies matches($tab, $hub:post-identifier-regex, 'x')]">
+          <xsl:when test="current-grouping-key() and current-group()[every $t in tab[@role = 'right']/following-sibling::node()[1] satisfies matches($t, $hub:post-identifier-regex, 'x')]">
             <xsl:apply-templates select="current-group()" mode="#current">
               <xsl:with-param name="set-post-identifier" as="xs:boolean" tunnel="yes" select="true()"/>
             </xsl:apply-templates>
@@ -2501,14 +2501,14 @@
           </xsl:apply-templates>
         </xsl:when>
         <xsl:when test="tab[following-sibling::node()[self::text() or self::phrase]] and not(phrase[@role eq 'hub:caption-number'])">
-          <xsl:variable name="tab" select="tab[1]" as="element(tab)"/>
+          <xsl:variable name="_tb" select="tab[1]" as="element(tab)"/>
           <phrase role="hub:identifier">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'section-title-identifier')"/>
-            <xsl:apply-templates select="node()[ . &lt;&lt; $tab]" mode="#current">
+            <xsl:apply-templates select="node()[ . &lt;&lt; $_tb]" mode="#current">
               <xsl:with-param name="hub:already-identified" select="true()" tunnel="yes" as="xs:boolean"/>
             </xsl:apply-templates>
           </phrase>
-          <xsl:apply-templates select="$tab | node()[ . &gt;&gt; $tab]" mode="#current"/>
+          <xsl:apply-templates select="$_tb | node()[ . &gt;&gt; $_tb]" mode="#current"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:apply-templates mode="#current">
@@ -2633,12 +2633,12 @@
         </xsl:when>
 
         <xsl:when test="tab">
-          <xsl:variable name="tab" select="tab[1]"/>
+          <xsl:variable name="_tb" select="tab[1]" as="element(tab)"/>
           <phrase role="hub:identifier">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tab-identifier')"/>
-            <xsl:apply-templates select="node()[ . &lt;&lt; $tab]" mode="#current"/>
+            <xsl:apply-templates select="node()[ . &lt;&lt; $_tb]" mode="#current"/>
           </phrase>
-          <xsl:apply-templates select="$tab | node()[ . &gt;&gt; $tab]" mode="#current"/>
+          <xsl:apply-templates select="$_tb | node()[ . &gt;&gt; $_tb]" mode="#current"/>
         </xsl:when>
 
         <!-- input examples: ^Abb. A.1$, ^Table K.1. - .*$ -->
