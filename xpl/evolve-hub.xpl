@@ -55,6 +55,10 @@
   
   <p:input port="source" primary="true" sequence="true"/>
   <p:input port="paths" kind="parameter" primary="true"/>
+  <p:input port="options" sequence="true">
+    <p:documentation>cx:options document</p:documentation>
+    <p:empty/>
+  </p:input>
   <p:output port="result" primary="true" sequence="true"/>
   <p:output port="report" sequence="true">
     <p:pipe port="report" step="dtp"/>
@@ -88,7 +92,9 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="load" select="$load"/>
     <p:input port="additional-inputs"><p:empty/></p:input>
-    <p:input port="options"><p:empty/></p:input>
+    <p:input port="options">
+      <p:pipe port="options" step="evolve-hub"/>
+    </p:input>
   </tr:dynamic-transformation-pipeline>
 
   <tr:simple-progress-msg name="success-msg" file="evolve-hub-success.txt">
