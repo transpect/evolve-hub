@@ -3021,6 +3021,14 @@
   <xsl:template name="hub_clean-hub">
     <xsl:apply-templates select="/" mode="hub:clean-hub"/>
   </xsl:template>
+  
+  <xsl:template match="indexterm[@role = 'hub:not-placed-on-page'][empty(see | seealso)]" mode="hub:clean-hub">
+    <!-- Saves you removing these InDesign leftovers in every subsequent conversion step -->
+  </xsl:template>
+  
+  <xsl:template match="@hub:anchored" mode="hub:clean-hub">
+    <!-- If you need it in downstream modes, overwrite this template’s sequence constructor with <xsl:copy/> -->
+  </xsl:template>
 
   <xsl:template match="*[matches(@conditon, 'Story(ID|Ref)')]" mode="hub:clean-hub">
     <xsl:message select="'StoryRef/StoryID element ', local-name(.), ' discarded'"/>
