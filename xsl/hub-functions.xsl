@@ -276,9 +276,6 @@
     <xsl:param name="string" as="xs:string"/>
     <xsl:variable name="offset" as="xs:integer">
       <xsl:choose>
-        <xsl:when test="false()">
-          <xsl:sequence select="1"></xsl:sequence>
-        </xsl:when>
         <xsl:when test="matches($string, '^[a-z][a-z]?$')">
           <xsl:sequence select="96"/>
         </xsl:when>
