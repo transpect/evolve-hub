@@ -271,6 +271,8 @@
   </xsl:function>
 
   <xsl:function name="hub:letters-to-number" as="xs:integer">
+    <!-- a, b, c, …, aa, ab, … to 1, 2, 3, …, 27, 28, …
+      Maybe this function should also deal with a, b, c, …, aa, bb, cc, … -->
     <xsl:param name="string" as="xs:string"/>
     <xsl:variable name="offset" as="xs:integer">
       <xsl:choose>
