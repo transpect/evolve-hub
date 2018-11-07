@@ -3162,134 +3162,177 @@
 
   <xsl:variable name="hub:section-sidebar-roles" select="('Excurse', 'Conclusion')" as="xs:string+" />
 
+  <xsl:template match="*[@xml:id]" mode="hub:ids-atts" priority="-0.25">
+    <xsl:sequence select="@xml:id"/>
+  </xsl:template>
+  
+  <xsl:template match="@linkend" mode="hub:ids">
+    <xsl:attribute name="{name()}">
+      <xsl:apply-templates select="key('hub:linked-item-by-id', .)" mode="hub:ids-atts"/>
+    </xsl:attribute>
+    <xsl:message select="'LLLLLLLLLLLLLL ',key('hub:linked-item-by-id', .)/@xml:id"></xsl:message>
+  </xsl:template>
+
   <xsl:template match="section | sidebar[title/@role = $hub:section-sidebar-roles]" mode="hub:ids">
     <xsl:copy>
-      <xsl:attribute name="xml:id" 
-        select="concat(
-                  'Sec', 
-                  string(
-                    count( 
-                      (//section | //sidebar[title/@role = $hub:section-sidebar-roles] ) [. &lt;&lt; current()]
-                    ) 
-                    + 1 
-                  )
-                )"/>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="section | sidebar[title/@role = $hub:section-sidebar-roles]" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" 
+      select="concat(
+                'Sec', 
+                string(
+                  count( 
+                    (//section | //sidebar[title/@role = $hub:section-sidebar-roles] ) [. &lt;&lt; current()]
+                  ) 
+                  + 1 
+                )
+              )"/>
   </xsl:template>
 
   <xsl:template match="chapter" mode="hub:ids">
     <xsl:copy>
-      <xsl:attribute name="xml:id" 
-        select="concat(
-                  'Chap', 
-                  string(
-                    count( 
-                      ( //chapter ) [. &lt;&lt; current()]
-                    ) 
-                    + 1 
-                  )
-                )"/>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="chapter" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" 
+      select="concat(
+                'Chap', 
+                string(
+                  count( 
+                    ( //chapter ) [. &lt;&lt; current()]
+                  ) 
+                  + 1 
+                )
+              )"/>
   </xsl:template>
 
 
   <xsl:template match="figure" mode="hub:ids">
     <xsl:copy>
-      <xsl:attribute name="xml:id" select="concat(
-                                             'Fig', 
-                                             string(
-                                               count(
-                                                 preceding::figure
-                                               ) 
-                                               + 1
-                                             )
-                                           )"/>
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
       <!-- sections with tables and/or figures only: set anchored to true, so this figure wont be moved to float variable  -->
       <xsl:if test="parent::section[count(*) eq count(title union table union figure)]">
         <xsl:attribute name="hub:anchored" select="'yes'"/>
       </xsl:if>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="figure" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" select="concat(
+                                           'Fig', 
+                                           string(
+                                             count(
+                                               preceding::figure
+                                             ) 
+                                             + 1
+                                           )
+                                         )"/>
   </xsl:template>
 
   <xsl:template match="table | informaltable" mode="hub:ids">
     <xsl:copy>
-      <xsl:attribute name="xml:id" select="concat(
-                                             'Tab', 
-                                             string(
-                                               count(
-                                                 preceding::table union ancestor::table
-                                                 union
-                                                 preceding::informaltable union ancestor::informaltable
-                                               ) 
-                                               + 1
-                                             )
-                                           )"/>
-
-      <!-- sections with tables and/or figures only: set anchored to true, so this table wont be moved to float variable  -->
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <!-- sections with tables and/or figures only: set anchored to true, so this figure wont be moved to float variable  -->
       <xsl:if test="parent::section[count(*) eq count(title union table union figure)]">
         <xsl:attribute name="hub:anchored" select="'yes'"/>
       </xsl:if>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="table | informaltable" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" select="concat(
+                                           'Tab', 
+                                           string(
+                                             count(
+                                               preceding::table union ancestor::table
+                                               union
+                                               preceding::informaltable union ancestor::informaltable
+                                             ) 
+                                             + 1
+                                           )
+                                         )"/>
   </xsl:template>
 
   <xsl:template match="index" mode="hub:ids">
     <xsl:copy>
-      <xsl:attribute name="xml:id" 
-        select="concat(
-                  'Ind', 
-                  string(
-                    count( 
-                      ( //index ) [. &lt;&lt; current()]
-                    ) 
-                    + 1 
-                  )
-                )"/>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="index" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" 
+      select="concat(
+                'Ind', 
+                string(
+                  count( 
+                    ( //index ) [. &lt;&lt; current()]
+                  ) 
+                  + 1 
+                )
+              )"/>
   </xsl:template>
 
   <xsl:template match="appendix" mode="hub:ids">
     <xsl:copy>
-      <xsl:attribute name="xml:id" 
-        select="concat(
-                  'App', 
-                  string(
-                    count( 
-                      ( //appendix ) [. &lt;&lt; current()]
-                    ) 
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="appendix" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" 
+      select="concat(
+                'App', 
+                string(
+                  count( 
+                    ( //appendix ) [. &lt;&lt; current()]
+                  ) 
+                  + 1 
+                )
+              )"/>
+  </xsl:template>
+
+  <xsl:template match="bibliography" mode="hub:ids">
+    <xsl:copy>
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="bibliography" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" 
+      select="concat(
+                    'Bib', 
+                    string(
+                      count( 
+                      ( //bibliography ) [. &lt;&lt; current()]
+                      ) 
                     + 1 
-                  )
-                )"/>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
+                    )
+                    )"/>
+  </xsl:template>
+  
+  <xsl:template match="footnote" mode="hub:ids">
+    <xsl:copy>
+      <xsl:apply-templates select="." mode="hub:ids-atts"/>
+      <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
 
-	<xsl:template match="bibliography" mode="hub:ids">
-		<xsl:copy>
-			<xsl:attribute name="xml:id" 
-				select="concat(
-											'Bib', 
-											string(
-												count( 
-												( //bibliography ) [. &lt;&lt; current()]
-												) 
-											+ 1 
-											)
-											)"/>
-			<xsl:apply-templates select="@* | node()" mode="#current"/>
-		</xsl:copy>
-	</xsl:template>
-	
-  <xsl:template match="footnote" mode="hub:ids">
-    <xsl:copy>
-      <xsl:attribute name="xml:id" select="concat('Fn', count(preceding::footnote) + 1)"/>
-      <xsl:apply-templates select="@* | node()" mode="#current"/>
-    </xsl:copy>
+  <xsl:template match="footnote" mode="hub:ids-atts">
+    <xsl:attribute name="xml:id" select="concat('Fn', count(preceding::footnote) + 1)"/>
   </xsl:template>
+
 
   <!-- collateral: poetry -->
   
