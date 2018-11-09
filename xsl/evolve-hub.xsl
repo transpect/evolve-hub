@@ -3166,11 +3166,10 @@
     <xsl:sequence select="@xml:id"/>
   </xsl:template>
   
-  <xsl:template match="@linkend" mode="hub:ids">
+  <xsl:template match="@linkend[exists(key('hub:linked-item-by-id', .))]" mode="hub:ids">
     <xsl:attribute name="{name()}">
       <xsl:apply-templates select="key('hub:linked-item-by-id', .)" mode="hub:ids-atts"/>
     </xsl:attribute>
-    <xsl:message select="'LLLLLLLLLLLLLL ',key('hub:linked-item-by-id', .)/@xml:id"></xsl:message>
   </xsl:template>
 
   <xsl:template match="section | sidebar[title/@role = $hub:section-sidebar-roles]" mode="hub:ids">
