@@ -888,7 +888,7 @@
                         ]" mode="hub:sort-table-captions">
     <xsl:copy>
       <xsl:sequence select="@*" />
-      <xsl:for-each-group select="*" group-starting-with="*[hub:is-table-not-in-table-env(.)]">
+      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-table-not-in-table-env(.)]">
         <xsl:variable name="captions" select="current-group() 
                                               intersect
                                               following-sibling::para[matches(@role, $hub:table-title-role-regex-x, 'x')]" />
