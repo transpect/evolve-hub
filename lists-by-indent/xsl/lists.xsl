@@ -99,7 +99,7 @@
   <xsl:template match="listitem[parent::orderedlist[hub:is-variable-list(.)]]" mode="hub:lists">
     <xsl:param name="is-variable-list" select="false()"/>
     <xsl:variable name="first-para" select="para[1]" as="element(para)?"/>
-    <xsl:variable name="tabs" select="$first-para//tab[not(@role)]
+    <xsl:variable name="tabs" select="$first-para//tab[not(@role) or @role='docx2hub:generated']
                                                       [not(parent::tabs)]
                                                       [hub:same-scope(., current())]"/>
     <xsl:choose>
