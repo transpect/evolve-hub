@@ -139,7 +139,7 @@
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
-  <xsl:template match="para//tab[not(@role)][
+  <xsl:template match="para//tab[not(@role) or @role='docx2hub:generated'][
                          every $t in ancestor::para[1]//(text() | imageobject)
                          satisfies ($t &gt;&gt; .)
                        ]" mode="hub:postprocess-lists"/>

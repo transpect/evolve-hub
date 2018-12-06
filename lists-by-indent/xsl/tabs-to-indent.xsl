@@ -62,7 +62,7 @@
   <!-- Remove leading and trailing tabs, add leading tab indent to @text-indent -->
   <xsl:template match="dbk:para[not(@role = $hub:equation-roles)]
                                [
-                                 .//dbk:tab[not(@role)]
+                               .//dbk:tab[not(@role) or @role='docx2hub:generated']
                                            [hub:same-scope(., current())]
                                            [not(parent::dbk:tabs)]
                                            [every $text in current()//(text()[normalize-space()] | * except .)
@@ -89,7 +89,7 @@
       </xsl:attribute>
       <xsl:apply-templates mode="#current">
         <xsl:with-param name="remove-nodes" as="node()*" tunnel="yes" 
-           select=".//dbk:tab[not(@role)]
+          select=".//dbk:tab[not(@role) or @role='docx2hub:generated']
                              [hub:same-scope(., current())]
                              [not(parent::dbk:tabs)]
                              [every $text in current()//(text()[normalize-space()] | * except .)
