@@ -909,9 +909,17 @@
     match="keywordset[@role eq 'hub']
                      (: The following match pattern should always the same as for the previous template :)
                      [//*[*[hub:is-table-not-in-table-env(.)]]
-                         [every $table in (*[hub:is-table-not-in-table-env(.)]) satisfies
-                          (matches($table/following-sibling::para[1]/@role, $hub:table-title-role-regex-x, 'x'))
-                         ]
+                        [every $table in (*[hub:is-table-not-in-table-env(.) 
+                                            and 
+                                            (
+                                              matches(following-sibling::*[1]/self::para/@role, $hub:table-title-role-regex-x,'x')
+                                              or 
+                                              matches(preceding-sibling::*[1]/self::para/@role, $hub:table-title-role-regex-x,'x')
+                                            )
+                                           ]
+                                         )
+                         satisfies (matches($table/following-sibling::*[1]/self::para/@role, $hub:table-title-role-regex-x, 'x'))
+                        ]
                      ]" 
     mode="hub:sort-table-captions">
     <xsl:copy>
