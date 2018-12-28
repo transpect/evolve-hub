@@ -195,7 +195,7 @@
                        and not(hub:is-ordered-list(.)) and not(hub:is-itemized-list(.)) and not(hub:is-variable-list(.))]" mode="hub:lists">
     <xsl:variable name="current" select="."/>
     <xsl:for-each-group select="*" 
-      group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]])
+      group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]][not(@role=($hub:equation-roles))])
                       then 
                         if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:itemizedlist-mark-regex))
                         then 'itemizedlist' 
