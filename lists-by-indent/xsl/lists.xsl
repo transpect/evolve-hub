@@ -274,15 +274,27 @@
           </variablelist>
         </xsl:when>
         <xsl:when test="current-grouping-key() = 'orderedlist'">
-          <xsl:for-each-group select="current-group()" 
-            group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">
-            <orderedlist numeration="{current-grouping-key()}">
-              <xsl:apply-templates select="current-group()" mode="#current">
-                <xsl:with-param name="set-override" select="'yes'" tunnel="yes"/>
-                <xsl:with-param name="identifier-needed" tunnel="yes" select="'no'"/>
-              </xsl:apply-templates>
-            </orderedlist>
-          </xsl:for-each-group>
+          <xsl:choose>
+            <xsl:when test="hub:get-list-type-with-warning(current-group()/para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])=('other','multiple')">
+              <xsl:for-each-group select="current-group()" 
+                group-adjacent="hub:get-list-type-with-warning(para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])">
+                <orderedlist numeration="{current-grouping-key()}">
+                  <xsl:apply-templates select="current-group()" mode="#current">
+                    <xsl:with-param name="set-override" select="'yes'" tunnel="yes"/>
+                    <xsl:with-param name="identifier-needed" tunnel="yes" select="'no'"/>
+                  </xsl:apply-templates>
+                </orderedlist>
+              </xsl:for-each-group>    
+            </xsl:when>
+            <xsl:otherwise>
+              <orderedlist numeration="{hub:get-list-type-with-warning(current-group()/para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])}">
+                <xsl:apply-templates select="current-group()" mode="#current">
+                  <xsl:with-param name="set-override" select="'yes'" tunnel="yes"/>
+                  <xsl:with-param name="identifier-needed" tunnel="yes" select="'no'"/>
+                </xsl:apply-templates>
+              </orderedlist>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:when>
         <xsl:otherwise>
           <!--
