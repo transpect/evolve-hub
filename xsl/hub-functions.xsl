@@ -335,5 +335,14 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
+  
+  <!-- converts filerefs starting with 'container:' to URIs -->
+  
+  <xsl:function name="hub:container-path-to-uri" as="xs:string">
+    <xsl:param name="path" as="xs:string"/>
+    <xsl:param name="source-dir-uri" as="xs:string"/>
+    <xsl:value-of select="resolve-uri(replace($path, '^container:', ''), 
+                                      $source-dir-uri)"/>
+  </xsl:function>
 
 </xsl:stylesheet>
