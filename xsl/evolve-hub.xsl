@@ -2429,16 +2429,16 @@
                          matches(., $hub:orderedlist-mark-at-start-regex)
                          and (
                            ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon][
-                             count(tab/preceding-sibling::node()[self::text() or self::*]) = 1
+                             count(tab/preceding-sibling::node()[self::text() or self::*[not(name() = ('indexterm', 'anchor'))]]) = 1
                              or
-                             (.//tab[not(ancestor::*[self::tabs])])[1][preceding-sibling::node()[1][. is current()]]
+                             (.//tab[not(ancestor::*[self::tabs])])[1][preceding-sibling::node()[not(self::*/name() = ('indexterm', 'anchor'))][1][. is current()]]
                            ]
                            or
                            ancestor::tocentry
                            or (:section titles are handled via a named template:)
                            ancestor::title[not(parent::section)]
                          )
-                         and . is (ancestor::*[self::para or self::tocentry or self::title[not(parent::section)]][1]//text())[1]
+                         and . is (ancestor::*[self::para or self::tocentry or self::title[not(parent::section)]][1]//text()[not(ancestor::indexterm)])[1]
                        ]" mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:variable name="context" select="." as="text()" />
