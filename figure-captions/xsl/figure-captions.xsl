@@ -104,11 +104,23 @@
   <xsl:template name="hub:figure-further-paras">
     <xsl:apply-templates select="current-group()" mode="#current"/>
   </xsl:template>
-  
+
+  <xsl:variable name="hub:create-note-element-for-figure-note-in-figure-note" as="xs:boolean"
+    select="false()"/>
+
   <xsl:template match="para[matches(@role, $hub:figure-note-role-regex)]" mode="hub:figure-captions">
-    <note>
-      <xsl:next-match/>
-    </note>
+    <xsl:choose>
+      <!-- case: note paragraphs in a table (wrapped in another para with figure-note-role-regex) -->
+      <xsl:when test="ancestor::para[matches(@role, $hub:figure-note-role-regex)]
+                      and $hub:create-note-element-for-figure-note-in-figure-note = false()">
+        <xsl:next-match/>
+      </xsl:when>
+      <xsl:otherwise>
+        <note>
+          <xsl:next-match/>
+        </note>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="para[matches(@role, $hub:figure-copyright-statement-role-regex)]" mode="hub:figure-captions">
