@@ -189,6 +189,8 @@
   
   <!-- Set to ('phrase', 'anchor') if formatting around the marker shouldn’t impede marker recognition -->
   <xsl:variable name="hub:ordered-list-marker-acceptable-markup" as="xs:string+" select="('anchor')"/>
+  
+  <xsl:variable name="hub:variable-list-exception-regex" select="($hub:equation-roles)"/>
 
   <!-- Mischung aus Folgeabsätzen und Unterpunkten oder Listen verschiedenen Typs, die zerschnitten werden müssen -->
   <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
@@ -226,7 +228,9 @@
             </itemizedlist>
           </xsl:for-each-group>
         </xsl:when>
-        <xsl:when test="current-grouping-key() = 'variablelist' 
+        <xsl:when test="((current-grouping-key() = 'variablelist') and (every $first-para-in-listitem 
+                                                                        in current-group()/self::listitem/para[1] 
+                                                                        satisfies (not($first-para-in-listitem/@role = $hub:variable-list-exception-regex)))) 
                         or
                        (current-grouping-key() = 'orderedlist' and 
                         (
