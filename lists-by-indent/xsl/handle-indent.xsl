@@ -118,7 +118,7 @@
                                                )
                                          ]
                               )
-                       and not(self::para[starts-with(@role, 'heading')])
+                       and not(self::para[starts-with(@role, 'heading') or starts-with(@role, 'berschrift')])
                        and hub:condition-that-stops-indenting-apart-from-role-regex(.)
                        and not(self::biblioentry[count(child::*)=1 and bibliomisc[not(child::node())]]
                       )
