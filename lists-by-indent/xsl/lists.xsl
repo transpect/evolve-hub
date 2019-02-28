@@ -190,7 +190,7 @@
   <!-- Set to ('phrase', 'anchor') if formatting around the marker shouldn’t impede marker recognition -->
   <xsl:variable name="hub:ordered-list-marker-acceptable-markup" as="xs:string+" select="('anchor')"/>
   
-  <xsl:variable name="hub:variable-list-exception-roles" select="($hub:equation-roles)"/>
+  <xsl:variable name="hub:variable-list-exception-roles" select="($hub:equation-roles)" as="xs:string+"/>
 
   <!-- Mischung aus Folgeabsätzen und Unterpunkten oder Listen verschiedenen Typs, die zerschnitten werden müssen -->
   <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
