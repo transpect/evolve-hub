@@ -173,9 +173,18 @@
   <xsl:template match="node()[not(self::phrase[@role eq 'hub:identifier'])]" mode="hub:lists-remove-identifier">
     <xsl:apply-templates select="." mode="hub:lists"/>
   </xsl:template>
-
+  
   <xsl:template match="phrase[@role eq 'hub:identifier']" mode="hub:lists-remove-identifier">
-    <xsl:apply-templates mode="hub:lists"/>
+    <xsl:choose>
+      <xsl:when test="@css:*">
+        <xsl:copy>
+          <xsl:apply-templates select="@* except @role, node()" mode="hub:lists"/>
+        </xsl:copy>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:apply-templates mode="hub:lists"/>    
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!-- continuations: -->
