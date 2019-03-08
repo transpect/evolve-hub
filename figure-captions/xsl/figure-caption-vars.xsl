@@ -37,6 +37,9 @@
   <xsl:variable name="hub:subfigure-caption-role-regex-x" as="xs:string"
     select="'^this-should-be-overriden-by-a-custom-regex$'" />
   
+  <xsl:variable name="hub:figure-legend-role-regex-x" as="xs:string"
+    select="'^this-should-be-overriden-by-a-custom-regex$'" />
+  
   <xsl:variable name="hub:figure-title-further-paras-role-regex-x" as="xs:string" select="'figure_title_2'"/>
   
   <xsl:variable name="hub:figure-caption-start-regex"  as="xs:string" select="'Bild|Abbildung|Abbildungen|Abb\.|Figuu?res?|Figs?\.?'"/>
@@ -114,7 +117,7 @@
       count($node/(mediaobject, inlinemediaobject, phrase/(mediaobject, inlinemediaobject))) = 1
       and 
         (
-          hub:is-subfigure-caption($node/following-sibling::element()[1])
+        hub:is-subfigure-caption($node/following-sibling::element()[not(every $i in descendant-or-self::para[not(ancestor::footnote)] satisfies matches($i/@role,$hub:figure-legend-role-regex-x, 'x'))][1])
           or
           hub:is-subfigure-caption(($node/mediaobject/caption/para)[1])
         )"/>

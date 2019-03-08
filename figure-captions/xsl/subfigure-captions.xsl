@@ -25,19 +25,25 @@
   <xsl:template match="*[para[matches(@role, $hub:subfigure-caption-role-regex-x)]]" mode="hub:subfigure-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="node()" group-adjacent="hub:is-subfigure-caption(.)">
+      <xsl:for-each-group select="node()" group-ending-with="*[hub:is-subfigure-caption(.)]">
         <xsl:choose>
-          <xsl:when test="current-grouping-key()
-                      and hub:is-subfigure(current-group()[1]/preceding-sibling::element()[1])">
-            <xsl:call-template name="hub:build-subfigure-caption">
-              <xsl:with-param name="media" select="preceding-sibling::element()[1]//(mediaobject, inlinemediaobject)"/>
-              <xsl:with-param name="caption" select="current-group()"/>
-            </xsl:call-template>
+          <xsl:when test="current-group()[last()][hub:is-subfigure-caption(.)]">
+            <xsl:for-each-group select="current-group()" group-starting-with="*[hub:is-subfigure(.)]">
+              <xsl:choose>
+                <xsl:when test="current-group()[1][hub:is-subfigure(.)]">
+                  <xsl:call-template name="hub:build-subfigure-caption">
+                    <xsl:with-param name="media" select="current-group()[1]//(mediaobject, inlinemediaobject)"/>
+                    <xsl:with-param name="caption" select="current-group()[position() gt 1]"/>
+                  </xsl:call-template>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:apply-templates select="current-group()" mode="#current"/>
+                </xsl:otherwise>
+              </xsl:choose>  
+            </xsl:for-each-group>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:apply-templates select="
-                                 current-group() except current-group()[last()][hub:is-subfigure(.)]
-                                 " mode="#current"/>
+            <xsl:apply-templates select="current-group()" mode="#current"/>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:for-each-group>
