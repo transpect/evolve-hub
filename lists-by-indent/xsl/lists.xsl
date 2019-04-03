@@ -446,31 +446,29 @@
 
   <xsl:function name="hub:is-ordered-list" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
-    <xsl:value-of select="if ( 
-                              (
-                                exists(
-                                  $list/listitem/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)]
-                                )
-                                and (
-                                  every $first-para-in-listitem in $list/listitem/para[1]
-                                  satisfies exists(
-                                    $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
-                                  )
-                                )
-                                and (
-                                  hub:get-list-type(
-                                    for $para in $list/listitem/para[1] 
-                                    return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
-                                  ) = $hub:known-ordered-list-types
-                                )
-                                and (
-                                    count(distinct-values(for $para in $list/listitem/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
-                                    eq 
-                                    count(for $para in $list/listitem/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
-                                )
+    <xsl:sequence select="(
+                            exists(
+                              $list/listitem/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)]
+                            )
+                            and (
+                              every $first-para-in-listitem in $list/listitem/para[1]
+                              satisfies exists(
+                                $first-para-in-listitem//phrase[hub:same-scope(., $first-para-in-listitem)][hub:is-identifier(.)]
                               )
-                              or hub:is-ordered-list-because-we-know-better($list)
-                          ) then true() else false()"/>
+                            )
+                            and (
+                              hub:get-list-type(
+                                for $para in $list/listitem/para[1] 
+                                return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)][1]
+                              ) = $hub:known-ordered-list-types
+                            )
+                            and (
+                                count(distinct-values(for $para in $list/listitem/para return string-join($para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)]//text(), ''))) 
+                                eq 
+                                count(for $para in $list/listitem/para return $para//phrase[hub:is-identifier(.)][hub:same-scope(., $para)])
+                            )
+                          )
+                          or hub:is-ordered-list-because-we-know-better($list)"/>
   </xsl:function>
 
   <xsl:function name="hub:is-ordered-list-because-we-know-better" as="xs:boolean">
