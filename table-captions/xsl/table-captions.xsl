@@ -28,9 +28,11 @@
   <xsl:template match="*[*[hub:is-table-title(.)]]" mode="hub:table-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-table-title(.)]">
+      <xsl:for-each-group select="* | processing-instruction() | comment()" group-starting-with="*[hub:is-table-title(.)]">
         <xsl:choose>
-          <xsl:when test="$hub:table-graphic-creation-enabled and current-group()[1][hub:is-table-title(.)] and current-group()[2][self::para[not(.//text())][mediaobject]]">
+          <xsl:when test="$hub:table-graphic-creation-enabled 
+                          and current-group()[1][hub:is-table-title(.)] 
+                          and current-group()[2][self::para[not(.//text())][mediaobject]]">
             <table>
               <title>
                 <xsl:apply-templates select="current-group()[1]/@*[not(name() = 'role')]" mode="#current"/>
@@ -40,11 +42,13 @@
             </table>
             <xsl:apply-templates select="current-group()[position() &gt; 2]" mode="hub:process-informaltables"/>
           </xsl:when>
-          <xsl:when test="current-group()[1][hub:is-table-title(.)] and current-group()[self::*[hub:is-table-not-in-table-env(.)]]">
+          <xsl:when test="current-group()[1][hub:is-table-title(.)] 
+                          and current-group()[self::*[hub:is-table-not-in-table-env(.)]]">
             <xsl:variable name="table" select="(current-group()[self::*[hub:is-table-not-in-table-env(.)]])[1]"/>
             <xsl:variable name="note" select="current-group()[self::para[matches(@role, $hub:table-note-style-regex-x)]]" as="element(para)*"/>
             <xsl:variable name="copyright-statement" select="current-group()[self::para[matches(@role, $hub:table-copyright-style-regex-x)]]" as="element(para)*"/>
-            <xsl:variable name="text" select="current-group()[position() &gt; 1 and . &lt;&lt; $table] except $note" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
+            <xsl:variable name="text" select="current-group()[position() &gt; 1 and . &lt;&lt; $table] 
+                                              except $note" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
             <table>
               <xsl:attribute name="frame" select="if ($table/name()='informaltable') 
                                                   then hub:get-frame-attribute(

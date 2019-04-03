@@ -80,20 +80,21 @@
 
   <xsl:function name="hub:is-table-not-in-table-env" as="xs:boolean">
     <xsl:param name="node" as="node()"/>
-    <xsl:sequence select="if (
-                               $node/self::informaltable
-                               or 
-                               $node/self::para[
-                                 informaltable and 
-                                 count(
-                                   node()[
-                                     not(self::processing-instruction() or self::anchor)
-                                   ]
-                                 ) = 1
-                               ]
-                             ) 
-                             then true() 
-                             else false()"/>
+    <xsl:sequence select="exists($node/self::informaltable)
+                          or
+                          exists(
+                            $node/self::para[
+                              exists(informaltable) and 
+                              count(
+                                node()[
+                                  empty(self::processing-instruction() 
+                                        | self::text()[not(normalize-space())]
+                                        | self::anchor 
+                                        | self::tabs)
+                                ]
+                              ) = 1
+                            ]
+                          )"/>
   </xsl:function>
 
 </xsl:stylesheet>
