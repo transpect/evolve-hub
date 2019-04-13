@@ -77,24 +77,26 @@
                              then true() 
                              else false()"/>
   </xsl:function>
+  
+  <xsl:function name="hub:is-informaltable-para" as="xs:boolean">
+    <xsl:param name="_para" as="element(para)"/>
+    <xsl:sequence select="exists($_para/informaltable)
+                          and 
+                          count(
+                            $_para/node()[
+                              empty(self::processing-instruction() 
+                                    | self::text()[not(normalize-space())]
+                                    | self::anchor 
+                                    | self::tabs)
+                            ]
+                          ) = 1"/>
+  </xsl:function>
 
   <xsl:function name="hub:is-table-not-in-table-env" as="xs:boolean">
     <xsl:param name="node" as="node()"/>
     <xsl:sequence select="exists($node/self::informaltable)
                           or
-                          exists(
-                            $node/self::para[
-                              exists(informaltable) and 
-                              count(
-                                node()[
-                                  empty(self::processing-instruction() 
-                                        | self::text()[not(normalize-space())]
-                                        | self::anchor 
-                                        | self::tabs)
-                                ]
-                              ) = 1
-                            ]
-                          )"/>
+                          exists($node/self::para[hub:is-informaltable-para(.)])"/>
   </xsl:function>
 
 </xsl:stylesheet>
