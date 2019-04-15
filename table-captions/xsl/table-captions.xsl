@@ -45,8 +45,8 @@
           <xsl:when test="current-group()[1][hub:is-table-title(.)] 
                           and current-group()[self::*[hub:is-table-not-in-table-env(.)]]">
             <xsl:variable name="table" select="(current-group()[self::*[hub:is-table-not-in-table-env(.)]])[1]"/>
-            <xsl:variable name="note" select="current-group()[self::para[matches(@role, $hub:table-note-style-regex-x)]]" as="element(para)*"/>
-            <xsl:variable name="copyright-statement" select="current-group()[self::para[matches(@role, $hub:table-copyright-style-regex-x)]]" as="element(para)*"/>
+            <xsl:variable name="note" select="current-group()[self::para[matches(@role, $hub:table-note-style-regex-x, 'x')]]" as="element(para)*"/>
+            <xsl:variable name="copyright-statement" select="current-group()[self::para[matches(@role, $hub:table-copyright-style-regex-x, 'x')]]" as="element(para)*"/>
             <xsl:variable name="text" select="current-group()[position() &gt; 1 and . &lt;&lt; $table] 
                                               except $note" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
             <table>
