@@ -3098,8 +3098,50 @@
     <xsl:if test="exists($elt)">
       <xsl:sequence select="$elt/@*[not(name() = ('xml:id', 'srcpath', 'role'))] 
                             union 
-                            key('hub:style-by-role', $elt/@role, root($elt))/@*[not(name() = ('layout-type', 'name', 'native-name'))]" />
+                            hub:lookup-style-without-tilde($elt, $elt/@role)/@*[not(name() = ('layout-type', 'name', 'native-name'))]" />
     </xsl:if>
+  </xsl:function>
+  
+  <xsl:function name="hub:lookup-style-without-tilde" as="element(css:rule)?">
+    <!-- If there is no associated css:rule for a given @role, strip tilde appendices from the role until 
+      there is a matching css:rule (which is not guaranteed).
+    This tilde stripping is useful when tildes were appended to original roles during evolve-hub, but without
+    creating css:rules with the same names (and properties). This may happten when future CSS decorator
+    classes are appended. Example: role="p" → role="p_-_nin", where 'nin' is for 'No Indent Next (block-level item)'. --> 
+    <xsl:param name="elt" as="element(*)"/>
+    <xsl:param name="role" as="xs:string"/>
+    <xsl:variable name="lookup" as="element(css:rule)?"
+      select="(key('hub:style-by-role', $role, root($elt))[@layout-type = hub:layout-type($elt)])[1]"/>
+    <xsl:choose>
+      <xsl:when test="exists($lookup)">
+        <xsl:sequence select="$lookup"/>
+      </xsl:when>
+      <xsl:when test="matches($role, '^.+_-_')">
+        <xsl:sequence select="hub:lookup-style-without-tilde($elt, replace($role, '^(.+)_-_.*$', '$1'))"/>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:function>
+  
+  <xsl:function name="hub:layout-type" as="xs:string+">
+    <xsl:param name="elt" as="element(*)"/>
+    <xsl:choose>
+      <xsl:when test="$elt/local-name() = ('title', 'para', 'simpara', 'bibliomixed', 'biblioentry')">
+        <xsl:sequence select="'para'"/>
+      </xsl:when>
+      <xsl:when test="$elt/local-name() = 'entry'">
+        <xsl:sequence select="'cell'"/>
+      </xsl:when>
+      <xsl:when test="$elt/local-name() = ('table', 'informaltable')">
+        <xsl:sequence select="'table'"/>
+      </xsl:when>
+      <xsl:when test="$elt/local-name() = ('phrase', 'emphasis', 'link', 'subscript', 'superscript')">
+        <xsl:sequence select="'inline'"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <!-- we don’t know (for example, the term element can stem from inline or para styles) -->
+        <xsl:sequence select="('inline', 'para')"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:function>
 
   <xsl:variable name="hub:clean-hub-ignored-generated-phrase-role-regex" as="xs:string+"
@@ -3108,7 +3150,7 @@
   
   <!-- Dissolve phrases whose formatting is the same as their parents’. Will lose srcpath attributes though. 
   Solution: either devise a template with a similarly complex matching pattern for the ancestor element,
-  in order to attache the dissolved phrases’ srcpath to it, or adapt the message rendering so that it uses 
+  in order to attach the dissolved phrases’ srcpath to it, or adapt the message rendering so that it uses 
   ancestor paths if it doesn’t find an immediate matching element. -->
   <!-- very dangerous template! semantic information like metadata tagging can be removed -->
 
