@@ -1857,9 +1857,8 @@
                          and following-sibling::node()[1]/self::para[matches(@role, $hub:blockquote-role-regex)]
                        ]" mode="hub:blockquotes" />
 
-  <xsl:template match="para[matches(@role, $hub:blockquote-role-regex)]
-                       /@*[name() = ('role', 'css:margin-left', 'css:text-indent')]" mode="hub:blockquotes" />
-
+  <xsl:template match="para[matches(@role, $hub:blockquote-role-regex)]/@*[name() = ('css:margin-left', 'css:text-indent')]" 
+                mode="hub:blockquotes" />
 
   <!-- mode: hub:split-at-tab -->
 	<!-- Optional mode that will split phrases and other elements within a para that contains
