@@ -153,19 +153,23 @@
     <xsl:apply-templates select="." mode="hub:table-captions"/>
   </xsl:template>
   
+  <xsl:variable name="row-keep-attributes" as="xs:string*"
+                select="'role', 'css:color', 'css:background-color'"/>
+  
   <xsl:template match="entry" mode="hub:table-captions">
     <xsl:element name="{name(.)}">
       <!--      <xsl:apply-templates select="ancestor::informaltable/@css:*[not(matches(local-name(), '^(margin|orientation)'))]" mode="#current"/>-->
       <!-- commented out 2018-03-05 to avoid inheriting border information. -->
-      <xsl:apply-templates select="ancestor::row/@css:*" mode="#current"/>
-      <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:apply-templates mode="#current"/>
+      <xsl:apply-templates select="parent::row/@css:*[not(name() = $row-keep-attributes)], 
+                                   @*, node()" 
+                           mode="#current"/>
     </xsl:element>
   </xsl:template>
   
   <xsl:template match="row" mode="hub:table-captions">
     <xsl:element name="{name(.)}">
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
+      <xsl:apply-templates select="@*[name() = $row-keep-attributes], node()" 
+                           mode="#current"/>
     </xsl:element>
   </xsl:template>
 
