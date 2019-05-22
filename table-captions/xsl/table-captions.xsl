@@ -165,8 +165,7 @@
   
   <xsl:template match="row" mode="hub:table-captions">
     <xsl:element name="{name(.)}">
-      <xsl:apply-templates select="@role" mode="#current"/>
-      <xsl:apply-templates mode="#current"/>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:element>
   </xsl:template>
 
