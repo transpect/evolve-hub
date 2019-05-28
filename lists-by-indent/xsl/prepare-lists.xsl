@@ -114,13 +114,13 @@
                                                                  descendant::phrase[@role = 'hub:identifier'][hub:same-scope(.,ancestor::para[last()])]
                                                                  or
                                                                  hub:is-variable-list-listitem-without-phrase-identifier(.)
-                                                               ]]">
+                                                                 ][not(@role = $hub:equation-roles)]]">
         <xsl:choose>
           <xsl:when test="current-group()[1][self::listitem[para[1][
                             descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., ancestor::para[last()])]
                             or
                             hub:is-variable-list-listitem-without-phrase-identifier(.)
-                          ]]]">
+                            ][not(@role = $hub:equation-roles)]]]">
             <listitem>
               <xsl:apply-templates select="current-group()/node()" mode="#current"/>
             </listitem>

@@ -357,7 +357,7 @@
   <!-- identifier im listitem entfernen, wenn durch itemizedlist oder orderedlist erfasst -->
   <xsl:function as="xs:boolean" name="hub:is-identifier-in-listitem">
     <xsl:param name="node" as="element(phrase)"/>
-    <xsl:sequence select="boolean($node[@role = 'hub:identifier' and ancestor::listitem and not(ancestor::footnote) and not(ancestor::remark[@role = 'endnote'])])"/>
+    <xsl:sequence select="boolean($node[@role = 'hub:identifier' and ancestor::listitem and not(ancestor::footnote) and not(ancestor::remark[@role = 'endnote']) and not(ancestor::para[@role=$hub:equation-roles])])"/>
   </xsl:function>
 
   <xsl:template match="phrase[hub:is-identifier-in-listitem(.)]//node()
