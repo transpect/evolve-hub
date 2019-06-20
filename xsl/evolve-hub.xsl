@@ -166,6 +166,8 @@
                         matches(@role, $hub:empty-para-role-regex-x, 'x')
                       ) 
                       and
+                      not(matches(@role, $hub:keep-empty-para-role-regex-x, 'x'))
+                      and
                       not(normalize-space(.)) 
                       and 
                       not(.//*[local-name() = $hub:non-empty-elements])
@@ -179,6 +181,8 @@
                            if(@srcpath ne '') then concat(' with srcpath ', xs:string(@srcpath)) else '',
                            if(*) then string-join(('; all descendant elements:', distinct-values(for $e in .//* return local-name($e))),' ') else ''"/>
   </xsl:template>
+  
+  <xsl:variable name="hub:keep-empty-para-role-regex-x" as="xs:string" select="'_-_virtual(_-_|$)'"/>
   
   <xsl:function name="hub:underlined" as="xs:boolean">
     <xsl:param name="elt" as="element(*)"/><!-- typically a para or a phrase -->
