@@ -2440,8 +2440,10 @@
                            ancestor::tocentry
                            or (:section titles are handled via a named template:)
                            ancestor::title[not(parent::section)]
+                           or
+                           ancestor::footnote
                          )
-                         and . is (ancestor::*[self::para or self::tocentry or self::title[not(parent::section)]][1]//text()[not(ancestor::indexterm)])[1]
+                         and . is (ancestor::*[self::para or self::tocentry or self::footnote or self::title[not(parent::section)]][1]//text()[not(ancestor::indexterm)])[1]
                        ]" mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:variable name="context" select="." as="text()" />
@@ -2861,6 +2863,10 @@
         <xsl:next-match/>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template match="footnote" mode="hub:insert-caption-num-to-text-separator">
+    <xsl:apply-templates select="." mode="hub:identifiers"/>
   </xsl:template>
   
   <!-- Remember to add this mode to the list of catch-all modes
