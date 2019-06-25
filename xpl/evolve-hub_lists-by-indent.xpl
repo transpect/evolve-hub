@@ -17,7 +17,9 @@
   
   <p:input port="source" primary="true"/>
   <p:input port="parameters" kind="parameter" primary="true" sequence="true"/>
-  <p:input port="stylesheet"/>
+  <p:input port="stylesheet">
+    <p:document href="../xsl/evolve-hub.xsl"/>
+  </p:input>
   <p:output port="result" primary="true"/>
   <p:output port="report" sequence="true">
     <p:pipe port="report" step="tabs-to-indent"/>
