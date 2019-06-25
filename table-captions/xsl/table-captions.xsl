@@ -102,7 +102,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="informaltable" priority="-5" mode="hub:table-captions">
+  <xsl:template match="informaltable[not(@annotations='generated')]" priority="-5" mode="hub:table-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:attribute name="frame"
@@ -112,7 +112,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="informaltable" mode="hub:process-informaltables">
+  <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="hub:table-captions"/>
       <xsl:attribute name="frame"
