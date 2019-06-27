@@ -248,6 +248,7 @@
         <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tabs-to-indent_liststyletype')"/>
         <xsl:choose>
           <xsl:when test=". = 'box'"><xsl:value-of select="'&#x25fd;'"/></xsl:when>
+          <xsl:when test=". = '&#x25fb;'"><xsl:value-of select="."/></xsl:when>
           <xsl:when test=". = 'check'"><xsl:value-of select="'&#x2713;'"/></xsl:when>
           <xsl:when test=". = 'circle'"><xsl:value-of select="'&#x25e6;'"/></xsl:when>
           <xsl:when test=". = 'diamond'"><xsl:value-of select="'&#x25c6;'"/></xsl:when>
