@@ -60,14 +60,14 @@
               </xsl:for-each-group>
             </xsl:variable>
             <figure>
-              <xsl:if test="current-group()/@srcpath">
-                <xsl:attribute name="srcpath" select="string-join(current-group()/@srcpath,' ')"/>  
-              </xsl:if>
               <xsl:variable name="anchor" as="element(anchor)?" 
                 select="if($hub:use-title-child-anchor-id-for-figure-id) 
                 then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)], $title//anchor[@xml:id][hub:same-scope(., $title)])[1] 
                         else ()"/>
-              <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation | current-group()[1]/@srcpath"/>
+              <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation"/>
+              <xsl:if test="current-group()[1]/@srcpath | $note-me-maybe/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join((current-group()[1]/@srcpath, $note-me-maybe/@srcpath),' ')"/>  
+              </xsl:if>
               <title>
                 <xsl:apply-templates select="$title/@*" mode="#current"/>
                 <xsl:apply-templates select="$title/node()" mode="#current">
@@ -173,22 +173,21 @@
               </xsl:for-each-group>
             </xsl:variable>
             <figure>
-<!--              <xsl:if test="current-group()/@srcpath">
-                <xsl:attribute name="srcpath" select="string-join(current-group()/@srcpath,' ')"/>  
-              </xsl:if>-->
-            	<!-- duplicates srcpaths when only a title exists.-->
               <xsl:variable name="anchor" as="element(anchor)?" 
                           select="if($hub:use-title-child-anchor-id-for-figure-id) 
                           then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
                                   else ()"/>
               <xsl:sequence select="$anchor/@xml:id"/>
+              <xsl:if test="$note-me-maybe/@srcpath | current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join(($note-me-maybe/@srcpath, current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath),' ')"/>  
+              </xsl:if>
               <title>
                 <xsl:if test="$title[not(hub:is-figure(.))]">
                   <xsl:apply-templates select="$title/@*" mode="#current"/>
-                <xsl:apply-templates select="$title/node()" mode="#current">
-                      <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
-                    </xsl:apply-templates>
-                  </xsl:if>
+                  <xsl:apply-templates select="$title/node()" mode="#current">
+                    <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
+                  </xsl:apply-templates>
+                </xsl:if>
               </title>
               <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
               <xsl:apply-templates select="current-group()[*][hub:is-figure(.) and . &lt;&lt; $title] | $title[hub:is-figure(.)]" mode="#current"/>
