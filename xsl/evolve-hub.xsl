@@ -2730,7 +2730,6 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:apply-templates select="descendant::*[self::anchor | self::indexterm][some $follower in following-sibling::node() satisfies (matches(string-join($follower, ''), $hub:caption-number-without-sep-regex))]" mode="#current"/>
     <phrase role="hub:caption-number">
       <xsl:analyze-string select="$caption-number" regex="{$hub:number-and-suffix-id-regex}">
         <xsl:matching-substring>
@@ -2747,6 +2746,7 @@
     <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
       <phrase role="hub:caption-text">
         <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'numbering-only')"/>
+        <xsl:apply-templates select="descendant::*[self::anchor | self::indexterm][some $follower in following-sibling::node() satisfies (matches(string-join($follower, ''), $hub:caption-number-without-sep-regex))]" mode="#current"/>
         <xsl:apply-templates mode="hub:insert-caption-num-to-text-separator">
           <xsl:with-param name="caption-number" select="$caption-number" tunnel="yes"/>
           <xsl:with-param name="parent" select="." tunnel="yes"/>
@@ -2876,7 +2876,9 @@
        see mode hub:insert-caption-num-to-text-separator. There may be more than one hub:caption-separator! -->
   <xsl:template match="node()[not(self::hub:caption-separator)][ . &lt;&lt; (ancestor::*[last()]//hub:caption-separator)[1]]" mode="hub:fix-floats-strip-num" priority="1">
     <xsl:apply-templates select="hub:caption-separator" mode="#current"/>
-  <xsl:apply-templates select="node()[not(self::hub:caption-separator)][preceding-sibling::hub:caption-separator]" mode="#current"/>
+    <!-- hold/move indexterm and anchor elements in(to) phrase element 'caption-text' -->
+    <xsl:apply-templates select="self::indexterm union self::anchor" mode="hub:identifiers"/>
+    <xsl:apply-templates select="node()[not(self::hub:caption-separator)][preceding-sibling::hub:caption-separator]" mode="#current"/>
   </xsl:template>
   <xsl:template match="hub:caption-separator" mode="hub:fix-floats-strip-num">
     <xsl:param name="insert-tab" select="false()" tunnel="yes"/>
