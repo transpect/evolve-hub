@@ -250,7 +250,7 @@
   </xsl:template>
   
   <xsl:function name="hub:continuation-marked-in-first-row" as="xs:boolean">
-    <xsl:param name="item" as="node()"/>
+    <xsl:param name="item" as="node()?"/>
     
     <xsl:choose>
       <xsl:when
