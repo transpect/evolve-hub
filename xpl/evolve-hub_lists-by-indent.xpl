@@ -11,6 +11,9 @@
   
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" select="'debug-dir-uri'"/>
+  <p:option name="debug-indent" select="'true'">
+    <p:documentation>Whether debug files should be indented.</p:documentation>
+  </p:option>
   <p:option name="status-dir-uri" select="'status-dir-uri'"/>
   <p:option name="fail-on-error" select="'no'"/>
   <p:option name="prefix" required="false" select="'evolve-hub/5'"/>
@@ -47,6 +50,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-indent" select="$debug-indent"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '0')"/>
@@ -57,6 +61,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-indent" select="$debug-indent"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '1')"/>
@@ -67,6 +72,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-indent" select="$debug-indent"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '2')"/>
@@ -77,6 +83,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-indent" select="$debug-indent"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '3')"/>
@@ -87,6 +94,7 @@
     <p:input port="models"><p:empty/></p:input>
     <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
     <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-indent" select="$debug-indent"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '4')"/>
