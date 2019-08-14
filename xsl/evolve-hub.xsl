@@ -2,6 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:saxon="http://saxon.sf.net/"
+  xmlns:functx="http://www.functx.com"
   xmlns:dbk="http://docbook.org/ns/docbook"
   xmlns:tr="http://transpect.io"
   xmlns:idml2xml="http://transpect.io/idml2xml"
@@ -10,7 +11,7 @@
   xmlns:hub="http://transpect.io/hub"
   xmlns="http://docbook.org/ns/docbook"
   xpath-default-namespace="http://docbook.org/ns/docbook"
-  exclude-result-prefixes="xs saxon tr xlink hub dbk idml2xml"
+  exclude-result-prefixes="functx xs saxon tr xlink hub dbk idml2xml"
   version="2.0">
  
   <!--  catch all must be first -->
@@ -25,6 +26,7 @@
   <xsl:import href="http://transpect.io/evolve-hub/table-merge/xsl/table-merge.xsl"/>
 
   <xsl:include href="http://transpect.io/evolve-hub/xsl/hub-functions.xsl"/>
+  <xsl:include href="http://transpect.io/xslt-util/functx/Strings/Replacing/escape-for-regex.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
 
   <xsl:output
@@ -2781,12 +2783,14 @@
     <xsl:param name="parent" as="element(*)" tunnel="yes"/>
     <xsl:variable name="context" select="." as="node()"/>
    
-    <xsl:variable name="previous-text"
-      select="replace(
-                string-join(preceding::text()[not(ancestor::*[self::indexterm])][. &gt;&gt; $parent], ''),
-                '&#x202f;+',
-                '&#x202f;'
-              )" as="xs:string"/>
+    <xsl:variable name="previous-text" as="xs:string"
+                  select="functx:escape-for-regex(
+                            replace(
+                              string-join(preceding::text()[not(ancestor::*[self::indexterm])][. &gt;&gt; $parent], ''),
+                              '&#x202f;+',
+                              '&#x202f;'
+                            )
+                          )"/>
     <xsl:choose>
       <!-- current node is an element and previous text is exactly the caption-number -->
       <!--<xsl:when test="self::* and $previous-text eq $caption-number and 
@@ -2802,11 +2806,13 @@
       <xsl:when test=". instance of text() and 
                       matches(
                         $previous-text, 
-                        concat(
-                          '^(',
-                          $caption-number, 
-                          $hub:caption-sep-among-caption-number-and-caption-text-regex,
-                          ')$'
+                        functx:escape-for-regex(
+                          concat(
+                            '^(',
+                            $caption-number, 
+                            $hub:caption-sep-among-caption-number-and-caption-text-regex,
+                            ')$'
+                          )
                         )
                       )">
         <xsl:analyze-string select="." regex="{concat('^(', $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, ')')}">
