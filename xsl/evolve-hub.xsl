@@ -2543,7 +2543,9 @@
   <!-- This template has a name so that you can match another element (e.g., sidebar[@role = 'o_table']/title)
        in your importing stylesheet and treat it as a float title. -->
   <xsl:template match="  figure/title[not(matches(@role, $hub:no-identifier-needed))]
+                                     [not(phrase[@role = 'hub:caption-number'] and phrase[@role = 'hub:caption-text'])]
                        | table/title[not(matches(@role, $hub:no-identifier-needed))]
+                                    [not(phrase[@role = 'hub:caption-number'] and phrase[@role = 'hub:caption-text'])]
                        | mediaobject/caption
                        | formalpara[@role eq 'Programcode'][$hub:caption-tagging-for-listings]/title" 
     name="hub:float-title-identifier" 
@@ -2914,6 +2916,22 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates mode="#current"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="tab[
+                         preceding-sibling::node()[1]/self::phrase[@role = 'hub:caption-number'] and 
+                         following-sibling::node()[1]/self::phrase[@role = 'hub:caption-text']
+                       ]" mode="hub:identifiers">
+    <xsl:choose>
+      <xsl:when test="hub:boolean-param($create-caption-numtext-separator)">
+        <phrase role="hub:caption-numtext-separator">
+          <xsl:next-match/>
+        </phrase>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
