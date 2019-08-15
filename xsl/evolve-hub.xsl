@@ -2799,14 +2799,12 @@
     <xsl:param name="parent" as="element(*)" tunnel="yes"/>
     <xsl:variable name="context" select="." as="node()"/>
    
-    <xsl:variable name="previous-text" as="xs:string"
-                  select="functx:escape-for-regex(
-                            replace(
-                              string-join(preceding::text()[not(ancestor::*[self::indexterm])][. &gt;&gt; $parent], ''),
-                              '&#x202f;+',
-                              '&#x202f;'
-                            )
-                          )"/>
+    <xsl:variable name="previous-text"
+      select="replace(
+                string-join(preceding::text()[not(ancestor::*[self::indexterm])][. &gt;&gt; $parent], ''),
+                '&#x202f;+',
+                '&#x202f;'
+              )" as="xs:string"/>
     <xsl:choose>
       <!-- current node is an element and previous text is exactly the caption-number -->
       <!--<xsl:when test="self::* and $previous-text eq $caption-number and 
@@ -2822,13 +2820,11 @@
       <xsl:when test=". instance of text() and 
                       matches(
                         $previous-text, 
-                        functx:escape-for-regex(
-                          concat(
-                            '^(',
-                            $caption-number, 
-                            $hub:caption-sep-among-caption-number-and-caption-text-regex,
-                            ')$'
-                          )
+                        concat(
+                          '^(',
+                          hub:escape-for-regex($caption-number), 
+                          $hub:caption-sep-among-caption-number-and-caption-text-regex,
+                          ')$'
                         )
                       )">
         <xsl:analyze-string select="." regex="{concat('^(', $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, ')')}">
