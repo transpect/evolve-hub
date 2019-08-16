@@ -3228,7 +3228,7 @@
 
   <!-- move trailing whitespace outside of links. Changed template because it made problems with whitespaces inside links. Content was duplicated -->
   <xsl:template match="link[every $n in node() satisfies $n instance of text()]
-                           [matches(., '[^\p{Zs}][\p{Zs}+]+$')]" mode="hub:clean-hub">
+                           [matches(., '[^\p{Zs}][\p{Zs}]+$')]" mode="hub:clean-hub">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:value-of select="replace(., '^(.+?)([\p{Zs}]+)$', '$1')"/>
