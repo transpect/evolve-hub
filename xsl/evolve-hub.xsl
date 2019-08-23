@@ -62,6 +62,7 @@
   <xsl:param name="split-at-br-also-for-non-br-paras" select="'yes'"/>
   <xsl:param name="create-ulinks-from-text" select="'no'"/>
   <xsl:param name="equations-after-list-paras-belong-to-list" select="'yes'"/>
+  <xsl:param name="generate-sortas" select="'no'"/>
 
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
@@ -3077,6 +3078,33 @@
   
   <xsl:template match="indexterm[@role = 'hub:not-placed-on-page'][empty(see | seealso)]" mode="hub:clean-hub">
     <!-- Saves you removing these InDesign leftovers in every subsequent conversion step -->
+  </xsl:template>
+  
+  <xsl:template match="indexterm/*[ends-with(name(), 'ary')]
+                                  [empty(@sortas)]
+                                  [$generate-sortas = 'yes']" mode="hub:clean-hub">
+    <xsl:variable name="normalized" as="xs:string" 
+      select="normalize-space(
+                replace(
+                  replace(., '^\p{P}+', ''),
+                  '\W+',
+                  ' '
+                )
+              )"/>
+    <xsl:choose>
+      <xsl:when test="not($normalized = .)">
+        <xsl:copy copy-namespaces="no">
+          <xsl:attribute name="sortas" select="$normalized"/>
+          <xsl:apply-templates select="@*, node()" mode="#current"/>
+        </xsl:copy>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
+  <xsl:template name="generate-sortas">
   </xsl:template>
   
   <xsl:template match="@hub:anchored" mode="hub:clean-hub">
