@@ -916,7 +916,7 @@
         <xsl:choose>
           <xsl:when test="current-group()[1][self::*[hub:is-table-not-in-table-env(.)]]">
             <xsl:sequence select="$captions" />
-            <xsl:sequence select="current-group() except $captions" />
+            <xsl:apply-templates select="current-group() except $captions" mode="#current"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
