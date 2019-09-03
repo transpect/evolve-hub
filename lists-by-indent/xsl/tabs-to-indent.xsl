@@ -142,7 +142,7 @@
   </xsl:template>
 
   <xsl:template match="*[hub:element-with-tab-and-matching-mark-regex(.)]
-                         /node()[1][. instance of text()]" mode="hub:tabs-to-indent">
+    /node()[not(self::anchor) and not(self::tabs)][1][. instance of text()]" mode="hub:tabs-to-indent">
     <xsl:param name="identifier-already-tagged" select="false()" tunnel="yes"/>
     <xsl:choose>
       <xsl:when test="$identifier-already-tagged">
@@ -169,14 +169,14 @@
                             ][
                               not(@tab-stops) 
                               and exists($hub:default-tabstop) 
-                              and node()[not(self::anchor)][1][matches(., $mark-regex)][not(matches(., $mark-exceptions))]
+                              and node()[not(self::anchor) and not(self::tabs)][1][matches(., $mark-regex)][not(matches(., $mark-exceptions))]
                               and (: next content element is an tabulator :)
                               (
                                 (:simplest case: second node is the tab :)
-                                node()[not(self::anchor)][2]/self::tab 
+                                node()[not(self::anchor) and not(self::tabs)][2]/self::tab 
                                 or
                                 (: more complex: the next first text node (anywhere nested) is the tabulatur :)
-                                node()[not(self::anchor)][2]//node()[hub:same-scope(., $element)][. instance of text()][1]/parent::tab
+                                node()[not(self::anchor) and not(self::tabs)][2]//node()[hub:same-scope(., $element)][. instance of text()][1]/parent::tab
                               )
                             ][
                               not(ancestor::*/name() = $hub:float-names) and not(self::*/name() = $hub:no-tabs)
