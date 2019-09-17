@@ -178,8 +178,8 @@
                           then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
                                   else ()"/>
               <xsl:sequence select="$anchor/@xml:id"/>
-              <xsl:if test="$note-me-maybe/@srcpath | current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath">
-                <xsl:attribute name="srcpath" select="string-join(($note-me-maybe/@srcpath, current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath),' ')"/>  
+              <xsl:if test="$note-me-maybe/*/para/@srcpath | current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join(($note-me-maybe/*/para/@srcpath, (current-group()[*][hub:is-figure(.) and . &lt;&lt; $title] | $title[hub:is-figure(.)])[1]/@srcpath),' ')"/>  
               </xsl:if>
               <title>
                 <xsl:if test="$title[not(hub:is-figure(.))]">
