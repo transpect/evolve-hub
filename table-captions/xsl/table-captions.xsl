@@ -133,7 +133,7 @@
     />
     <xsl:sequence select="
       for $c in $group/colspec/@colnum return (
-        $group//entry[calstable:is-col-in-span($c, (@namest, @colname), (@namest, @colname), $group/colspec)][last()]/@css:border-bottom-style
+        ($group//entry[calstable:is-col-in-span($c, (@namest, @colname), (@namest, @colname), $group/colspec)])[last()]/@css:border-bottom-style
       )"/>
   </xsl:function>
   
