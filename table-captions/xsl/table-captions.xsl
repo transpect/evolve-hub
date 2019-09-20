@@ -129,7 +129,7 @@
     <xsl:sequence
       select="$group//entry[$group/colspec[@colnum = 1]/@colname = (@colname, @namest)]/@css:border-left-style"/>
     <xsl:sequence
-      select="$group//entry[$group/colspec[@colnum = max(($group/colspec/@colnum))]/@colname = (@colname, @namest)]/@css:border-right-style"
+      select="$group//entry[$group/colspec[@colnum = max(($group/colspec/@colnum))]/@colname = (@colname, @nameend)]/@css:border-right-style"
     />
     <xsl:sequence select="
       for $c in $group/colspec/@colnum return (
