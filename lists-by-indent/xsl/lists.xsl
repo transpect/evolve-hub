@@ -198,6 +198,14 @@
   
   <!-- Set to ('phrase', 'anchor') if formatting around the marker shouldn’t impede marker recognition -->
   <xsl:variable name="hub:ordered-list-marker-acceptable-markup" as="xs:string+" select="('anchor')"/>
+
+  <xsl:function name="hub:is-ordered-list-marker-acceptable-markup" as="xs:boolean">
+    <xsl:param name="node" as="element()"/>
+    <xsl:sequence select="empty($node//*[not(name() = $hub:ordered-list-marker-acceptable-markup)]
+                                        (: for better orderedlist support in DocBook/Hub we ignore a letter-spacing phrase element, atm :)
+                                        [not(self::phrase and count(@*) = 1 and @css:letter-spacing)]
+                               )"/>
+  </xsl:function>
   
   <xsl:variable name="hub:variable-list-exception-roles" select="($hub:equation-roles)" as="xs:string+"/>
 
@@ -213,11 +221,11 @@
                         else 
                           if (matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
                               and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]
-                                                            [empty(.//*[not(name() = $hub:ordered-list-marker-acceptable-markup)])]
+                                                            [hub:is-ordered-list-marker-acceptable-markup(.)]
                               and (if (count($current/listitem) gt 1) 
                                    then count($current/listitem[matches(para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1], $hub:orderedlist-mark-regex)
                                                                 and para[1]/descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]
-                                                                                              [empty(.//*[not(name() = $hub:ordered-list-marker-acceptable-markup)])] ]) gt 1 
+                                                                                              [hub:is-ordered-list-marker-acceptable-markup(.)] ]) gt 1 
                                    else true()))
                           then 'orderedlist' 
                           else 'variablelist'
