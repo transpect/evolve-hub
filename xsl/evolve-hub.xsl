@@ -2627,7 +2627,8 @@
         <!-- examples: ^Fig. 2$,  ^Table 4.1$,  ^Listing 1.3$ -->
         <xsl:when test="matches($cleaned-text, concat($hub:caption-number-without-sep-regex, '\s*$')) and not(parent::*/@label)">
           <xsl:for-each select=".//text()">
-            <xsl:if test="not(ancestor::indexterm)">
+            <xsl:if test="not(ancestor-or-self::indexterm
+                             |ancestor-or-self::footnote)">
               <phrase role="hub:caption-number">
                 <xsl:analyze-string select="." regex="{$hub:number-and-suffix-id-regex}">
                   <xsl:matching-substring>
@@ -2804,8 +2805,8 @@
     <xsl:variable name="context" select="." as="node()"/>
     <xsl:variable name="previous-text"
       select="replace(
-                string-join(preceding::text()[not(ancestor::*[self::indexterm
-                                                             |self::footnote])]
+                string-join(preceding::text()[not(ancestor-or-self::indexterm
+                                                 |ancestor-or-self::footnote)]
                                              [. &gt;&gt; $parent], ''),
                 '&#x202f;+',
                 '&#x202f;'
