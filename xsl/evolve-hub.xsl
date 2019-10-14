@@ -2567,7 +2567,8 @@
     mode="hub:identifiers">
 
     <xsl:variable name="cleaned-text" as="xs:string?"
-      select="string-join(.//text()[not(ancestor-or-self::indexterm)],'')"/>
+                  select="string-join(.//text()[not(ancestor-or-self::indexterm
+                                                   |ancestor-or-self::footnote)],'')"/>
     <xsl:copy>
       <xsl:apply-templates select="@*|processing-instruction()" mode="#current"/>
       <xsl:choose>
@@ -2626,24 +2627,21 @@
         <!-- examples: ^Fig. 2$,  ^Table 4.1$,  ^Listing 1.3$ -->
         <xsl:when test="matches($cleaned-text, concat($hub:caption-number-without-sep-regex, '\s*$')) and not(parent::*/@label)">
           <xsl:for-each select=".//text()">
-            <xsl:choose>
-              <xsl:when test="ancestor::indexterm" />
-              <xsl:otherwise>
-                <phrase role="hub:caption-number">
-                  <xsl:analyze-string select="." regex="{$hub:number-and-suffix-id-regex}">
-                    <xsl:matching-substring>
-                      <phrase role="hub:identifier">
-                        <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'figtablist-identi')"/>
-                        <xsl:value-of select="."/>
-                      </phrase>
-                    </xsl:matching-substring>
-                    <xsl:non-matching-substring>
+            <xsl:if test="not(ancestor::indexterm)">
+              <phrase role="hub:caption-number">
+                <xsl:analyze-string select="." regex="{$hub:number-and-suffix-id-regex}">
+                  <xsl:matching-substring>
+                    <phrase role="hub:identifier">
+                      <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'figtablist-identi')"/>
                       <xsl:value-of select="."/>
-                    </xsl:non-matching-substring>
-                  </xsl:analyze-string>
-                </phrase>
-              </xsl:otherwise>
-            </xsl:choose>
+                    </phrase>
+                  </xsl:matching-substring>
+                  <xsl:non-matching-substring>
+                    <xsl:value-of select="."/>
+                  </xsl:non-matching-substring>
+                </xsl:analyze-string>
+              </phrase>
+            </xsl:if>
           </xsl:for-each>
           <phrase role="hub:caption-text">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'no-indexterm-no-palabel')"/>
@@ -2736,16 +2734,14 @@
             concat('(', $hub:caption-number-regex, ')(.+)$'), 
             '$1'
             )" />
-          
         </xsl:when>
         <!-- input examples: ^Fig. 4.1: bla .*$, ^Tab. 3[&#x2002;]bla .*$-->
         <xsl:otherwise>
-          <xsl:value-of 
-                        select="replace(
-                        $cleaned-text, 
-                        concat($hub:caption-number-plus-sep-regex, '(.+)$'), 
-                        '$1$2$3'
-                        )" />
+          <xsl:value-of select="replace($cleaned-text, 
+                                        concat($hub:caption-number-plus-sep-regex, '(.+)$'), 
+                                        '$1$2$3',
+                                        'mi'
+                                        )"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
@@ -2765,7 +2761,12 @@
     <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
       <phrase role="hub:caption-text">
         <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'numbering-only')"/>
-        <xsl:apply-templates select="descendant::*[self::anchor | self::indexterm][some $follower in following-sibling::node() satisfies (matches(string-join($follower, ''), $hub:caption-number-without-sep-regex))]" mode="#current"/>
+        <xsl:apply-templates select=".//*[self::anchor | self::indexterm]
+                                         [some $follower in following-sibling::node() 
+                                          satisfies (matches(string-join($follower, ''), 
+                                                             $hub:caption-number-without-sep-regex)
+                                                    )
+                                         ]" mode="#current"/>
         <xsl:apply-templates mode="hub:insert-caption-num-to-text-separator">
           <xsl:with-param name="caption-number" select="$caption-number" tunnel="yes"/>
           <xsl:with-param name="parent" select="." tunnel="yes"/>
@@ -2786,7 +2787,9 @@
   </xsl:template>
   
   <xsl:template match="*[self::anchor | self::indexterm]
-                        [some $follower in following-sibling::node() satisfies (matches(string-join($follower, ''), $hub:caption-number-without-sep-regex))]" 
+                        [some $follower in following-sibling::node() 
+                         satisfies (matches(string-join($follower, ''), 
+                                            $hub:caption-number-without-sep-regex))]" 
                         mode="hub:insert-caption-num-to-text-separator" priority="3">
     <!-- if anchor or indexterms are pulled before caption number, they shouldnt be processed again -->
   </xsl:template>
@@ -2799,10 +2802,11 @@
     <xsl:param name="caption-number" as="xs:string" tunnel="yes"/>
     <xsl:param name="parent" as="element(*)" tunnel="yes"/>
     <xsl:variable name="context" select="." as="node()"/>
-   
     <xsl:variable name="previous-text"
       select="replace(
-                string-join(preceding::text()[not(ancestor::*[self::indexterm])][. &gt;&gt; $parent], ''),
+                string-join(preceding::text()[not(ancestor::*[self::indexterm
+                                                             |self::footnote])]
+                                             [. &gt;&gt; $parent], ''),
                 '&#x202f;+',
                 '&#x202f;'
               )" as="xs:string"/>
@@ -2825,10 +2829,14 @@
                           '^(',
                           hub:escape-for-regex($caption-number), 
                           $hub:caption-sep-among-caption-number-and-caption-text-regex,
-                          ')$'
+                          ')$', 
+                        'mi'
                         )
                       )">
-        <xsl:analyze-string select="." regex="{concat('^(', $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, ')')}">
+        <xsl:analyze-string select="." flags="mi"
+                            regex="{concat('^(', 
+                                           $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, 
+                                           ')')}">
           <xsl:matching-substring>
             <hub:caption-separator hub-origin="text-with-capnum-and-sep">
               <xsl:analyze-string select="." regex="&#x9;">
@@ -2851,11 +2859,14 @@
            (the current node is part of the caption-number and/or part of the caption-text) -->
       <xsl:when test=". instance of text() and not(starts-with($previous-text, $caption-number))">
         <xsl:variable name="current-text" select="." as="xs:string"/>
-        <xsl:variable name="end-position" select="hub:get-endpos-of-string1-in-string2($caption-number, $previous-text, ., 1)" as="element(hub:pos)?"/>
-        
+        <xsl:variable name="end-position" 
+                      select="hub:get-endpos-of-string1-in-string2($caption-number, 
+                                                                   $previous-text, 
+                                                                   ., 
+                                                                   1)" as="element(hub:pos)?"/>
         <xsl:choose>
           <xsl:when test="exists($end-position)">
-            <xsl:analyze-string select="$current-text" 
+            <xsl:analyze-string select="$current-text" flags="mi" 
               regex="{string-join(
                         (
                           '^', 
