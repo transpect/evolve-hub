@@ -229,14 +229,13 @@
     <xsl:param name="string2" as="xs:string"/>
     <xsl:param name="text-before-string1" as="xs:string"/>
     <xsl:param name="string1" as="xs:string"/>
-    <xsl:param name="current-pos" as="xs:integer"/>
-    
+    <xsl:param name="current-pos" as="xs:integer"/>    
     <xsl:variable name="caption-number-plus-current-and-previous-string-in-current-text" as="xs:string"
       select="string-join(($text-before-string1, substring($string1, 1, $current-pos)), '')"/>
     
     <xsl:choose>
       <xsl:when test="$current-pos gt string-length($string1)"/>
-      <xsl:when test="$caption-number-plus-current-and-previous-string-in-current-text eq $string2">
+      <xsl:when test="$caption-number-plus-current-and-previous-string-in-current-text eq normalize-space($string2)">
         <hub:pos val="{$current-pos}"/>
       </xsl:when>
       <xsl:otherwise>
