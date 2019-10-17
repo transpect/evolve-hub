@@ -138,7 +138,7 @@
   </xsl:template>
 
   <!-- for anchors in titles whose xml:id should be promoted to the object that contains the title --> 
-  <xsl:template match="anchor" mode="hub:figure-captions hub:table-captions hub:hierarchy hub:identifiers hub:fix-floats-strip-num">
+  <xsl:template match="*:anchor" mode="hub:figure-captions hub:table-captions hub:hierarchy hub:identifiers hub:fix-floats-strip-num">
     <xsl:param name="suppress" as="element(anchor)*" tunnel="yes"/>
     <xsl:choose>
       <xsl:when test="exists($suppress) and (some $a in $suppress satisfies ($a is .))"/>
@@ -2830,10 +2830,10 @@
                           '^(',
                           hub:escape-for-regex($caption-number), 
                           $hub:caption-sep-among-caption-number-and-caption-text-regex,
-                          ')$', 
+                          ')$'),
                         'mi'
-                        )
                       )">
+        
         <xsl:analyze-string select="." flags="mi"
                             regex="{concat('^(', 
                                            $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, 
