@@ -63,6 +63,7 @@
   <xsl:param name="create-ulinks-from-text" select="'no'"/>
   <xsl:param name="equations-after-list-paras-belong-to-list" select="'yes'"/>
   <xsl:param name="generate-sortas" select="'no'"/>
+  <xsl:param name="tab-leader-as-role" select="'no'"/>
 
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />

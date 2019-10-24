@@ -143,7 +143,77 @@
                          every $t in ancestor::para[1]//(text() | imageobject)
                          satisfies ($t &gt;&gt; .)
                        ]" mode="hub:postprocess-lists"/>
+  
+  <!--
+      all possible tab-positions are defined in para | css:rule
+      however, we dont know the exact starting position of the tab (in pt), as it depends on the length of preceding rendered text
+      there are many parameters that influence text length (e.g. font-name, style, size, char-spacing ...) and thus the tab position
+      Example: with a definition of 'no-leader' 40pt, 'leader' 200pt, the first <tab> will render the leader only if preceding text extends behind 40pt
+  -->
+  <xsl:template match="para[$tab-leader-as-role = 'yes']//tab[not(@role)]" mode="hub:postprocess-lists">
+    <xsl:variable name="para" select="ancestor::para[1]" as="node()?"/>
+    <xsl:variable name="tab-defs" select="($para/tabs, //css:rule[@name = $para/@role]/tabs)[1]/tab" as="node()*"/>
+    <xsl:variable name="tab-def" as="node()?"
+      select="hub:get-tab-def(preceding::node()[some $p in ancestor::para satisfies $p is $para][hub:same-scope(., $para)], $tab-defs)"/>
+    <xsl:copy copy-namespaces="no">
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:if test="$tab-def/@leader">
+        <xsl:attribute name="role" select="'leader-', $tab-def/@leader" separator=""/>
+      </xsl:if>
+      <xsl:apply-templates select="node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
 
+  <xsl:function name="hub:get-tab-def" as="node()?">
+    <xsl:param name="nodes" as="node()*"/>
+    <xsl:param name="tab-def" as="node()*"/>
+    <xsl:sequence select="$tab-def[xs:decimal(replace(@horizontal-position, 'pt$', '')) gt hub:heuristic-position-in-pt($nodes, $tab-def)][1]"/>
+  </xsl:function>
+
+  <xsl:function name="hub:heuristic-position-in-pt" as="xs:decimal?">
+    <xsl:param name="nodes" as="node()*"/>
+    <xsl:param name="tab-def" as="node()*"/>
+    <xsl:if test="exists($nodes)">
+      <xsl:variable name="preceding-heuristic-length" as="xs:decimal?"
+        select="hub:heuristic-position-in-pt($nodes[position() lt last()], $tab-def)"/>
+      <xsl:variable name="self-heurisitic-length" as="xs:decimal*">
+        <xsl:choose>
+          <xsl:when test="$nodes[last()]/self::text()">
+            <xsl:sequence select="hub:text-length-heuristic($nodes[last()])"/>
+          </xsl:when>
+          <xsl:when test="$nodes[last()]/self::tab[not(parent::tabs)]">
+            <xsl:variable name="tab-def-position" select="for $t in $tab-def return xs:decimal(replace($t/@horizontal-position, 'pt$', ''))" as="xs:decimal*"/>
+            <xsl:choose>
+              <xsl:when test="some $t in $tab-def-position satisfies $t gt $preceding-heuristic-length">
+                <xsl:sequence select="$tab-def-position[. gt $preceding-heuristic-length][1] - $preceding-heuristic-length"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <!-- default tab length 20pt -->
+                <xsl:sequence select="20"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:when>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:sequence select="sum(($preceding-heuristic-length, $self-heurisitic-length))"/>
+    </xsl:if>
+  </xsl:function>
+  
+  <xsl:function name="hub:text-length-heuristic" as="xs:decimal*">
+    <xsl:param name="text" as="text()"/>
+    <!-- match invisible (0-width) chars
+      https://www.regular-expressions.info/unicode.html#category
+    -->
+    <xsl:variable name="regex" select="'\p{Mn}|\p{Me}|\p{Zl}|\p{Zp}|\p{Cc}|\p{Cf}'"/>
+    <xsl:variable name="one-char-length" select="6.0225" as="xs:decimal?"/>
+    <xsl:analyze-string select="$text" regex="{$regex}">
+      <xsl:non-matching-substring>
+        <!-- FIXME: include font, size etc. in actual calculation -->
+        <xsl:sequence select="string-length(.) * $one-char-length"/>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
+  </xsl:function>
+  
   <xsl:template match="para/phrase[
                          every $p in preceding-sibling::node()
                          satisfies ($p/self::tabs or $p/self::info)
