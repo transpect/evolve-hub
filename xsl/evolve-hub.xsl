@@ -2331,7 +2331,7 @@
                          matches(., $hub:itemizedlist-mark-at-start-regex) 
                          and ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon]
                                            [(count(.//tab[hub:same-scope(., current()/ancestor::para[1])]/preceding-sibling::node()[self::text() or self::*][not(self::dbk:anchor)]) =1) 
-                                            or (position()=1 and matches((.//text())[1],'\s+$'))
+                                            (:or (position()=1 and matches((.//text())[1],'\s+$')):)
                                            ]
                          and . is (ancestor::para[1]//text())[1]
                        ]" mode="hub:identifiers" priority="0.4">
