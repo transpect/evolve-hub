@@ -2252,8 +2252,17 @@
   <xsl:variable name="hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional" as="xs:string"
     select="'[ .:&#xa0;&#x2002;&#8212;]'"/>
 
+  <!-- help/clarify variable hub:caption-sep-among-caption-number-and-caption-text-regex:
+  Input example: Figure 1 – Double reversal test voltage profile 
+             The string ' – ' is the character sequence we want (among caption number and caption text) 
+  -->
   <xsl:variable name="hub:caption-sep-among-caption-number-and-caption-text-regex" as="xs:string"
-    select="concat($hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, '?')"/>
+    select="concat(
+              $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, '?', 
+              '(',
+                '[&#x2011;&#x2013;&#x202F;-]', $hub:caption-sep-among-caption-number-and-caption-text-regex_non-optional, 
+              ')?'
+            )"/>
 
   <!-- §§§ to clarify: what is a 'sep' in captions? Isn`t <tab/> a separator? -->
   <xsl:variable name="hub:caption-number-plus-sep-regex" as="xs:string"
