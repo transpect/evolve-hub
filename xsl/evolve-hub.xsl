@@ -2524,7 +2524,7 @@
     </footnoteref>
   </xsl:template>
 
-  <xsl:template match="section/title" mode="hub:identifiers">
+  <xsl:template match="section/title | chapter/title" mode="hub:identifiers">
     <xsl:call-template name="hub:section-title-identifier"/>
   </xsl:template>
   
