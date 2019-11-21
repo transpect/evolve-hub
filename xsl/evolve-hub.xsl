@@ -176,6 +176,8 @@
                       and 
                       not(.//*[local-name() = $hub:non-empty-elements])
                       and
+                      not(.//phrase[@role = 'hub:foreign'])
+                      and
                       (: If you want to discard whitespace-only paras with underlines, redefine hub:underlined()
                       so that it always returns false() :)
                       not(hub:underlined(.))
