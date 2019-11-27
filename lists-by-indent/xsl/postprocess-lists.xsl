@@ -247,7 +247,7 @@
 
   <!-- copy condtion attribute (for ex., 'PrintOnly') up to listitem if every child has the same value
        https://redmine.le-tex.de/issues/7738 -->
-  <xsl:template match="listitem" mode="hub:postprocess-lists">
+  <xsl:template match="listitem | varlistentry" mode="hub:postprocess-lists">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:call-template name="hub:move-condition-up"/>
@@ -256,12 +256,13 @@
   </xsl:template>
   
   <xsl:template name="hub:move-condition-up">
-    <xsl:if test="exists(*/@condition) 
+    <xsl:variable name="context" as="element(listitem)" select="self::listitem | self::varlistentry/listitem"/>
+    <xsl:if test="exists($context/*/@condition) 
                   and 
-                  (every $p in * satisfies (exists($p/@condition)))
+                  (every $p in $context/* satisfies (exists($p/@condition)))
                   and
-                  (count(fn:distinct-values(*/@condition)) eq 1)">
-      <xsl:copy-of select="*[1]/@condition"/>
+                  (count(fn:distinct-values($context/*/@condition)) eq 1)">
+      <xsl:copy-of select="$context/*[1]/@condition"/>
     </xsl:if>
   </xsl:template>
 
