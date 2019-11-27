@@ -77,6 +77,7 @@
     <orderedlist numeration="loweralpha">
       <xsl:for-each-group select="node()" group-starting-with="para[node()[1][self::text() and matches(., '^[a-z]\)$')]]">
         <listitem>
+          <xsl:call-template name="hub:move-condition-up"/>
           <xsl:attribute name="override" select="current-group()[1]/text()[1]"/>
           <xsl:apply-templates select="current-group()[1]" mode="#current">
             <xsl:with-param name="override" select="current-group()[1]/text()[1]"/>
@@ -114,6 +115,7 @@
   <xsl:template match="varlistentry/listitem" mode="hub:postprocess-lists">
     <xsl:param name="set-override" select="'no'"/>
     <xsl:copy>
+      <xsl:call-template name="hub:move-condition-up"/>
       <xsl:choose>
         <xsl:when test="$set-override = 'term'">
           <xsl:attribute name="override" select="preceding-sibling::term"/>
@@ -242,7 +244,27 @@
   <xsl:template match="  @margin-left | listitem/para/@css:margin-left
                        | @text-indent | listitem/para/@css:text-indent" 
                 mode="hub:postprocess-lists" priority="1"/>
+
+  <!-- copy condtion attribute (for ex., 'PrintOnly') up to listitem if every child has the same value
+       https://redmine.le-tex.de/issues/7738 -->
+  <xsl:template match="listitem" mode="hub:postprocess-lists">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:call-template name="hub:move-condition-up"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
   
+  <xsl:template name="hub:move-condition-up">
+    <xsl:if test="exists(*/@condition) 
+                  and 
+                  (every $p in * satisfies (exists($p/@condition)))
+                  and
+                  (count(fn:distinct-values(*/@condition)) eq 1)">
+      <xsl:copy-of select="*[1]/@condition"/>
+    </xsl:if>
+  </xsl:template>
+
   <!-- Idea for improvement: add the net indentation (css:margin-left + text-indent) as css:margin-left to each 
     itemizedlist, orderedlist, variablelist element. The issue with this approach may be: when converting
     the css properties to style attributes on HTML’s ol, ul, or dl elements, the nested lists
