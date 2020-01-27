@@ -2470,7 +2470,7 @@
                            or
                            ancestor::tocentry
                            or (:section titles are handled via a named template:)
-                           ancestor::title[not(parent::section)]
+                           ancestor::title[not(parent::section | parent::bibliography (: https://redmine.le-tex.de/issues/7869 :))]
                            or
                            ancestor::footnote
                          )
@@ -2528,7 +2528,7 @@
     </footnoteref>
   </xsl:template>
 
-  <xsl:template match="section/title | chapter/title" mode="hub:identifiers">
+  <xsl:template match="section/title | chapter/title | bibliography/title (: https://redmine.le-tex.de/issues/7869 :)" mode="hub:identifiers">
     <xsl:call-template name="hub:section-title-identifier"/>
   </xsl:template>
   
