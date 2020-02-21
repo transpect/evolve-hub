@@ -4072,8 +4072,9 @@
                        ]
                        [hub:specify-split-at-br-context(.)]" mode="hub:split-at-br">
     <linegroup remap="{name()}">
+      <xsl:apply-templates select="@*" mode="#current"/>
       <line>
-        <xsl:apply-templates select="@*, node()" mode="#current"/>
+        <xsl:apply-templates mode="#current"/>
       </line>
     </linegroup>
   </xsl:template>
