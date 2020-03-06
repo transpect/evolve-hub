@@ -585,7 +585,11 @@
                           and exists(
                                      ($para//tab[not(parent::tabs)]
                                                 [following-sibling::node()[normalize-space()]]
-                                                [hub:same-scope(., $para)])[1]/preceding::node()[. &gt;&gt; $para]
+                                                [hub:same-scope(., $para)])[1]/preceding::node()[not(
+                                                                                                   self::anchor | 
+                                                                                                   self::text()[not(fn:normalize-space())]
+                                                                                                )]
+                                                                                                [. &gt;&gt; $para]
                                      )"/>
   </xsl:function>
 
