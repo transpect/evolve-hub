@@ -34,7 +34,7 @@
     mode="hub:prepare-lists">
   </xsl:template>
 
-  <!-- Detect consecutive list paras and sort them into preceding listitem -->
+  <!-- Detect list continuation paras and sort them into preceding listitem -->
   <xsl:template match="orderedlist[listitem/para[1][not(@margin-left) and @text-indent and @text-indent &gt; 0]
                                    and listitem[para[1][@margin-left]]]"
     mode="hub:prepare-lists">
@@ -83,10 +83,10 @@
 
   <xsl:template match="listitem[para[1][not(@margin-left) and @text-indent and @text-indent &gt; 0]
                        and parent::orderedlist[listitem[1][para[1][@margin-left]]]]" mode="hub:prepare-lists">
-    <!-- these are consecutive list paras set via tabs oder text-indent  -->
+    <!-- these are list continuation paras set via tabs oder text-indent  -->
   </xsl:template>
 
-  <!-- adjust @tab-stops of consecutive list paragraphs in listitem -->
+  <!-- adjust @tab-stops of list continuation paragraphs in listitem -->
   <xsl:template match="para[parent::listitem and not(@margin-left) and @text-indent]/@tab-stops
                        [tokenize(tokenize(., ' ')[1], ';')[1] = ../@text-indent]" mode="hub:prepare-lists">
     <xsl:variable name="new-tabs" select="string-join(tokenize(., ' ')[position() &gt; 1], ' ')"/>
@@ -95,7 +95,7 @@
     </xsl:if>
   </xsl:template>
 
-  <!-- IDML, consecutive list paras in listitems -->
+  <!-- IDML, list continuation paras in listitems -->
   <xsl:template match="orderedlist[some $p in listitem/para[1] 
                                    satisfies ($p[descendant::phrase[@role = 'hub:identifier']
                                                                    [hub:same-scope(., $p)]]
