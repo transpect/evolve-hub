@@ -45,6 +45,15 @@
     </orderedlist>
   </xsl:template>
 
+  <xsl:template match="variablelist[empty(@role)]
+                                   [not(hub:is-variable-list-because-we-know-better(.))]
+                                   [exists(descendant::anchor[@role = 'hub:endnote'])]" mode="hub:postprocess-lists">
+    <xsl:copy>
+      <xsl:attribute name="role" select="'formerly-ordered endnotes'"/>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+
   <xsl:template match="variablelist[matches(varlistentry[1]/term, '^(&#x2022;|&#x2013;|&#x2014;)$')
                        and (every $x in varlistentry/term satisfies $x = current()/varlistentry[1]/term)]" mode="hub:postprocess-lists">
     <itemizedlist mark="{varlistentry[1]/term}">
