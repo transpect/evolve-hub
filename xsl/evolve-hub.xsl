@@ -2397,6 +2397,7 @@
                        
                          (: https://mantis.le-tex.de/view.php?id=28089 :)
                        | phrase[count(node()) = 1][text()[hub:text-node-is-list-identifier(.)]]
+                               [matches(., concat($hub:orderedlist-mark-at-start-regex, '\*?$'))]
                              " mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:choose>
@@ -2407,7 +2408,7 @@
         <phrase role="hub:identifier">
           <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-1')"/>
           <xsl:apply-templates select="@*" mode="#current"/>
-          <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
+          <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the template 'idTextNodeIdentifier' will catch -->
         </phrase>
       </xsl:when>
       <xsl:otherwise>
@@ -2415,7 +2416,7 @@
           <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-o')"/>
           <xsl:copy>
             <xsl:apply-templates select="@*" mode="#current"/>
-            <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the following template will catch -->
+            <xsl:sequence select="node()"/><!-- no apply-templates here because otherwise the  template 'idTextNodeIdentifier' will catch -->
           </xsl:copy>
         </phrase>
       </xsl:otherwise>
@@ -2462,6 +2463,7 @@
 
   <!-- Example(s): <para>1.<tab/>Text</para>
                    <para><phrase>1.<tab/></phrase>Text</para>
+       idTextNodeIdentifier
   -->
   <xsl:template match="text()[hub:text-node-is-list-identifier(.)]" mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
@@ -2514,9 +2516,8 @@
                 $text[not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope($text, .)])]
                      [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
                      [not(ancestor::*:math)]
-                     [
-                       matches(., $hub:orderedlist-mark-at-start-regex)
-                       and (
+                     [matches(., $hub:orderedlist-mark-at-start-regex)]
+                     [ (
                          ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon][
                            count(tab/preceding-sibling::node()[self::text() or self::*[not(name() = ('indexterm', 'anchor'))]]) = 1
                            or
