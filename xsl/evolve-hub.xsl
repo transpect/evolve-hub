@@ -2393,8 +2393,16 @@
                                  )
                                )
                                and following-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::tab
-                             ]" mode="hub:identifiers">
+                              ]
+                       
+                         (: https://mantis.le-tex.de/view.php?id=28089 :)
+                       | phrase[count(node()) = 1][text()[hub:text-node-is-list-identifier(.)]]
+                             " mode="hub:identifiers">
+    <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:choose>
+      <xsl:when test="$hub:already-identified">
+        <xsl:next-match/>
+      </xsl:when>
       <xsl:when test="not(@*) or (every $a in @* satisfies $a/name() = ('srcpath', 'xml:lang'))">
         <phrase role="hub:identifier">
           <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-1')"/>
@@ -2455,27 +2463,7 @@
   <!-- Example(s): <para>1.<tab/>Text</para>
                    <para><phrase>1.<tab/></phrase>Text</para>
   -->
-  <xsl:template match="text()
-		                   [not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope(current(), .)])]
-		                   [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
-		                   [not(ancestor::*:math)]
-		                   [
-                         matches(., $hub:orderedlist-mark-at-start-regex)
-                         and (
-                           ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon][
-                             count(tab/preceding-sibling::node()[self::text() or self::*[not(name() = ('indexterm', 'anchor'))]]) = 1
-                             or
-                             (.//tab[not(ancestor::*[self::tabs])])[1][preceding-sibling::node()[not(self::*/name() = ('indexterm', 'anchor'))][1][. is current()]]
-                           ]
-                           or
-                           ancestor::tocentry
-                           or (:section titles are handled via a named template:)
-                           ancestor::title[not(parent::section | parent::bibliography (: https://redmine.le-tex.de/issues/7869 :))]
-                           or
-                           ancestor::footnote
-                         )
-                         and . is (ancestor::*[self::para or self::tocentry or self::footnote or self::title[not(parent::section)]][1]//text()[not(ancestor::indexterm)])[1]
-                       ]" mode="hub:identifiers">
+  <xsl:template match="text()[hub:text-node-is-list-identifier(.)]" mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:variable name="context" select="." as="text()" />
     <xsl:variable name="no-identifier-but-simple-equation-starts" select="matches(., concat($hub:orderedlist-mark-at-start-regex, '[=\-\+÷]'))" as="xs:boolean"/>
@@ -2518,6 +2506,33 @@
       </xsl:non-matching-substring>
     </xsl:analyze-string>
   </xsl:template>
+
+  <xsl:function name="hub:text-node-is-list-identifier" as="xs:boolean">
+    <xsl:param name="text" as="text()"/>
+    <xsl:sequence 
+      select="boolean(
+                $text[not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope($text, .)])]
+                     [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
+                     [not(ancestor::*:math)]
+                     [
+                       matches(., $hub:orderedlist-mark-at-start-regex)
+                       and (
+                         ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon][
+                           count(tab/preceding-sibling::node()[self::text() or self::*[not(name() = ('indexterm', 'anchor'))]]) = 1
+                           or
+                           (.//tab[not(ancestor::*[self::tabs])])[1][preceding-sibling::node()[not(self::*/name() = ('indexterm', 'anchor'))][1][. is $text]]
+                         ]
+                         or
+                         ancestor::tocentry
+                         or (:section titles are handled via a named template:)
+                         ancestor::title[not(parent::section | parent::bibliography (: https://redmine.le-tex.de/issues/7869 :))]
+                         or
+                         ancestor::footnote
+                       )
+                       and . is (ancestor::*[self::para or self::tocentry or self::footnote or self::title[not(parent::section)]][1]//text()[not(ancestor::indexterm)])[1]
+                     ]
+              )"/>
+  </xsl:function>
 
   <xsl:variable name="hub:footnote-role-regex" as="xs:string"
     select="'Footnoteref'"/>
