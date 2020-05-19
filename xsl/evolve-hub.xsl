@@ -2548,6 +2548,11 @@
     <xsl:call-template name="hub:section-title-identifier"/>
   </xsl:template>
   
+  <xsl:function name="tr:exception-from-identifier-detection" as="xs:boolean">
+    <xsl:param name="context" as="node()"/>
+    <xsl:sequence select="false()"/>
+  </xsl:function>
+  
   <xsl:template name="hub:section-title-identifier" as="element(title)">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
@@ -2560,7 +2565,7 @@
             <xsl:with-param name="hub:already-identified" select="false()" tunnel="yes" as="xs:boolean"/>
           </xsl:apply-templates>
         </xsl:when>
-        <xsl:when test="tab[following-sibling::node()[self::text() or self::phrase]] and not(phrase[@role eq 'hub:caption-number'])">
+        <xsl:when test="tab[following-sibling::node()[self::text() or self::phrase]] and not(phrase[@role eq 'hub:caption-number']) and not(tr:exception-from-identifier-detection(.))">
           <xsl:variable name="_tb" select="tab[1]" as="element(tab)"/>
           <phrase role="hub:identifier">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'section-title-identifier')"/>
