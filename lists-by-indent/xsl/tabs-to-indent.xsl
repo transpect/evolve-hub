@@ -142,7 +142,7 @@
   </xsl:template>
 
   <xsl:template match="*[hub:element-with-tab-and-matching-mark-regex(.)]
-    /node()[not(self::anchor) and not(self::tabs)][1][. instance of text()]" mode="hub:tabs-to-indent">
+    /node()[not(self::anchor) and not(self::tabs)][1][. instance of text()][not(tr:exception-from-identifier-detection(.))]" mode="hub:tabs-to-indent">
     <xsl:param name="identifier-already-tagged" select="false()" tunnel="yes"/>
     <xsl:choose>
       <xsl:when test="$identifier-already-tagged">
