@@ -2298,13 +2298,39 @@
   </xsl:template>
 
   <!-- first node in figure or table title is an indexterm: move the indexterm at end of title -->
-  <xsl:template match="*[self::table or self::figure or self::section]/title[node()[1]
-                                                                                   [self::indexterm or 
-                                                                                    self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
-                                                                                                [not(@role='start' and 
-                                                                                                     @xml:id and 
-                                                                                                     matches(following-sibling::anchor[@role='end']/@xml:id,
-                                                                                                             concat('^',@xml:id,'_end$')))]]]" 
+  <xsl:template match="*[self::table or self::figure]/title[node()[1]
+                                                                  [self::indexterm or 
+                                                                   self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]]]" 
+                mode="hub:repair-hierarchy" priority="1">
+    <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or 
+                                                                      self::anchor)]
+                                                                 [preceding-sibling::*[self::indexterm or 
+                                                                                       self::anchor]][1]" as="node()?"/>
+    <xsl:copy>
+      <xsl:choose>
+        <xsl:when test="empty($first-valid-node-in-title)">
+          <xsl:message select="'EVOLVE WARNING:', local-name(), 'consists of critical element(s):', node()"/>
+          <xsl:apply-templates select="@*, node()" mode="#current" />
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:if test="parent::section and not(@role) and ../@role">
+            <xsl:attribute name="role" select="../@role"/>
+          </xsl:if>
+          <xsl:apply-templates select="@*, $first-valid-node-in-title, 
+                                       node()[not(self::anchor[@role='end'])][ . &gt;&gt; $first-valid-node-in-title], 
+                                       node()[ . &lt;&lt; $first-valid-node-in-title], anchor[@role='end'][ . &gt;&gt; $first-valid-node-in-title]" mode="#current" />
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="section/title[node()[1]
+                                           [self::indexterm or 
+                                            self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
+                                                        [not(@role='start' and 
+                                                             @xml:id and 
+                                                             matches(following-sibling::anchor[@role='end']/@xml:id,
+                                                                     concat('^',@xml:id,'_end$')))]]]" 
                 mode="hub:repair-hierarchy" priority="1">
     <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or 
                                                                       self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
