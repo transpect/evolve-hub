@@ -2298,9 +2298,26 @@
   </xsl:template>
 
   <!-- first node in figure or table title is an indexterm: move the indexterm at end of title -->
-  <xsl:template match="*[self::table or self::figure or self::section]
-                         /title[node()[1][self::indexterm or self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]]]" mode="hub:repair-hierarchy" priority="1">
-    <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or self::anchor)][preceding-sibling::*[self::indexterm or self::anchor]][1]" as="node()?"/>
+  <xsl:template match="*[self::table or self::figure or self::section]/title[node()[1]
+                                                                                   [self::indexterm or 
+                                                                                    self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
+                                                                                                [not(@role='start' and 
+                                                                                                     @xml:id and 
+                                                                                                     matches(following-sibling::anchor[@role='end']/@xml:id,
+                                                                                                             concat('^',@xml:id,'_end$')))]]]" 
+                mode="hub:repair-hierarchy" priority="1">
+    <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or 
+                                                                      self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
+                                                                                  [not(@role='start' and 
+                                                                                       @xml:id and 
+                                                                                       matches(following-sibling::anchor[@role='end']/@xml:id,
+                                                                                               concat('^',@xml:id,'_end$')))])]
+                                                                 [preceding-sibling::*[self::indexterm or 
+                                                                                       self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
+                                                                                                   [not(@role='start' and 
+                                                                                                        @xml:id and 
+                                                                                                        matches(following-sibling::anchor[@role='end']/@xml:id,
+                                                                                                                concat('^',@xml:id,'_end$')))]]][1]" as="node()?"/>
     <xsl:copy>
       <xsl:choose>
         <xsl:when test="empty($first-valid-node-in-title)">
