@@ -197,13 +197,14 @@
 
   <xsl:template match="css:rule" mode="hub:prepare-lists">
     <xsl:call-template name="css:move-to-attic">
-      <xsl:with-param name="atts" select="@css:list-style-type, @css:display[. = 'list-item'], 
-        @*[matches(name(), '^css:pseudo-marker_')],
-        @css:margin-left[concat('-', .) = ../@css:text-indent]
-        [not(matches(current()/@name, $hub:list-by-indent-exception-role-regex))],
-        @css:text-indent[. = concat('-', ../@css:margin-left)]
-        [not(matches(current()/@name, $hub:list-by-indent-exception-role-regex))],
-        @css:text-indent[../@css:display = 'list-item']                
+      <xsl:with-param name="atts" 
+        select="@css:list-style-type, @css:display[. = 'list-item'], 
+                @*[matches(name(), '^css:pseudo-marker_')],
+                @css:margin-left[concat('-', .) = ../@css:text-indent]
+                                [not(matches(current()/@name, $hub:list-by-indent-exception-role-regex))],
+                @css:text-indent[. = concat('-', ../@css:margin-left)]
+                                [not(matches(current()/@name, $hub:list-by-indent-exception-role-regex))],
+                @css:text-indent[../@css:display = 'list-item']                
         "/>
       <!-- §§§ text-indent is removed "twice" for some common cases. We had a case where it wasn’t equal to 
         the negative margin-left. But it was in a list and had to be removed nevertheless. Otherwise, the
@@ -211,4 +212,24 @@
       <!-- §§§ should have used a proper length comparison function for @css:margin-left an @css:text-indent --> 
     </xsl:call-template>
   </xsl:template>
+  
+  <xsl:template mode="hub:prepare-lists" 
+    match="tab[empty(@*)]
+              [preceding-sibling::node()[empty(self::text[not(fn:normalize-space())])]/self::phrase[@role = 'hub:identifier']]">
+    <!-- We just remove the tab that was inserted because of 
+https://github.com/transpect/idml2xml/commit/bda5bce2d7a2cfc7cf0de61f38eed6fe4ad1516e#diff-82f412691863018b7799acb15fbbd07dR3044
+    We need to remove it because otherwise the list item in question will be recognized as a variable list item
+    due to hub:is-variable-list-listitem-with-phrase-identifier(). It belongs to a list that is neither itemized,
+    ordered, nor variable an will be processed using this fallback template:
+  <xsl:template match="orderedlist[some $x in listitem/para[1] 
+                                   satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
+                                   and not(hub:is-ordered-list(.)) 
+                                   and not(hub:is-itemized-list(.)) 
+                                   and not(hub:is-variable-list(.))]" mode="hub:lists">
+    ………
+  Test file: http://svn.le-tex.de/svn/ltxbase/Difftestdata/Hogrefe/hogrefe.ch/PRG/86048/idml/101024_86048_PRG.idml 
+  The list starts with "A. Ein durchgehendes Muster von Unaufmerksamkeit und/oder Hyperaktivität-­"
+    -->
+  </xsl:template>
+  
 </xsl:stylesheet>

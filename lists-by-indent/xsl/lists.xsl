@@ -210,8 +210,11 @@
   <xsl:variable name="hub:variable-list-exception-roles" select="($hub:equation-roles)" as="xs:string+"/>
 
   <!-- Mischung aus Folgeabsätzen und Unterpunkten oder Listen verschiedenen Typs, die zerschnitten werden müssen -->
-  <xsl:template match="orderedlist[some $x in listitem/para[1] satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
-                       and not(hub:is-ordered-list(.)) and not(hub:is-itemized-list(.)) and not(hub:is-variable-list(.))]" mode="hub:lists">
+  <xsl:template match="orderedlist[some $x in listitem/para[1] 
+                                     satisfies exists($x//phrase[hub:same-scope(., $x)][hub:is-identifier(.)])
+                                   and not(hub:is-ordered-list(.)) 
+                                   and not(hub:is-itemized-list(.)) 
+                                   and not(hub:is-variable-list(.))]" mode="hub:lists">
     <xsl:variable name="current" select="."/>
     <xsl:for-each-group select="*" 
       group-adjacent="if (para[1][descendant::phrase[hub:same-scope(., current())][hub:is-identifier(.)][1]][not(@role=($hub:equation-roles))])
