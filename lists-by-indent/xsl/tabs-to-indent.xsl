@@ -129,7 +129,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="*[self::figure | self::table | self::informalfigure | self::informaltable]
+  <xsl:template match="*[name() = ('figure', 'table', 'informalfigure', 'informaltable')]
                         [(. | key('hub:style-by-role', @role))/@css:margin-left]"
                 mode="hub:tabs-to-indent">
     <xsl:copy>
