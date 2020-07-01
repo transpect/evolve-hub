@@ -125,15 +125,15 @@
   
   <xsl:function name="hub:get-entry-outer-borders" as="attribute()*">
     <xsl:param name="group" as="element(tgroup)*"/>
-    <xsl:sequence select="$group//row[1]/entry/@css:border-top-style"/>
+    <xsl:sequence select="($group//row)[1]/entry/@css:border-top-style"/>
     <xsl:sequence
-      select="$group//entry[$group/colspec[@colnum = 1]/@colname = (@colname, @namest)]/@css:border-left-style"/>
+      select="$group//entry[ancestor::tgroup[1]/colspec[@colnum = 1]/@colname = (@colname, @namest)]/@css:border-left-style"/>
     <xsl:sequence
-      select="$group//entry[$group/colspec[@colnum = max(($group/colspec/@colnum))]/@colname = (@colname, @nameend)]/@css:border-right-style"
+      select="$group//entry[ancestor::tgroup[1]/colspec[@colnum = max((ancestor::tgroup[1]/colspec/@colnum))]/@colname = (@colname, @nameend)]/@css:border-right-style"
     />
     <xsl:sequence select="
       for $c in $group/colspec/@colnum return (
-        ($group//entry[calstable:is-col-in-span($c, (@namest, @colname), (@namest, @colname), $group/colspec)])[last()]/@css:border-bottom-style
+      ($group//entry[calstable:is-col-in-span($c, (@namest, @colname), (@namest, @colname), ancestor::tgroup[1]/colspec)])[last()]/@css:border-bottom-style
       )"/>
   </xsl:function>
   
