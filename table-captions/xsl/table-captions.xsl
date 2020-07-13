@@ -35,7 +35,7 @@
                           and current-group()[2][self::para[not(.//text())][mediaobject]]">
             <table>
               <title>
-                <xsl:apply-templates select="current-group()[1]/@*[not(name() = 'role')]" mode="#current"/>
+                <xsl:apply-templates select="current-group()[1]/@*" mode="#current"/>
                 <xsl:apply-templates select="current-group()[1]/node()" mode="#current"/>
               </title>
               <xsl:sequence select="current-group()[2]/mediaobject"/>
