@@ -64,6 +64,7 @@
   <xsl:param name="equations-after-list-paras-belong-to-list" select="'yes'"/>
   <xsl:param name="generate-sortas" select="'no'"/>
   <xsl:param name="tab-leader-as-role" select="'no'"/>
+  <xsl:param name="strip-lang-variant" select="'yes'"/><!-- makes 'en' from 'en-GB' -->
 
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
@@ -2129,11 +2130,17 @@
                 mode="hub:preprocess-hierarchy"/>
   
   <!-- Collateral: normalize @xml:lang, stripping the country or other suffixes -->
-  <xsl:template match="@xml:lang[matches(., '^(\p{Ll}+).*$')]" mode="hub:group-environments hub:split-at-tab">
+  <xsl:template match="@xml:lang[matches(., '^(\p{Ll}+).*$')]
+                                [$strip-lang-variant eq 'yes']" 
+                mode="hub:group-environments hub:split-at-tab">
     <xsl:attribute name="{name()}" select="replace(., '^(\p{Ll}+).*$', '$1')"/>
   </xsl:template>
 
-  <xsl:template match="emphasis[matches(., '^\d+$')][every $a in @* satisfies ($a/self::attribute(srcpath) or $a/self::attribute(xml:lang))]" mode="hub:hierarchy">
+  <xsl:template match="emphasis[matches(., '^\d+$')]
+                               [every $a in @* 
+                                satisfies (   $a/self::attribute(srcpath) 
+                                           or $a/self::attribute(xml:lang))]" 
+                mode="hub:hierarchy">
     <xsl:apply-templates mode="#current" />
   </xsl:template>
   
