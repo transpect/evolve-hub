@@ -570,7 +570,7 @@
   <xsl:function name="hub:is-variable-list-listitem-with-phrase-identifier" as="xs:boolean">
     <xsl:param name="para" as="element(para)?"/>
     <xsl:sequence select="exists(
-                            $para//tab[not(parent::tabs)][hub:same-scope(., $para)][1][
+                            $para//tab[not(@role = 'underline')][not(parent::tabs)][hub:same-scope(., $para)][1][
                               exists(
                                 preceding::node()[self::phrase][hub:is-identifier(.)]
                                   [hub:same-scope(., $para)]
@@ -587,6 +587,7 @@
                           )
                           and exists(
                                      ($para//tab[not(parent::tabs)]
+                                                [not(@role = 'underline')]
                                                 [following-sibling::node()[normalize-space()]]
                                                 [hub:same-scope(., $para)])[1]/preceding::node()[not(
                                                                                                    self::anchor | 
