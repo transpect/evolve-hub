@@ -3177,6 +3177,10 @@
     <!-- Saves you removing these InDesign leftovers in every subsequent conversion step -->
   </xsl:template>
   
+  <xsl:template match="itermset[every $i in * satisfies $i[@role = 'hub:not-placed-on-page'][empty(see | seealso)]]" 
+    mode="hub:clean-hub"/>
+  
+  
   <xsl:template match="indexterm/*[ends-with(name(), 'ary')]
                                   [empty(@sortas)]
                                   [$generate-sortas = 'yes']" mode="hub:clean-hub">
