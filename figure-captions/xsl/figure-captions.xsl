@@ -116,20 +116,21 @@
         <xsl:next-match/>
       </xsl:when>
       <xsl:otherwise>
-        <note>
+        <xsl:element name="note">
           <xsl:next-match/>
-        </note>
+        </xsl:element>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
   <xsl:template match="para[matches(@role, $hub:figure-copyright-statement-role-regex)]" mode="hub:figure-captions">
-    <info>
+    <xsl:element name="info">
       <!-- legalnotice because copyright requires a tagged year -->
-      <legalnotice role="copyright">
+      <xsl:element name="legalnotice">
+        <xsl:attribute name="role" select="'copyright'"/>
         <xsl:next-match/>
-      </legalnotice>
-    </info>
+      </xsl:element>
+    </xsl:element>
   </xsl:template>
   
   <!-- This is another figure caption template to handle figures with more than one actual image in figure. Split figures for example or really several images with just one caption.
