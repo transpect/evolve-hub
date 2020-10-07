@@ -82,14 +82,14 @@
                                                     </xsl:for-each>
                                                     <xsl:for-each
                                                   select="distinct-values(current-group()/*:spanspec/@spanname)">
-                                                      <spanspec>
+                                                      <xsl:element name="spanspec">
                                                         <xsl:attribute name="spanname" select="."/>
                                                         <xsl:attribute name="namest"
                                                   select="$colspecs[@spanname=current()][1]/@namest"/>
                                                         <xsl:attribute name="nameend"
                                                   select="$colspecs[@spanname=current()][1]/@nameend"
                                                   />
-                                                      </spanspec>
+                                                      </xsl:element>
                                                     </xsl:for-each>
                                                     <xsl:apply-templates
                                                   select="current-group()[1]/*:thead"
