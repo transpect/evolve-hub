@@ -32,7 +32,7 @@
               <xsl:choose>
                 <xsl:when test="current-group()[1][hub:is-subfigure(.)]">
                   <xsl:call-template name="hub:build-subfigure-caption">
-                    <xsl:with-param name="media" select="current-group()[1]//(mediaobject, inlinemediaobject)"/>
+                    <xsl:with-param name="media" select="current-group()[1]//(self::mediaobject, mediaobject, inlinemediaobject)"/>
                     <xsl:with-param name="caption" select="current-group()[position() gt 1]"/>
                   </xsl:call-template>
                 </xsl:when>

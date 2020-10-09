@@ -115,10 +115,17 @@
   <xsl:function name="hub:is-subfigure" as="xs:boolean">
     <xsl:param name="node" as="node()?"/>
     <xsl:sequence select="
-      count($node/(mediaobject, inlinemediaobject, phrase/(mediaobject, inlinemediaobject))) = 1
+      count($node/(self::mediaobject, mediaobject, inlinemediaobject, phrase/(mediaobject, inlinemediaobject))) = 1
       and 
         (
-        hub:is-subfigure-caption($node/following-sibling::element()[not(every $i in descendant-or-self::para[not(ancestor::footnote)] satisfies matches($i/@role,$hub:figure-legend-role-regex-x, 'x'))][1])
+          hub:is-subfigure-caption(
+            $node/following-sibling::element()[
+              not(
+                every $i in descendant-or-self::para[not(ancestor::footnote)]
+                satisfies matches($i/@role,$hub:figure-legend-role-regex-x, 'x')
+              )
+            ][1]
+          )
           or
           hub:is-subfigure-caption(($node/mediaobject/caption/para)[1])
         )"/>
