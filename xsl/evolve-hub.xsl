@@ -3823,7 +3823,7 @@
            local-name(.[1]), 
            '_', 
            replace(
-             title//phrase[@role eq 'hub:identifier'][1],
+             (title//phrase[@role eq 'hub:identifier'])[1],
              $hub:internalref-number-suffix-regex,
              ''
            )
