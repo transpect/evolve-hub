@@ -2558,6 +2558,8 @@
       </xsl:non-matching-substring>
     </xsl:analyze-string>
   </xsl:template>
+  
+  <xsl:variable name="text-to-identifiy-not-identifier" select="'years|Jahre'"/>
 
   <xsl:function name="hub:text-node-is-list-identifier" as="xs:boolean">
     <xsl:param name="text" as="text()"/>
@@ -2567,6 +2569,7 @@
                      [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
                      [not(ancestor::*:math)]
                      [matches(., $hub:orderedlist-mark-at-start-regex)]
+                     [not(matches(., concat($hub:orderedlist-mark-at-start-regex,$text-to-identifiy-not-identifier)))]
                      [ (
                          ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon][
                            count(tab/preceding-sibling::node()[self::text() or self::*[not(name() = ('indexterm', 'anchor'))]]) = 1
@@ -2650,7 +2653,6 @@
                        | formalpara[@role eq 'Programcode'][$hub:caption-tagging-for-listings]/title" 
     name="hub:float-title-identifier" 
     mode="hub:identifiers">
-
     <xsl:variable name="cleaned-text" as="xs:string?"
                   select="string-join(.//text()[not(ancestor-or-self::indexterm
                                                    |ancestor-or-self::footnote)],'')"/>
