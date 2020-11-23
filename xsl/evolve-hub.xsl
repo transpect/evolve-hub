@@ -3169,6 +3169,39 @@
 
   <xsl:key name="hub:linked-item-by-id" match="*[@xml:id]" use="@xml:id" />
 
+  <!-- mode: hub:strip-space -->
+  
+  <xsl:template match="*[self::phrase
+                        |self::superscript
+                        |self::subscript]
+                        [not(@css:text-decoration-line or @css:background-color or @css:background)]
+                        [matches(., '^\s+$')]" mode="hub:strip-space">
+    <xsl:comment>hurz</xsl:comment>
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xsl:template match="*[phrase[following-sibling::node()[1][self::phrase]]]" mode="hub:strip-space">
+    <xsl:copy>
+      <xsl:apply-templates select="@*"/>
+      <xsl:for-each-group select="node()" group-adjacent="string-join(@*/concat(name(), '=', .), ';')">
+        <xsl:choose>
+          <xsl:when test="string-length(current-grouping-key())">
+            <xsl:copy>
+              <xsl:comment>foo</xsl:comment>
+              <xsl:apply-templates select="current-group()[1]/@*, current-group()/node()" mode="#current"/>
+            </xsl:copy>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:copy>
+              <xsl:comment>bar</xsl:comment>
+              <xsl:apply-templates select="current-group()" mode="#current"/>  
+            </xsl:copy>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each-group>
+    </xsl:copy>
+  </xsl:template>
+
   <!-- mode: hub:clean-hub -->
 
   <xsl:template name="hub_clean-hub">
