@@ -3190,9 +3190,7 @@
             </xsl:copy>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:copy>
-              <xsl:apply-templates select="current-group()" mode="#current"/>
-            </xsl:copy>
+            <xsl:apply-templates select="current-group()" mode="#current"/>
           </xsl:otherwise>
         </xsl:choose>
       </xsl:for-each-group>
