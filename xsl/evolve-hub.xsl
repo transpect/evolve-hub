@@ -3182,7 +3182,7 @@
   <xsl:template match="*[phrase[following-sibling::node()[1][self::phrase]]]" mode="hub:strip-space">
     <xsl:copy>
       <xsl:apply-templates select="@*"/>
-      <xsl:for-each-group select="node()" group-adjacent="string-join((@css:*, @role)/concat(name(), '=', .), ';')">
+      <xsl:for-each-group select="node()" group-adjacent="string-join((@css:*, @role, @xml:lang)/concat(name(), '=', .), ';')">
         <xsl:choose>
           <xsl:when test="string-length(current-grouping-key())">
             <xsl:copy>
