@@ -3171,7 +3171,7 @@
 
   <!-- mode: hub:strip-space -->
   
-  <xsl:template match="*[self::phrase
+  <xsl:template match="*[self::phrase[not(@role eq 'hub:identifier')]
                         |self::superscript
                         |self::subscript]
                         [not(@css:text-decoration-line or @css:background-color or @css:background)]
