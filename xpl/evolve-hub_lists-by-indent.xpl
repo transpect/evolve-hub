@@ -67,17 +67,6 @@
     <p:with-option name="prefix" select="concat($prefix, '1')"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:strip-space" name="strip-space">
-    <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
-    <p:input port="models"><p:empty/></p:input>
-    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
-    <p:with-option name="debug" select="$debug"/>
-    <p:with-option name="debug-indent" select="$debug-indent"/>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-    <p:with-option name="prefix" select="concat($prefix, '2')"/>
-  </tr:xslt-mode>
-  
   <tr:xslt-mode msg="yes" hub-version="1.2" mode="hub:prepare-lists" name="prepare-lists">
     <p:input port="stylesheet"><p:pipe step="lists-by-indent" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
