@@ -3185,7 +3185,7 @@
       <xsl:for-each-group select="node()" 
                           group-adjacent="concat(local-name(), '_', string-join((@css:*, @role, @xml:lang)/concat(name(), '=', .), ';'))">
         <xsl:choose>
-          <xsl:when test="string-length(current-grouping-key())">
+          <xsl:when test="string-length(current-grouping-key()) and starts-with(current-grouping-key(), 'phrase')">
             <xsl:copy>
               <xsl:apply-templates select="current-group()[1]/@*, current-group()/node()" mode="#current"/>
             </xsl:copy>
