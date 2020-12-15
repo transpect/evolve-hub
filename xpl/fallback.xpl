@@ -212,6 +212,9 @@
 
     <dt>hub:repair-float-ids</dt>
     <dd></dd>    
+    
+    <dt>hub:handle-phrase</dt>
+    <dd>In this mode special phrase treatment should be realized. Currently whitespace phrases that only contain font size, style and weight information are removed.</dd>
   </p:documentation>
   
   
@@ -308,6 +311,13 @@
   
   <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/60" mode="hub:ids">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
+    <p:input port="models"><p:empty/></p:input>
+    <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+  </tr:xslt-mode>
+  
+  <tr:xslt-mode hub-version="1.1" msg="yes" prefix="evolve-hub/75" mode="hub:handle-phrase">
+    <p:input port="stylesheet"><p:pipe port="stylesheet" step="evolve-hub"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
