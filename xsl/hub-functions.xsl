@@ -11,7 +11,7 @@
   xmlns="http://docbook.org/ns/docbook"
   exclude-result-prefixes="xs saxon tr hub dbk idml2xml"
   version="2.0">
-
+  
   <xsl:function name="hub:boolean-param" as="xs:boolean">
     <xsl:param name="input" as="xs:string" />
     <xsl:sequence select="$input = ('yes', '1', 'true')" />
@@ -268,17 +268,28 @@
                             ')+$'
                           ))"/>
   </xsl:function>
-
+  
+  <xsl:function name="hub:letters-to-number" as="xs:integer">
+  <!--wrapper for 1-parameter-call; default: type=1-->
+    <xsl:param name="string" as="xs:string"/>
+    <xsl:sequence select="hub:letters-to-number($string,1)"/>
+  </xsl:function>
+  
   <xsl:function name="hub:letters-to-number" as="xs:integer">
     <!-- a, b, c, …, aa, ab, … to 1, 2, 3, …, 27, 28, …
       Maybe this function should also deal with a, b, c, …, aa, bb, cc, … -->
+    
     <xsl:param name="string" as="xs:string"/>
+    <xsl:param name="type"/>
+    <!--possible values: 1: normal: a..z, aa, ab..az, ba, bb
+                         2: double digits: a..z, aa, bb..zz-->
+    
     <xsl:variable name="offset" as="xs:integer">
       <xsl:choose>
-        <xsl:when test="matches($string, '^[a-z][a-z]?$')">
+        <xsl:when test="matches($string, '^[a-z][a-z]*$')">
           <xsl:sequence select="96"/>
         </xsl:when>
-        <xsl:when test="matches($string, '^[A-Z][A-Z]?$')">
+        <xsl:when test="matches($string, '^[A-Z][A-Z]*$')">
           <xsl:sequence select="64"/>
         </xsl:when>
         <xsl:otherwise>
@@ -287,16 +298,38 @@
       </xsl:choose>
     </xsl:variable>
     <xsl:choose>
-      <xsl:when test="$offset = -1">
-        <xsl:sequence select="0"/><!-- or throw an error? -->
+      <xsl:when test="$type = 2">
+        <!-- length ordered letter groups aa,bb -->
+        <xsl:choose>
+          <xsl:when test="$offset = -1">
+            <xsl:sequence select="0"/><!-- or throw an error? -->
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:variable name="nums" as="xs:integer+">
+              <xsl:for-each select="string-to-codepoints($string)">
+                <xsl:sequence select="."/>
+              </xsl:for-each>
+            </xsl:variable>
+            <xsl:variable name="length" as="xs:integer" select="count($nums)"/>
+            <xsl:sequence select="xs:integer((sum($nums) div $length) + (26 * ($length - 1)) - $offset)"/>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:variable name="nums" as="xs:integer+">
-          <xsl:for-each select="reverse(string-to-codepoints($string))">
-            <xsl:sequence select="(. - $offset) * hub:pow(26, position() - 1)"/>
-          </xsl:for-each>
-        </xsl:variable>
-        <xsl:sequence select="xs:integer(sum($nums))"/>
+        <!-- lexicographic ordered letters aa,ab -->
+        <xsl:choose>
+          <xsl:when test="$offset = -1">
+            <xsl:sequence select="0"/><!-- or throw an error? -->
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:variable name="nums" as="xs:integer+">
+              <xsl:for-each select="reverse(string-to-codepoints($string))">
+                <xsl:sequence select="(. - $offset) * hub:pow(26, position() - 1)"/>
+              </xsl:for-each>
+            </xsl:variable>
+            <xsl:sequence select="xs:integer(sum($nums))"/>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
