@@ -363,7 +363,13 @@
             <xsl:sequence select="hub:letters-to-number(.) = hub:letters-to-number($marks[position() = $pos ]) + 1"/>
           </xsl:for-each>
         </xsl:variable>
-        <xsl:sequence select="every $b in $tmp satisfies $b"/>
+        <xsl:variable name="tmp2" as="xs:boolean+">
+          <xsl:for-each select="$marks[position() gt 1]">
+            <xsl:variable name="pos" as="xs:integer" select="position()"/>
+            <xsl:sequence select="hub:letters-to-number(.,2) = hub:letters-to-number($marks[position() = $pos ],2) + 1"/>
+          </xsl:for-each>
+        </xsl:variable>
+        <xsl:sequence select="every $b in $tmp satisfies $b or (every $b in $tmp2 satisfies $b)"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
