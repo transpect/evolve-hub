@@ -11,6 +11,8 @@
 
   <xsl:variable name="hub:hierarchy-role-regexes-x" as="xs:string+"
     select="('^[Hh]eading[ ]?1$', '^[Hh]eading[ ]?2$', '^[Hh]eading[ ]?3$', '^[Hh]eading[ ]?4$', '^[Hh]eading[ ]?5$', '^[Hh]eading[ ]?6$')" />
+  
+  <xsl:variable name="hub:top-level-section-exception" select="''"/>
 
   <xsl:variable name="hub:anchor-ids-to-section" as="xs:boolean" select="false()"/> 
 
@@ -115,7 +117,7 @@
             <xsl:variable name="top-level-headings" select="$headings[xs:integer(../@level) eq $top-level]" as="element(hub:heading)*"/>
             <xsl:for-each-group select="$elts" group-starting-with="*[generate-id() = $top-level-headings/@id]">
               <xsl:choose>
-                <xsl:when test="generate-id() = $top-level-headings/@id">
+                <xsl:when test="generate-id() = $top-level-headings/@id and not(current-group()[1][@role=$hub:top-level-section-exception])">
                   <section>
                     <xsl:variable name="anchor" as="element(anchor)?" select="(.//anchor[@xml:id][not(matches(@xml:id, 'page(end)?_'))][hub:same-scope(., current())])[1]"/>
                     <xsl:if test="$hub:anchor-ids-to-section">
