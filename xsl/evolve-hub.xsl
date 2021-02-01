@@ -2149,10 +2149,14 @@
   <xsl:variable name="hub:thead-pstyle-regex" as="xs:string"
     select="'^Table[-_\s]Head'" />
   
+  <xsl:variable name="hub:thead-cstyle-regex" as="xs:string"
+    select="'^Table[-_\s]Head'" />
+  
   <xsl:variable name="hub:pstyle-regex" as="xs:string"
     select="'^Table[-_\s](Head|Body)'" />
   
-  <xsl:template match="tgroup[tbody/row/entry/para[matches(@role, $hub:thead-pstyle-regex)]]" mode="hub:repair-hierarchy">
+  <xsl:template match="tgroup[tbody/row/entry/para[matches(@role, $hub:thead-pstyle-regex)]]
+                      | tgroup[tbody/row/entry[matches(@role, $hub:thead-cstyle-regex)]]" mode="hub:repair-hierarchy">
     <xsl:variable name="attribs" select="@*"/>
     <xsl:variable name="colspecs" select="colspec"/>
     <xsl:variable name="existing-thead" select="thead"/>
@@ -2167,6 +2171,8 @@
                                                                            and (
                                                                              every $x in entry/para satisfies
                                                                                (matches($x/@role, $hub:thead-pstyle-regex))
+                                                                               or (every $x in entry satisfies
+                                                                                  (matches($x/@role, $hub:thead-cstyle-regex)))
                                                                            )">
                 <xsl:choose>
                   <xsl:when test="current-grouping-key()">
@@ -2201,12 +2207,16 @@
                             $row
                               [entry/para]
                               [every $x in entry/para satisfies
-                                (matches($x/@role, $hub:thead-pstyle-regex))]
+                                (matches($x/@role, $hub:thead-pstyle-regex))
+                              or (every $x in entry satisfies
+                                (matches($x/@role, $hub:thead-cstyle-regex)))]
                               [empty(
                                 preceding-sibling::row[1]
                                   [entry/para]
                                   [every $x in entry/para satisfies
-                                    (matches($x/@role, $hub:thead-pstyle-regex))]
+                                    (matches($x/@role, $hub:thead-pstyle-regex))
+                                    or (every $x in entry satisfies
+                                (matches($x/@role, $hub:thead-cstyle-regex)))]
                               )]
                           )" />
   </xsl:function>
