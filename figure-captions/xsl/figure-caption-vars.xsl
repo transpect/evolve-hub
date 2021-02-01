@@ -75,6 +75,9 @@
   <xsl:variable name="hub:figure-number-role-regex-x" as="xs:string" 
     select="'^Figure_Number$'"/>
   
+ <!-- supply role for breaks that merge figure captions (to be able to keep them)  -->
+  <xsl:variable name="hub:figure-caption-merge-keep-brs-role" as="xs:string" select="''"/>
+  
   <!-- checks whether the current node 
       (1) contains para/mediaobject and only breaks and whitespace,
       (2) contains para/phrase/mediaobject and only breaks and whitespace on each level or 

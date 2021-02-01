@@ -304,7 +304,16 @@
             <para>
               <xsl:apply-templates select="$title/@*, $title/node()" mode="#current"/>
               <xsl:for-each select="$further-caption-paras/self::title/node()">
-                <br/>
+                <xsl:choose>
+                  <xsl:when test="$hub:figure-caption-merge-keep-brs-role">
+                   <phrase role="{$hub:figure-caption-merge-keep-brs-role}">
+                     <br/>
+                   </phrase>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <br/>
+                  </xsl:otherwise>
+                </xsl:choose>
                 <xsl:apply-templates select="current()/node()" mode="#current"/>
               </xsl:for-each>
             </para>
