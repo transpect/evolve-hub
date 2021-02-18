@@ -58,6 +58,7 @@
   <xsl:param name="move-floats" select="'yes'"/>
   <xsl:param name="remove-empty-paras" select="'no'"/>
   <xsl:param name="map-phrase-with-css-vertical-pos-to-super-or-subscript" select="'no'"/>
+  <xsl:param name="map-phrase-with-remap-to-super-or-subscript" select="'no'"/>
   <xsl:param name="collect-continued-floats" select="'no'"/>
   <xsl:param name="clean-hub_remove-attributes-with-paths" select="'no'"/>
   <xsl:param name="split-at-br-also-for-non-br-paras" select="'yes'"/>
@@ -221,6 +222,19 @@
     <xsl:variable name="position" select="xs:decimal(replace(@css:top, '[a-zA-Z\s]', ''))" as="xs:decimal"/>
     <xsl:element name="{if($position gt 0) then 'subscript' else 'superscript'}">
       <xsl:apply-templates select="@* except (@css:top, @css:position), node()" mode="#current"/>
+    </xsl:element>
+  </xsl:template>
+
+  <xsl:template match="phrase[@role][
+                         key('hub:style-by-role', @role)[@layout-type = 'inline']
+                           /@remap = ('subscript', 'superscript')
+                         and 
+                         $map-phrase-with-remap-to-super-or-subscript = 'yes'
+                       ]" mode="hub:hierarchy" priority="1">
+    <xsl:variable name="remap" as="attribute(remap)?"
+      select="key('hub:style-by-role', @role)[@layout-type = 'inline']/@remap"/>
+    <xsl:element name="{$remap}">
+      <xsl:next-match/>
     </xsl:element>
   </xsl:template>
   
