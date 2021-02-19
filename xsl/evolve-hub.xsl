@@ -1592,6 +1592,21 @@
     </hub:regex-container>
   </xsl:variable>
 
+<xsl:variable name="hub:startendbox-formalpara-heading-role-regex" as="xs:string"
+    select="'^(boxtitle)$'"/>
+  <xsl:variable name="hub:startendbox-formalpara-start-role-regex" as="xs:string"
+    select="'^(boxstart)$'"/>
+  <xsl:variable name="hub:startendbox-formalpara-end-role-regex" as="xs:string"
+    select="'^(boxend)$'"/>
+
+  <xsl:variable name="hub:startendbox-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container
+      start="{$hub:startendbox-formalpara-start-role-regex}" dissolve-start="yes"
+      end="{$hub:startendbox-formalpara-end-role-regex}" dissolve-end="yes">
+      <hub:regex-map regex="{$hub:startendbox-formalpara-heading-role-regex}" role="boxed-text" heading="yes"/>
+    </hub:regex-container>
+  </xsl:variable>
+
   <xsl:variable name="special-regex-containers" as="element(*)*"
                 select="($hub:answers-role-regex-container,
                          $hub:definition-role-regex-container,
@@ -1613,7 +1628,8 @@
                          $hub:result-role-regex-container,
                          $hub:eyecatcher-role-regex-container,
                          $hub:questionnaire-role-regex-container,
-                         $hub:casestudy-role-regex-container
+                         $hub:casestudy-role-regex-container,
+                         $hub:startendbox-role-regex-container
                         )"/>
 
   <xsl:template match="*[some $re in $special-regex-containers/* satisfies (some $e in * satisfies (matches($e/@role, $re/@regex)))][not(self::para)]" mode="hub:special-paras">
@@ -1630,8 +1646,60 @@
     <xsl:param name="context" as="element(*)" />
     <xsl:param name="regex-container-pos" as="xs:integer" />
     <xsl:variable name="regex-container" select="$special-regex-containers[$regex-container-pos]" as="element(hub:regex-container)*" />
-    <xsl:for-each-group select="$context/node()" group-adjacent="some $u in $regex-container/hub:regex-map/@regex satisfies matches(@role, $u)">
+    <xsl:for-each-group select="$context/node()" 
+      group-adjacent="(
+                        some $u in $regex-container[not(@start|@end)]/hub:regex-map/@regex 
+                        satisfies matches(@role, $u)
+                      )
+                      or
+                      (
+                        (
+                          $regex-container/@start/normalize-space(.) and
+                          $regex-container/@end/normalize-space(.)
+                        ) 
+                        and
+                        (
+                          (
+                            matches(@role, $regex-container/@start) or
+                            matches(@role, $regex-container/@end)
+                          )
+                          or
+                          (
+                            preceding-sibling::*[
+                              matches(@role, $regex-container/@start) or 
+                              matches(@role, $regex-container/@end)
+                            ][1]/@role[matches(., $regex-container/@start)] 
+                            and
+                            following-sibling::*[
+                              matches(@role, $regex-container/@start) or 
+                              matches(@role, $regex-container/@end)
+                            ][1]/@role[matches(., $regex-container/@end)]
+                          )
+                        )
+                      )">
       <xsl:choose>
+        <!-- group with @start and @end -->
+        <xsl:when test="current-grouping-key() and
+                        $regex-container/@start/normalize-space(.) and
+                        $regex-container/@end/normalize-space(.)">
+          <xsl:for-each-group select="current-group()" group-ending-with="*[matches(@role, $regex-container/@end)]">
+            <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
+              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              <xsl:if test="current-group()[position = ('1', last())]/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join(current-group()[position = ('1', last())]/@srcpath, '&#x20;')"/>
+              </xsl:if>
+              <xsl:if test="current-group()[position() lt 4][@role[matches(., $regex-container/hub:regex-map[@heading='yes']/@regex)]]">
+                <title>
+                  <xsl:apply-templates select="current-group()[position() lt 4][@role[matches(., $regex-container/hub:regex-map[@heading='yes']/@regex)]]/(@srcpath, node())" mode="#current"/>
+                </title>
+              </xsl:if>
+              <xsl:apply-templates mode="#current"
+                select="current-group()[not($regex-container/@dissolve-start and matches(@role, $regex-container/@start))]
+                                       [not($regex-container/@dissolve-end and matches(@role, $regex-container/@end))]
+                                       [not(position() lt 4 and @role[matches(., $regex-container/hub:regex-map[@heading='yes']/@regex)])]"/>
+            </xsl:element>
+          </xsl:for-each-group>
+        </xsl:when>
         <xsl:when test="current-grouping-key()  and 
                         current-group()
                           [last()]
