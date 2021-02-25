@@ -423,7 +423,7 @@
   
   <xsl:function name="hub:is-itemized-list" as="xs:boolean">
     <xsl:param name="list" as="element(*)"/>
-    <xsl:value-of select="if ( 
+    <xsl:sequence select="if( 
                               (
                                 matches(
                                   $list/listitem[1]/para[1]//phrase[hub:same-scope(., $list/listitem[1]/para[1])][hub:is-identifier(.)][1], 
@@ -447,7 +447,7 @@
                                 )
                               )
                               or hub:is-itemized-list-because-we-know-better($list)
-                          ) then true() else false()"/>
+                            ) then true() else false()"/>
   </xsl:function>
 
   <xsl:function name="hub:is-itemized-list-because-we-know-better" as="xs:boolean">
