@@ -41,7 +41,6 @@
     method="xml"
     indent="yes"
     encoding="utf-8"
-    saxon:suppress-indentation="para title simpara tocentry"
     />
 
   <!-- Params -->
