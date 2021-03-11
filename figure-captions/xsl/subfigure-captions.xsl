@@ -52,7 +52,7 @@
 
   <xsl:template name="hub:build-subfigure-caption">
     <xsl:param name="media" as="node()"/>
-    <xsl:param name="caption" as="node()+"/>
+    <xsl:param name="caption" as="node()*"/>
     <para>
       <mediaobject>
         <xsl:apply-templates select="$media/(@*, node())" mode="hub:subfigure-captions"/>
