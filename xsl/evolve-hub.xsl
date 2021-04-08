@@ -972,9 +972,12 @@
 
   <!-- mode: hub:join-phrases -->
 
+  <xsl:variable name="hub:join-phrases-element-names" as="xs:string+"
+    select="('phrase', 'subscript', 'superscript')"/>
+
   <xsl:template match="@srcpath[not(hub:boolean-param($srcpaths))]" mode="hub:join-phrases" />
 
-  <xsl:template match="*[phrase or superscript or subscript]" mode="hub:join-phrases">
+  <xsl:template match="*[*/name() = $hub:join-phrases-element-names]" mode="hub:join-phrases">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
       <xsl:for-each-group select="node()" group-adjacent="hub:phrase-signature(.)">
@@ -985,12 +988,12 @@
                           not(self::superscript or self::subscript)">
             <xsl:apply-templates select="current-group()" mode="hub:join-phrases-unwrap" />
           </xsl:when>
-          <xsl:when test="self::phrase or self::superscript or self::subscript">
+          <xsl:when test="self::*[name() = $hub:join-phrases-element-names]">
             <xsl:copy>
-              <xsl:if test="hub:boolean-param($srcpaths) and (current-group()/@srcpath)[. ne ''][1]">
-                <xsl:attribute name="srcpath" select="current-group()/@srcpath[. ne '']" separator=" "/>
-              </xsl:if>
-              <xsl:sequence select="@* except @srcpath" />
+              <xsl:apply-templates select="@*" mode="hub:join-phrases-copy-attributes">
+                <xsl:with-param name="new-srcpath" 
+                  select="string-join(current-group()/@srcpath, ' ')"/>
+              </xsl:apply-templates>
               <xsl:apply-templates select="current-group()" mode="hub:join-phrases-unwrap" />
             </xsl:copy>
           </xsl:when>
@@ -1034,28 +1037,26 @@
                           else '' " />
   </xsl:function>
 
+  <xsl:template match="@*" mode="hub:join-phrases-copy-attributes">
+    <xsl:copy/>
+  </xsl:template>
+
+  <xsl:template match="@srcpath" mode="hub:join-phrases-copy-attributes">
+    <xsl:param name="new-srcpath" as="xs:string"/>
+    <xsl:if test="hub:boolean-param($srcpaths)">
+      <xsl:attribute name="srcpath" select="$new-srcpath"/>
+    </xsl:if>
+  </xsl:template>
+
   <!-- If a span, return its hash. 
        If a whitespace text node in between two spans of same hash, return their hash.
        Otherwise, return the empty string. -->
   <xsl:function name="hub:phrase-signature" as="xs:string">
     <xsl:param name="node" as="node()" />
     <xsl:apply-templates select="$node" mode="hub:phrase-signature"/>
-    <!--<xsl:sequence select="if ($node/self::phrase or $node/self::superscript or $node/self::subscript) 
-                          then hub:signature($node)
-                          else 
-                            if ($node/self::*)
-                            then ''
-                            else
-                              if ($node/self::text()
-                                    [matches(., '^[\p{Zs}\s]+$')]
-                                    [hub:signature($node/preceding-sibling::*[1]) eq hub:signature($node/following-sibling::*[1])]
-                                 )
-                              then hub:signature($node/preceding-sibling::*[1])
-                              else ''
-                          " />-->
   </xsl:function>
   
-  <xsl:template match="phrase | superscript | subscript" mode="hub:phrase-signature" as="xs:string">
+  <xsl:template match="*[name() = $hub:join-phrases-element-names]" mode="hub:phrase-signature" as="xs:string">
     <xsl:sequence select="hub:signature(.)"/>
   </xsl:template>
 
@@ -1080,7 +1081,7 @@
   </xsl:template>
 
 
-  <xsl:template match="phrase | superscript | subscript" mode="hub:join-phrases-unwrap">
+  <xsl:template match="*[name() = $hub:join-phrases-element-names]" mode="hub:join-phrases-unwrap">
     <xsl:apply-templates mode="hub:join-phrases" />
   </xsl:template>
   
