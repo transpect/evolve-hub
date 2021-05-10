@@ -1809,6 +1809,12 @@
 
   <xsl:template match="phrase[matches(@role, $hub:remove-special-cstyle-role-regex)]" mode="hub:special-paras" />
 
+  <xsl:variable name="hub:index-role-regex" as="xs:string"
+    select="'^(Index-Heading)$'"/>
+  
+  <xsl:variable name="hub:create-index-element" as="xs:boolean"
+    select="false()"/>
+
   <xsl:variable name="hub:indexdiv-role-regex" as="xs:string"
     select="'^(Index-Head|Index_Head|Index Section Head)$'"/>
 
@@ -1825,7 +1831,7 @@
     select="'\s*(See|Siehe)\s*'"/>
   
   <xsl:template match="*[para[matches(@role, $hub:indexdiv-role-regex)]]" mode="hub:special-paras">
-    <xsl:copy>
+    <xsl:element name="{if ($hub:create-index-element and title[matches(@role,$hub:index-role-regex)]) then 'index' else local-name()}">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" group-starting-with="para[matches(@role, $hub:indexdiv-role-regex)]">
         <xsl:choose>
@@ -1842,7 +1848,7 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:for-each-group>
-    </xsl:copy>
+    </xsl:element>
   </xsl:template>
 
   <xsl:template match="para[matches(@role, $hub:primaryie-role-regex)]" mode="hub:special-paras">
@@ -2395,6 +2401,36 @@
         </xsl:choose>
       </xsl:for-each-group>
     </xsl:copy>
+  </xsl:template>
+  
+  <xsl:variable name="hub:seealso-indexentry-text-regex" select="'\s*[sS]iehe\p{Zs}+auch'"/>
+  
+  <xsl:template match="primaryie[matches(string-join(text(),''),$hub:seealso-indexentry-text-regex)]"  mode="hub:repair-hierarchy" priority="4">
+    <xsl:copy>
+      <xsl:apply-templates select="node()[not(matches(string-join(text(),''),$hub:seealso-indexentry-text-regex))]" mode="#current"/>
+    </xsl:copy>
+    <xsl:analyze-string select="node()[matches(string-join(text(),''),$hub:seealso-indexentry-text-regex)]" regex="{$hub:seealso-indexentry-text-regex}">
+      <xsl:matching-substring/>
+      <xsl:non-matching-substring>
+        <xsl:element name="seealsoie">
+          <xsl:value-of select="."/>
+        </xsl:element>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
+  </xsl:template>
+  
+  <xsl:template match="primaryie[matches(string-join(descendant::text(),''),$hub:see-indexentry-text-regex)]"  mode="hub:repair-hierarchy">
+    <xsl:copy>
+      <xsl:apply-templates select="node()[not(matches(string-join(text(),''),$hub:see-indexentry-text-regex))]" mode="#current"/>
+    </xsl:copy>
+    <xsl:analyze-string select="node()[matches(string-join(text(),''),$hub:see-indexentry-text-regex)]" regex="{$hub:see-indexentry-text-regex}">
+      <xsl:matching-substring/>
+      <xsl:non-matching-substring>
+        <xsl:element name="seeie">
+          <xsl:value-of select="."/>
+        </xsl:element>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
   </xsl:template>
 
   <!-- first node in figure or table title is an indexterm: move the indexterm at end of title -->
