@@ -27,6 +27,8 @@
                | Table_Legend_\d+-row
                | Tabelle
                | Table
+	       | Caption
+	       | Beschriftung
               )$'"/>
 
   <xsl:variable name="hub:table-caption-start-regex" as="xs:string"

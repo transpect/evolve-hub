@@ -32,6 +32,8 @@
                  Figure_?title
                | figlegend
                | Figure_Legend
+	       | Caption
+	       | Beschriftung
               )$'" />
   
   <xsl:variable name="hub:subfigure-caption-role-regex-x" as="xs:string"
