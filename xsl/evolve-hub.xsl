@@ -3556,7 +3556,7 @@
     </xsl:attribute>
   </xsl:template>
 
-  <xsl:template match="section | sidebar[title/@role = $hub:section-sidebar-roles]" mode="hub:ids">
+  <xsl:template match="section | sidebar[title/@role = $hub:section-sidebar-roles]" mode="hub:ids" priority="1">
     <xsl:copy>
       <xsl:apply-templates select="." mode="hub:ids-atts"/>
       <xsl:apply-templates select="@* except @xml:id | node()" mode="#current"/>
