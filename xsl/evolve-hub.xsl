@@ -1838,7 +1838,7 @@
           <xsl:when test="self::para[matches(@role, $hub:indexdiv-role-regex)]">
             <indexdiv>
               <title>
-                <xsl:apply-templates select="node()" mode="#current"/>
+                <xsl:apply-templates select="@*, node()" mode="#current"/>
               </title>
               <xsl:apply-templates select="current-group()[position() gt 1]" mode="#current"/>
             </indexdiv>
