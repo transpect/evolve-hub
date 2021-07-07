@@ -348,6 +348,9 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:choose>
+          <xsl:when test="every $n in listitem/node() satisfies $n[self::para[hub:is-equation-para(.)] or self::orderedlist]">
+            <xsl:apply-templates select="listitem/node()" mode="#current"/>
+          </xsl:when>
           <xsl:when test="listitem[1][count(node()) eq 1][orderedlist]">
             <xsl:apply-templates select="listitem[1]/node()" mode="#current"/>
             <blockquote role="hub:lists">
