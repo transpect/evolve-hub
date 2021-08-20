@@ -1904,7 +1904,7 @@
     </xsl:for-each>
   </xsl:template>
 
-  <!-- To Do: import Symbol font map as external -->
+  <!-- To Do: Import Symbol font map as external -->
   <xsl:variable name="hub:symbol-phrase-role-regex" select="'Symbolphrase-to-evolve'" as="xs:string"/>
   <xsl:variable name="hub:symbol-font-map" select="if (doc-available('http://transpect.io/evolve-hub/fontmaps/Symbol.xml')) then document('http://transpect.io/evolve-hub/fontmaps/Symbol.xml')/symbols/symbol else ()" as="node()*"/>
   <xsl:template match="phrase[matches(@role,$hub:symbol-phrase-role-regex)]" mode="hub:special-phrases">
