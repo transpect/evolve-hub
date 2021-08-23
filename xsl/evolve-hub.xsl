@@ -2580,7 +2580,7 @@
                              " mode="hub:identifiers">
     <xsl:param name="hub:already-identified" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:choose>
-      <xsl:when test="$hub:already-identified">
+      <xsl:when test="$hub:already-identified and not(ancestor::*[self::footnote[ancestor::*[self::title]]])">
         <xsl:next-match/>
       </xsl:when>
       <xsl:when test="not(@*) or (every $a in @* satisfies $a/name() = ('srcpath', 'xml:lang'))">
