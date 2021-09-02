@@ -1768,7 +1768,7 @@
   </xsl:template>
   
   <!-- If a paragraph contains only one inlineequation, then it should be a regular equation. -->
-  <xsl:template match="para/inlineequation[position() eq 1 and position() eq last()]" mode="hub:special-paras">
+  <xsl:template match="para[count(node()) = 1]/inlineequation" mode="hub:special-paras">
     <equation>
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </equation>
