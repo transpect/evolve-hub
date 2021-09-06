@@ -2965,8 +2965,12 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
+    <xsl:variable name="phrase-wrapper" as="element(phrase)?"
+      select="($cleaned-text-nodes/ancestor::phrase[last()])[1]"/>
     <phrase role="hub:caption-number">
-      <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
+      <xsl:if test="every $n in $cleaned-text-nodes satisfies $n/ancestor::*[. is ($phrase-wrapper)]">
+        <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
+      </xsl:if>
       <xsl:analyze-string select="$caption-number" regex="{$hub:number-and-suffix-id-regex}">
         <xsl:matching-substring>
           <phrase role="hub:identifier">
@@ -2981,7 +2985,9 @@
     </phrase>
     <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
       <phrase role="hub:caption-text">
-        <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
+        <xsl:if test="every $n in $cleaned-text-nodes satisfies $n/ancestor::*[. is $phrase-wrapper]">
+          <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
+        </xsl:if>
         <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'numbering-only')"/>
         <xsl:apply-templates select=".//*[self::anchor | self::indexterm]
                                          [some $follower in following-sibling::node() 
