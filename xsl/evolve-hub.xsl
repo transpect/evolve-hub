@@ -2782,9 +2782,10 @@
                        | formalpara[@role eq 'Programcode'][$hub:caption-tagging-for-listings]/title" 
     name="hub:float-title-identifier" 
     mode="hub:identifiers">
+    <xsl:variable name="cleaned-text-nodes" as="node()*"
+      select=".//text()[not(ancestor-or-self::indexterm|ancestor-or-self::footnote)]"/>
     <xsl:variable name="cleaned-text" as="xs:string?"
-                  select="string-join(.//text()[not(ancestor-or-self::indexterm
-                                                   |ancestor-or-self::footnote)],'')"/>
+      select="string-join($cleaned-text-nodes, '')"/>
     <xsl:copy>
       <xsl:apply-templates select="@*|processing-instruction()" mode="#current"/>
       <xsl:choose>
@@ -2875,7 +2876,8 @@
                           and matches( $cleaned-text, concat( '^', $hub:caption-number-regex ) )
                         ) and not(parent::*/@label)">
               <xsl:call-template name="create-identifier-x">
-                <xsl:with-param name="cleaned-text" as="xs:string" select="$cleaned-text"/>
+                <xsl:with-param name="cleaned-text" as="xs:string?" select="$cleaned-text"/>
+                <xsl:with-param name="cleaned-text-nodes" as="node()*" select="$cleaned-text-nodes"/>
               </xsl:call-template>
         </xsl:when>
 
@@ -2936,6 +2938,7 @@
 
   <xsl:template name="create-identifier-x">
     <xsl:param name="cleaned-text" as="xs:string?"/>
+    <xsl:param name="cleaned-text-nodes" as="node()*"/>
     <xsl:variable name="caption-number" as="xs:string">
       <xsl:choose>
         <!-- input examples: ^14.9$ -->
@@ -2963,6 +2966,7 @@
       </xsl:choose>
     </xsl:variable>
     <phrase role="hub:caption-number">
+      <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
       <xsl:analyze-string select="$caption-number" regex="{$hub:number-and-suffix-id-regex}">
         <xsl:matching-substring>
           <phrase role="hub:identifier">
@@ -2977,6 +2981,7 @@
     </phrase>
     <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
       <phrase role="hub:caption-text">
+        <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
         <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'numbering-only')"/>
         <xsl:apply-templates select=".//*[self::anchor | self::indexterm]
                                          [some $follower in following-sibling::node() 
