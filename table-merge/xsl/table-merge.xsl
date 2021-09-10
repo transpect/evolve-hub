@@ -29,6 +29,7 @@
       <xsl:element name="{$context/name()}">
         <xsl:sequence select="$context/@*"/>
         <xsl:for-each-group select="$context/node()" group-starting-with="*:table[not(hub:is-continued-table(.))]">
+          
           <xsl:choose>
             <xsl:when test="current-group()[1][self::*:table[not(hub:is-continued-table(.))]]">
               <xsl:for-each-group select="current-group()" group-ending-with="*[hub:is-continued-table(.)]">
@@ -46,7 +47,12 @@
                       <xsl:choose>
                         <xsl:when test="current-grouping-key() and current-group()[1][self::*:table[not(hub:is-continued-table(.))]] and current-group()[last()][self::*[hub:is-continued-table(.)]]">
                           <xsl:choose>
-                            <xsl:when test="string-join(current-group()[1]/*:title/*:phrase[@role='hub:caption-number']/*:phrase[@role='hub:identifier']/text(), '') = hub:get-continued-table-identifier(current-group()[last()])">
+                            <xsl:when test="string-join(current-group()[1]/*:title/*:phrase[@role='hub:caption-number']//*:phrase[@role='hub:identifier']/text(), '') = hub:get-continued-table-identifier(current-group()[last()])">
+                              <xsl:message>
+                                GRUPPE1:
+                                <xsl:copy-of select="current-group()"/>
+                                :GRUPPE1
+                              </xsl:message>
                               <table>
                                 <xsl:apply-templates select="current-group()[self::*[matches(name(),'table$')]][1]/@*" mode="#current"/>
                                 <xsl:apply-templates
@@ -143,6 +149,11 @@
                               </table>
                             </xsl:when>
                             <xsl:otherwise>
+                              <xsl:message>
+                                GRUPPE2:
+                                <xsl:copy-of select="current-group()"/>
+                                :GRUPPE2
+                              </xsl:message>
                               <xsl:apply-templates select="current-group()" mode="#current"/>
                             </xsl:otherwise>
                           </xsl:choose>
