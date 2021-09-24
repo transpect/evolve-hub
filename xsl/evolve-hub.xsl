@@ -47,7 +47,7 @@
 
   <xsl:param name="debug" select="'yes'"/>
   <xsl:param name="debug-path" select="concat($stylesheet-dir, 'debug')"/>
-  <xsl:param name="set-debugging-info-origin" select="'no'"/>
+  <xsl:param name="set-debugging-info-origin" select="'yes'"/>
   <xsl:param name="srcpaths" select="'no'"/>
   <xsl:param name="create-caption-numtext-separator" select="'no'"/>
   <xsl:param name="expand-css-properties" select="'yes'"/>
@@ -2708,7 +2708,7 @@
                          or
                          ancestor::tocentry
                          or (:section titles are handled via a named template:)
-                         ancestor::title[not(parent::section | parent::bibliography (: https://redmine.le-tex.de/issues/7869 :))]
+                         ancestor::title[not(parent::section | parent::bibliography | parent::figure | parent::table (: https://redmine.le-tex.de/issues/7869 :))]
                          or
                          ancestor::footnote
                        )
@@ -2879,6 +2879,7 @@
                 <xsl:with-param name="cleaned-text" as="xs:string?" select="$cleaned-text"/>
                 <xsl:with-param name="cleaned-text-nodes" as="node()*" select="$cleaned-text-nodes"/>
               </xsl:call-template>
+          <xsl:message select="'#####', $cleaned-text"></xsl:message>
         </xsl:when>
 
         <xsl:when test="tab">
@@ -3001,6 +3002,8 @@
         </xsl:apply-templates>
       </phrase>
     </xsl:variable>
+    <xsl:message select="'~~~', ($hub:create-caption-numtext-separator and 
+      exists($caption-number-with-tagged-separator//hub:caption-separator/node())) , '||', (contains($cleaned-text, '&#x9;') or $hub:create-caption-numtext-separator), '||',  $caption-number-with-tagged-separator"></xsl:message>
     <xsl:if test="$hub:create-caption-numtext-separator and 
       exists($caption-number-with-tagged-separator//hub:caption-separator/node())">
       <phrase role="hub:caption-numtext-separator">
