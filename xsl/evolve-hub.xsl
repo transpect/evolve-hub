@@ -2842,7 +2842,7 @@
           <xsl:apply-templates select="node()[. &gt;&gt; $identifier]" mode="#current"/>
         </xsl:when>
         <!-- examples: ^Fig. 2$,  ^Table 4.1$,  ^Listing 1.3$ -->
-        <xsl:when test="matches($cleaned-text, concat($hub:caption-number-without-sep-regex, '\s*$')) and not(parent::*/@label)">
+        <xsl:when test="matches($cleaned-text, concat($hub:caption-number-without-sep-regex, '\p{Zs}*$')) and not(parent::*/@label)">
           <xsl:for-each select=".//text()">
             <xsl:if test="not(ancestor-or-self::indexterm
                              |ancestor-or-self::footnote)">
