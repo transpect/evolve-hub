@@ -3002,8 +3002,6 @@
         </xsl:apply-templates>
       </phrase>
     </xsl:variable>
-    <xsl:message select="'~~~', ($hub:create-caption-numtext-separator and 
-      exists($caption-number-with-tagged-separator//hub:caption-separator/node())) , '||', (contains($cleaned-text, '&#x9;') or $hub:create-caption-numtext-separator), '||',  $caption-number-with-tagged-separator"></xsl:message>
     <xsl:if test="$hub:create-caption-numtext-separator and 
       exists($caption-number-with-tagged-separator//hub:caption-separator/node())">
       <phrase role="hub:caption-numtext-separator">
