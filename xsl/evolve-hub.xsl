@@ -935,7 +935,7 @@
           <xsl:when test="current-group()[1][self::*[hub:is-table-not-in-table-env(.)]]">
             <xsl:sequence select="$captions" />
             <xsl:apply-templates select="current-group() except $captions" mode="#current">
-              <xsl:with-param name="sorted-table-caption" as="xs:boolean" select="true()" tunnel="yes"/>
+              <xsl:with-param name="sorted-table-caption" as="xs:boolean" select="if ($captions[self::*:para[matches(@role, $hub:table-title-role-regex-x, 'x')]]) then true() else false()" tunnel="yes"/>
             </xsl:apply-templates>
           </xsl:when>
           <xsl:otherwise>
