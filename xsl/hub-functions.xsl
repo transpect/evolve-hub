@@ -373,6 +373,24 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
+
+  <xsl:function name="hub:normalize-text" as="xs:string">
+    <xsl:param name="nodes" as="node()*"/>
+    <xsl:param name="type" as="xs:string?"/>
+    <xsl:choose>
+      <xsl:when test="$type = '+annot'">
+        <xsl:sequence select="normalize-space(string-join($nodes, ''))"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="normalize-space(string-join($nodes/descendant::text()[not(ancestor::annotation)], ''))"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+
+  <xsl:function name="hub:normalize-text" as="xs:string">
+    <xsl:param name="nodes" as="node()*"/>
+    <xsl:sequence select="hub:normalize-text($nodes, '')"/>
+  </xsl:function>
   
   <!-- converts filerefs starting with 'container:' to URIs -->
   
