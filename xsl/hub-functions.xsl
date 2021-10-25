@@ -102,7 +102,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="@* | indexterm | para | alt" mode="discard-index-terms-and-paras"/>
+  <xsl:template match="@* | indexterm | para | alt | info" mode="discard-index-terms-and-paras"/>
   
   <xsl:function name="hub:insert-sep" as="element(*)">
     <xsl:param name="elt" as="element(*)" />
