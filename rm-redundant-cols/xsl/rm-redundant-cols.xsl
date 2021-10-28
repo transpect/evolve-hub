@@ -199,7 +199,7 @@
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="*:colspec" mode="hub:rm-redundant-cols-colname hub:rm-redundant-cols-nameend">
+  <xsl:template match="*:tgroup/*:colspec" mode="hub:rm-redundant-cols-colname hub:rm-redundant-cols-nameend">
     <xsl:param name="redundant-cols" tunnel="yes" as="xs:string*" select="()"/>
     
     <xsl:copy>
@@ -219,7 +219,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="*:colspec" mode="hub:rm-redundant-cols-namest">
+  <xsl:template match="*:tgroup/*:colspec" mode="hub:rm-redundant-cols-namest">
     <xsl:param name="redundant-cols" tunnel="yes" as="xs:string*" select="()"/>
     
     <xsl:copy>
