@@ -2882,7 +2882,6 @@
                 <xsl:with-param name="cleaned-text" as="xs:string?" select="$cleaned-text"/>
                 <xsl:with-param name="cleaned-text-nodes" as="node()*" select="$cleaned-text-nodes"/>
               </xsl:call-template>
-          <xsl:message select="'#####', $cleaned-text"></xsl:message>
         </xsl:when>
 
         <xsl:when test="tab">
