@@ -76,6 +76,7 @@
               </title>
               <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
               <xsl:apply-templates select="current-group()[1]" mode="#current"/>
+              
               <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
             </figure>
             <xsl:apply-templates select="$note-me-maybe[not(self::notes | self::copyrights)]" mode="#current"/>
@@ -94,25 +95,34 @@
   <!-- if there’s more than one note or copyright statement, you’ll have to apply some more grouping -->
   
   <xsl:template name="hub:figure-notes">
-    <xsl:apply-templates select="current-group()" mode="#current"/>
+    <xsl:apply-templates select="current-group()" mode="#current">
+      <xsl:with-param name="figure-env-created" as="xs:boolean" tunnel="yes" select="true()"/>
+    </xsl:apply-templates>
   </xsl:template>
 
   <xsl:template name="hub:figure-copyrights">
-    <xsl:apply-templates select="current-group()" mode="#current"/>
+    <xsl:apply-templates select="current-group()" mode="#current">
+      <xsl:with-param name="figure-env-created" as="xs:boolean" tunnel="yes" select="true()"/>
+    </xsl:apply-templates>
   </xsl:template>
   
   <xsl:template name="hub:figure-further-paras">
-    <xsl:apply-templates select="current-group()" mode="#current"/>
+    <xsl:apply-templates select="current-group()" mode="#current">
+      <xsl:with-param name="figure-env-created" as="xs:boolean" tunnel="yes" select="true()"/>
+    </xsl:apply-templates>
   </xsl:template>
 
   <xsl:variable name="hub:create-note-element-for-figure-note-in-figure-note" as="xs:boolean"
     select="false()"/>
 
   <xsl:template match="para[matches(@role, $hub:figure-note-role-regex)]" mode="hub:figure-captions">
+    <xsl:param name="figure-env-created" as="xs:boolean?" tunnel="yes" select="false()"/>
     <xsl:choose>
       <!-- case: note paragraphs in a table (wrapped in another para with figure-note-role-regex) -->
-      <xsl:when test="ancestor::para[matches(@role, $hub:figure-note-role-regex)]
-                      and $hub:create-note-element-for-figure-note-in-figure-note = false()">
+      <xsl:when test="(ancestor::para[matches(@role, $hub:figure-note-role-regex)]
+                       and $hub:create-note-element-for-figure-note-in-figure-note = false()
+                      )
+                      or $figure-env-created = false()">
         <xsl:next-match/>
       </xsl:when>
       <xsl:otherwise>
@@ -124,13 +134,20 @@
   </xsl:template>
 
   <xsl:template match="para[matches(@role, $hub:figure-copyright-statement-role-regex)]" mode="hub:figure-captions">
-    <xsl:element name="info">
-      <!-- legalnotice because copyright requires a tagged year -->
-      <xsl:element name="legalnotice">
-        <xsl:attribute name="role" select="'copyright'"/>
+    <xsl:param name="figure-env-created" as="xs:boolean?" tunnel="yes"/>
+    <xsl:choose>
+      <xsl:when test="$figure-env-created">
+        <xsl:element name="info">
+        <!-- legalnotice because copyright requires a tagged year -->
+        <xsl:element name="legalnotice">
+          <xsl:attribute name="role" select="'copyright'"/>
+          <xsl:next-match/>
+        </xsl:element>
+      </xsl:element></xsl:when>
+      <xsl:otherwise>
         <xsl:next-match/>
-      </xsl:element>
-    </xsl:element>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <!-- This is another figure caption template to handle figures with more than one actual image in figure. Split figures for example or really several images with just one caption.
@@ -195,6 +212,7 @@
               <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
             </figure>
             <xsl:apply-templates select="$note-me-maybe[not(self::notes | self::copyrights)]" mode="#current"/>
+            
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
