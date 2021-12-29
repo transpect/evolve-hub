@@ -28,8 +28,14 @@
       <xsl:for-each-group select="node()" group-ending-with="*[hub:is-subfigure-caption(.)]">
         <xsl:choose>
           <xsl:when test="current-group()[last()][hub:is-subfigure-caption(.)]">
-            <xsl:for-each-group select="current-group()" group-starting-with="*[hub:is-subfigure(.)]">
+            <xsl:for-each-group select="current-group()" group-starting-with="*[hub:is-subfigure(.)][not(preceding-sibling::*[1][hub:is-subfigure-unit(.)])] | *[hub:is-subfigure-unit(.)]">
               <xsl:choose>
+                <xsl:when test="current-group()[1][hub:is-subfigure-unit(.)]">
+                  <xsl:call-template name="hub:build-subfigure-caption">
+                    <xsl:with-param name="media" select="current-group()[2]//(self::mediaobject, mediaobject, inlinemediaobject)"/>
+                    <xsl:with-param name="caption" select="current-group()[position() gt 2], current-group()[1]"/>
+                  </xsl:call-template>
+                </xsl:when>
                 <xsl:when test="current-group()[1][hub:is-subfigure(.)]">
                   <xsl:call-template name="hub:build-subfigure-caption">
                     <xsl:with-param name="media" select="current-group()[1]//(self::mediaobject, mediaobject, inlinemediaobject)"/>

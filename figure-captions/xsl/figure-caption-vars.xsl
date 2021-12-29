@@ -143,4 +143,17 @@
                              )"/>
   </xsl:function>
 
+  <xsl:function name="hub:is-figure-unit" as="xs:boolean">
+    <xsl:param name="node" as="node()?"/>
+    <xsl:sequence select="exists($node/self::para[matches(@role, $hub:figure-units-role-regex-x, 'x')][following-sibling::*[1][hub:is-figure(.)]])"/>
+  </xsl:function>
+  
+  <xsl:function name="hub:is-subfigure-unit" as="xs:boolean">
+    <xsl:param name="node" as="node()?"/>
+    <xsl:sequence select="exists($node/self::para[matches(@role, $hub:figure-units-role-regex-x, 'x')][following-sibling::*[1][hub:is-subfigure(.)]])"/>
+  </xsl:function>
+  
+  <xsl:variable name="hub:figure-units-role-regex-x" as="xs:string"
+    select="'^this-should-be-overriden-by-a-custom-regex$'" />
+
 </xsl:stylesheet>

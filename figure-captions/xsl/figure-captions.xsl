@@ -212,7 +212,6 @@
               <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
             </figure>
             <xsl:apply-templates select="$note-me-maybe[not(self::notes | self::copyrights)]" mode="#current"/>
-            
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
