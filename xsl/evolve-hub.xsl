@@ -2851,7 +2851,7 @@
     name="hub:float-title-identifier" 
     mode="hub:identifiers">
     <xsl:variable name="cleaned-text-nodes" as="node()*"
-      select=".//text()[not(ancestor-or-self::indexterm|ancestor-or-self::footnote)]"/>
+      select=".//text()[not(ancestor-or-self::*/name() = ('annotation', 'indexterm', 'footnote'))]"/>
     <xsl:variable name="cleaned-text" as="xs:string?"
       select="string-join($cleaned-text-nodes, '')"/>
     <xsl:copy>
@@ -2912,8 +2912,7 @@
         <!-- examples: ^Fig. 2$,  ^Table 4.1$,  ^Listing 1.3$ -->
         <xsl:when test="matches($cleaned-text, concat($hub:caption-number-without-sep-regex, '\p{Zs}*$')) and not(parent::*/@label)">
           <xsl:for-each select=".//text()">
-            <xsl:if test="not(ancestor-or-self::indexterm
-                             |ancestor-or-self::footnote)">
+            <xsl:if test="not(ancestor-or-self::*/name() = ('annotation', 'indexterm', 'footnote'))">
               <phrase role="hub:caption-number">
                 <xsl:analyze-string select="." regex="{$hub:number-and-suffix-id-regex}">
                   <xsl:matching-substring>
