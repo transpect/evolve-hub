@@ -2721,8 +2721,13 @@
       <xsl:matching-substring>
         <xsl:choose>
           <xsl:when test="$context/following-sibling::node()[1]/self::tab 
-                          and matches($context, concat($hub:orderedlist-mark-at-start-regex, '\p{L}'))
-                          (: GI 2018-09-06: [A-Za-z] → \p{L} so that in 'o.ä.' 'o.' won’t be marked up as hub:identifier :)
+                          and (
+                            (: GI 2018-09-06: [A-Za-z] → \p{L} so that in 'o.ä.' 'o.' won’t be marked up as hub:identifier :)
+                            matches($context, concat($hub:orderedlist-mark-at-start-regex, '\p{L}'))
+                            or
+                            (: exclude simple letter+space variant, example: 'zu 2.4:' :)
+                            matches($context, '^\p{L}+\s')
+                          )
                           or $hub:already-identified
                           or $no-identifier-but-simple-equation-starts">
             <xsl:value-of select="." />
