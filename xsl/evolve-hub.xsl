@@ -2724,12 +2724,11 @@
                           and (
                             (: GI 2018-09-06: [A-Za-z] → \p{L} so that in 'o.ä.' 'o.' won’t be marked up as hub:identifier :)
                             matches($context, concat($hub:orderedlist-mark-at-start-regex, '\p{L}'))
-                            or
-                            (: exclude simple letter+space variant, example: 'zu 2.4:' :)
-                            matches($context, '^\p{L}+\s')
                           )
                           or $hub:already-identified
-                          or $no-identifier-but-simple-equation-starts">
+                          or $no-identifier-but-simple-equation-starts
+                          or (: exclude simple letter+space variant, example: 'zu 2.4:' :)
+                          matches($context, '^\p{L}+\s')">
             <xsl:value-of select="." />
           </xsl:when>
           <xsl:otherwise>
