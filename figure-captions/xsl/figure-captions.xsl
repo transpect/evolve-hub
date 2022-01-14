@@ -62,7 +62,8 @@
             <figure>
               <xsl:variable name="anchor" as="element(anchor)?" 
                 select="if($hub:use-title-child-anchor-id-for-figure-id) 
-                then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)], $title//anchor[@xml:id][hub:same-scope(., $title)])[1] 
+                        then ($title//anchor[not(@role = ('start', 'end'))][@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)], 
+                              $title//anchor[not(@role = ('start', 'end'))][@xml:id][hub:same-scope(., $title)])[1] 
                         else ()"/>
               <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation"/>
               <xsl:if test="(current-group()[1], $note-me-maybe/*[self::copyrights or self::notes])/@srcpath">
@@ -192,9 +193,9 @@
             </xsl:variable>
             <figure>
               <xsl:variable name="anchor" as="element(anchor)?" 
-                          select="if($hub:use-title-child-anchor-id-for-figure-id) 
-                          then ($title//anchor[@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
-                                  else ()"/>
+                select="if($hub:use-title-child-anchor-id-for-figure-id) 
+                        then ($title//anchor[@xml:id][not(@role = ('start', 'end'))][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)])[1] 
+                        else ()"/>
               <xsl:sequence select="$anchor/@xml:id"/>
               <xsl:if test="$note-me-maybe/*/para/@srcpath | current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath">
                 <xsl:attribute name="srcpath" select="string-join(($note-me-maybe/*/para/@srcpath, (current-group()[*][hub:is-figure(.) and . &lt;&lt; $title] | $title[hub:is-figure(.)])[1]/@srcpath),' ')"/>  
@@ -212,6 +213,7 @@
               <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
             </figure>
             <xsl:apply-templates select="$note-me-maybe[not(self::notes | self::copyrights)]" mode="#current"/>
+            
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="current-group()" mode="#current"/>
