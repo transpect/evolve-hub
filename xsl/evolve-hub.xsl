@@ -2726,9 +2726,7 @@
                             matches($context, concat($hub:orderedlist-mark-at-start-regex, '\p{L}'))
                           )
                           or $hub:already-identified
-                          or $no-identifier-but-simple-equation-starts
-                          or (: exclude simple letter+space variant, example: 'zu 2.4:' :)
-                          matches($context, '^\p{L}+\s')">
+                          or $no-identifier-but-simple-equation-starts">
             <xsl:value-of select="." />
           </xsl:when>
           <xsl:otherwise>
