@@ -3808,7 +3808,7 @@
       <!-- the template with this priority would override id recognition, therefore it is explicitly called here-->
         <xsl:apply-templates select="." mode="hub:ids-atts"/>
       </xsl:if>
-      <xsl:apply-templates select="if (self::section or self::sidebar[title]) then (@* except @xml:id, node()) else (@*, node())" mode="#current"/>
+      <xsl:apply-templates select="if (self::section or self::sidebar[title]) then (@* except @xml:id) else @*" mode="#current"/>
       <xsl:for-each-group select="node()" 
         group-adjacent="boolean(self::para[matches(@role, $hub:poetry-heading-regex-x, 'x')] | self::linegroup)">
         <xsl:choose>
