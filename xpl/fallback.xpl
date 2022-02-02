@@ -218,7 +218,7 @@
   </p:documentation>
   
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/00" mode="hub:split-at-tab">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/00" mode="hub:split-at-tab">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
@@ -226,77 +226,77 @@
   </tr:xslt-mode>
   
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/01" mode="hub:dissolve-sidebars-without-purpose">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/01" mode="hub:dissolve-sidebars-without-purpose">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/02" mode="hub:preprocess-hierarchy">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/02" mode="hub:preprocess-hierarchy">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/03" mode="hub:hierarchy">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/03" mode="hub:hierarchy">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/04" mode="hub:postprocess-hierarchy">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/04" mode="hub:postprocess-hierarchy">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/11" mode="hub:subfigure-captions">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/11" mode="hub:subfigure-captions">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
 
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/12" mode="hub:figure-captions">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/12" mode="hub:figure-captions">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/13" mode="hub:table-captions">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/13" mode="hub:table-captions">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
 
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/40" mode="hub:repair-hierarchy">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/40" mode="hub:repair-hierarchy">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/41" mode="hub:join-phrases">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/41" mode="hub:join-phrases">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/42" mode="hub:twipsify-lengths">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/42" mode="hub:twipsify-lengths">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/44" mode="hub:identifiers">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/44" mode="hub:identifiers">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
@@ -309,21 +309,21 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </hub:evolve-hub_lists-by-indent>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/60" mode="hub:ids">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/60" mode="hub:ids">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode hub-version="1.1" msg="yes" prefix="evolve-hub/75" mode="hub:handle-phrase">
+  <tr:xslt-mode hub-version="1.2" msg="yes" prefix="evolve-hub/75" mode="hub:handle-phrase">
     <p:input port="stylesheet"><p:pipe port="stylesheet" step="evolve-hub"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <tr:xslt-mode msg="yes" hub-version="1.1" prefix="evolve-hub/90" mode="hub:clean-hub">
+  <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/90" mode="hub:clean-hub">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
