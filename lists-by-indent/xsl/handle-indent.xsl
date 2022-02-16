@@ -112,8 +112,8 @@
                        ):)
                        and not(matches(@role, $hub:list-by-indent-exception-role-regex))
                        and not(self::*[local-name() = ('title', 'subtitle', 'titleabbrev', 'bridgehead', 'entry')])
-                       and not(self::para[(@role = $hub:equation-roles)]
-                                         [empty(preceding-sibling::*[1]/self::para[hub:is-list-member-candidate(.)]
+                       and not(self::para[@role = $hub:equation-roles]
+                                         [empty(preceding-sibling::*[not(@role = $hub:equation-roles)][1]/self::para[hub:is-list-member-candidate(.)]
                                                                                   [$equations-after-list-paras-belong-to-list = 'yes']
                                                )
                                          ]
