@@ -86,14 +86,17 @@
       (3) is an mediaobject itself.
       result is boolean.
   -->
-  
+  <xsl:variable name="tr:preserve-para-with-fig-role-regex" select="'tr_para_separator'" as="xs:string"/>
+
   <xsl:function name="hub:is-figure" as="xs:boolean">
     <xsl:param name="node" as="node()?"/>
     <xsl:sequence select="if 
                           (
-                            $node/self::para[mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')]
+                            $node/self::para[not(@role[matches(., $tr:preserve-para-with-fig-role-regex)])]
+                                            [mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')]
                             or 
-                            $node/self::para[phrase/mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')
+                            $node/self::para[not(@role[matches(., $tr:preserve-para-with-fig-role-regex)])]
+                                            [phrase/mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')
                               and matches(hub:same-scope-text(phrase),'^[\s&#xa0;&#x2002;]*$')]
                             or 
                             $node/self::mediaobject
