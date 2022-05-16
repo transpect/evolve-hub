@@ -2504,7 +2504,7 @@
   <!-- first node in figure or table title is an indexterm: move the indexterm at end of title -->
   <xsl:template match="*[self::table or self::figure]/title[node()[1]
                                                                   [self::indexterm or 
-                                                                   self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]]]" 
+                                                                   self::anchor[not(@xml:id and matches(@xml:id, '^((title|para)Id|(cell)?page)_'))]]]" 
                 mode="hub:repair-hierarchy" priority="1">
     <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or 
                                                                       self::anchor)]
@@ -2530,7 +2530,7 @@
   
   <xsl:template match="section/title[node()[1]
                                            [self::indexterm or 
-                                            self::anchor[not(@xml:id and matches(@xml:id, '^(cell)?page_'))]
+                                            self::anchor[not(@xml:id and matches(@xml:id, '^((title|para)Id|(cell)?page)_'))]
                                                         [not(@role='start' and 
                                                              @xml:id and 
                                                              matches(following-sibling::anchor[@role='end']/@xml:id,
@@ -2573,7 +2573,6 @@
 
   <xsl:variable name="hub:figure-caption-must-begin-with-figure-caption-start-regex"  as="xs:boolean"
     select="true()" />
-
   <xsl:template match="keywordset[@role eq 'hub']" mode="hub:identifiers">
     <xsl:copy>
       <xsl:sequence select="@*" />
