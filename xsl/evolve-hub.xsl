@@ -2696,7 +2696,7 @@
                                        ]
                                     )
                           ]
-                          [following-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::tab]" mode="hub:identifiers">
+                          [following-sibling::node()[not(self::text()[matches(., '^\s+$')])][1]/self::tab][not(parent::*/phrase[@role='hub:identifier'])]" mode="hub:identifiers">
     <phrase role="hub:identifier">
       <xsl:copy>
       <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'phrase-not-identif-yet-with-link')"/>
