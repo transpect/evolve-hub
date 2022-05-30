@@ -2764,6 +2764,7 @@
     <xsl:sequence 
       select="boolean(
                 $text[not(ancestor::phrase[@role eq 'hub:identifier'][hub:same-scope($text, .)])]
+                     [empty(ancestor::*[self::title|self::para][phrase[@role eq 'hub:identifier']])]
                      [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
                      [not(ancestor::*:math)]
                      [matches(., $hub:orderedlist-mark-at-start-regex)]
