@@ -358,18 +358,24 @@
     </para>
   </xsl:template>
   
-  <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]]" mode="hub:join-tables">
+  <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]
+                                      [not(@morerows) or @morerows='0']]" mode="hub:join-tables">
+    <!-- some customers wished to join entries that have a rowspan. 
+         In this case the tables have to be normalized before (http://transpect.io/xslt-util/calstable/xsl/call-normalize.xsl) and the 
+         @role of the entries copied (not a default in normalization).
+         The joining  applies to last temp entry (morerows="0"=) only.
+         In a next mode the temporary entries (with @linkend to parent) must be discarded and their content merged to parent cell (with @xml:id) -->
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="row"
                           group-starting-with="*[self::row]
                                                 [entry
-                                                      [matches(@role, $hub:split-style-regex)]
+                                                      [matches(@role, $hub:split-style-regex)][not(@morerows) or @morerows='0']
                                                       [not(parent::*/preceding-sibling::*[1][entry[matches(@role, $hub:split-style-regex)]])]
                                                 ]">
          <xsl:for-each-group  select="current-group()" 
-                              group-adjacent="exists(entry[matches(@role, $hub:split-style-regex)] 
-                                                     | entry[parent::*/preceding-sibling::*[1][self::row][entry[matches(@role, $hub:split-style-regex)]]])">
+                              group-adjacent="exists(entry[matches(@role, $hub:split-style-regex)][not(@morerows) or @morerows='0']
+                                                     | entry[parent::*/preceding-sibling::*[1][self::row][entry[matches(@role, $hub:split-style-regex)][not(@morerows) or @morerows='0']]])">
           <xsl:choose>
             <xsl:when test="current-grouping-key()">
               <xsl:copy>
@@ -377,13 +383,24 @@
                 <xsl:for-each select="entry">
                   <xsl:copy>
                     <xsl:variable name="pos" select="position()"/>
+                    <!-- wenn die Zelle in der nächsten Zeile ein morerows hat, muss das übernommen werden, sonst steht b3 allein in einer Zeile:
+                    |–––––––––––––––––––––––––|    
+                    | a1 ~SPLIT   | b1 ~SPLIT |
+                    |–––––––––––––|–––––––––––|
+                    |             | b2 ~REST  |
+                    | a2/3 ~ REST |–––––––––––|
+                    |             | b3        |
+                    ––––––––––––––––––––––––––
+                    -->
                     <xsl:apply-templates select="@* except @css:border-bottom-width, 
                                                   (
                                                     (../following-sibling::row[entry[position() eq $pos]
                                                                                     [not(matches(@role, '_-_SPLIT'))]
                                                                              ]
-                                                     )[1]/entry[position() eq $pos]/@css:border-bottom-width, 
-                                                    key('hub:style-by-role',(../following-sibling::row[entry[position() eq $pos][not(matches(@role, '_-_SPLIT'))]])[1]/entry[position() eq $pos]/@role)/@css:border-bottom-width)[1]" mode="#current"/>
+                                                     )[1]/entry[position() eq $pos]/@*[name() = ('css:border-bottom-width', 'morerows')], 
+                                                    key('hub:style-by-role',
+                                                         (../following-sibling::row[entry[position() eq $pos][not(matches(@role, '_-_SPLIT'))]]
+                                                        )[1]/entry[position() eq $pos]/@role)/@css:border-bottom-width)[1]" mode="#current"/>
                     <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" group-starting-with="*[hub:split-start-para(., $pos)]">
                       <xsl:for-each-group select="current-group()" group-adjacent="hub:to-be-grouped-with-split(., $pos)">
                         <xsl:choose>
