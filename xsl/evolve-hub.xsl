@@ -888,7 +888,7 @@
                          ($caption/preceding-sibling::*[1][hub:is-figure(.)]))]" mode="hub:sort-figure-captions">
     <xsl:copy>
       <xsl:sequence select="@*" />
-      <xsl:for-each-group select="*" group-starting-with="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]">
+      <xsl:for-each-group select="node()" group-starting-with="para[matches(@role, $hub:figure-title-role-regex-x, 'x')]">
         <xsl:variable name="mediaobjects" select="current-group() 
                                                   intersect
                                                   following-sibling::*[hub:is-figure(.)][hub:is-figure-title(preceding-sibling::*[1])]" />
