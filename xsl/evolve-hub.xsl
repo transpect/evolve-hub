@@ -2953,6 +2953,15 @@
           </phrase>
         </xsl:when>
 
+        <xsl:when test="tab">
+          <xsl:variable name="_tb" select="tab[1]" as="element(tab)"/>
+          <phrase role="hub:identifier">
+            <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tab-identifier')"/>
+            <xsl:apply-templates select="node()[ . &lt;&lt; $_tb]" mode="#current"/>
+          </phrase>
+          <xsl:apply-templates select="$_tb | node()[ . &gt;&gt; $_tb]" mode="#current"/>
+        </xsl:when>
+
         <!-- examples: ^Fig. 4.1: bla .*$, ^Tab. 3[&#x2002;]bla .*$, ^14.9$ -->
         <xsl:when test="matches($cleaned-text, $hub:caption-number-plus-sep-regex)
                         or (: figure title just starts with i.e. '23.7' :)
@@ -2967,14 +2976,6 @@
               </xsl:call-template>
         </xsl:when>
 
-        <xsl:when test="tab">
-          <xsl:variable name="_tb" select="tab[1]" as="element(tab)"/>
-          <phrase role="hub:identifier">
-            <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tab-identifier')"/>
-            <xsl:apply-templates select="node()[ . &lt;&lt; $_tb]" mode="#current"/>
-          </phrase>
-          <xsl:apply-templates select="$_tb | node()[ . &gt;&gt; $_tb]" mode="#current"/>
-        </xsl:when>
 
         <!-- input examples: ^Abb. A.1$, ^Table K.1. - .*$ -->
         <xsl:when test="matches(
