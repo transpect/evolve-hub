@@ -97,7 +97,7 @@
 
   <!-- IDML, list continuation paras in listitems -->
   <xsl:template match="orderedlist[some $p in listitem/para[1] 
-                                   satisfies ($p[descendant::phrase[@role = 'hub:identifier']
+    satisfies ($p[descendant::phrase[@role = 'hub:identifier'][not(ancestor::*/@role = $hub:equation-roles)][not(ancestor::*/@role = $hub:equation-roles)]
                                                                    [hub:same-scope(., $p)]]
                                               or 
                                               hub:is-variable-list-listitem-without-phrase-identifier($p)
@@ -105,7 +105,7 @@
                                   ] (:for the very special case of unordered list without any identifier:)
                                   [(some $p in listitem/para[1] 
                                     satisfies ($p[not(
-                                                    descendant::phrase[@role = 'hub:identifier']
+                                    descendant::phrase[@role = 'hub:identifier'][not(ancestor::*/@role = $hub:equation-roles)]
                                                                       [hub:same-scope(., $p)]
                                                  )] 
                                                and 
@@ -113,7 +113,7 @@
                                               )
                                    )
                                    and (some $p in listitem/para[1] 
-                                        satisfies ($p[descendant::phrase[@role = 'hub:identifier']
+                                   satisfies ($p[descendant::phrase[@role = 'hub:identifier'][not(ancestor::*/@role = $hub:equation-roles)]
                                                                         [hub:same-scope(., $p)]] 
                                                    or 
                                                    hub:is-variable-list-listitem-without-phrase-identifier($p)
@@ -130,13 +130,13 @@
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" group-starting-with="listitem[para[1][
-                                                                 descendant::phrase[@role = 'hub:identifier'][hub:same-scope(.,ancestor::para[last()])]
+        descendant::phrase[@role = 'hub:identifier'][not(ancestor::*/@role = $hub:equation-roles)][hub:same-scope(.,ancestor::para[last()])]
                                                                  or
                                                                  hub:is-variable-list-listitem-without-phrase-identifier(.)
                                                                  ][not(@role = $hub:equation-roles)]]">
         <xsl:choose>
           <xsl:when test="current-group()[1][self::listitem[para[1][
-                            descendant::phrase[@role = 'hub:identifier'][hub:same-scope(., ancestor::para[last()])]
+            descendant::phrase[@role = 'hub:identifier'][not(ancestor::*/@role = $hub:equation-roles)][hub:same-scope(., ancestor::para[last()])]
                             or
                             hub:is-variable-list-listitem-without-phrase-identifier(.)
                             ][not(@role = $hub:equation-roles)]]]">
