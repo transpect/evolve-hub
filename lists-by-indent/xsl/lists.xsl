@@ -313,6 +313,14 @@
                 </orderedlist>
               </xsl:for-each-group>    
             </xsl:when>
+            <xsl:when test="hub:is-ordered-list-exception(current-group())">
+              <orderedlist numeration="{hub:get-list-type-with-warning(current-group()/para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])}">
+                <xsl:apply-templates select="current-group()" mode="#current">
+                  <xsl:with-param name="set-override" select="'no'" tunnel="yes"/>
+                  <xsl:with-param name="identifier-needed" tunnel="yes" select="'yes'"/>
+                </xsl:apply-templates>
+              </orderedlist>
+            </xsl:when>
             <xsl:otherwise>
               <orderedlist numeration="{hub:get-list-type-with-warning(current-group()/para[1]//phrase[hub:same-scope(.,current-group()[1]/para[1])][hub:is-identifier(.)][1])}">
                 <xsl:apply-templates select="current-group()" mode="#current">
@@ -335,7 +343,11 @@
     </xsl:for-each-group>
   </xsl:template>
 
-
+  <xsl:function name="hub:is-ordered-list-exception" as="xs:boolean">
+    <xsl:param name="group"/>
+    <xsl:sequence select="false()"/>
+  </xsl:function>
+  
   <!-- indentations that are not list items as blockquote -->
   <xsl:template match="orderedlist[not(hub:is-itemized-list(.))]
                                   [not(hub:is-ordered-list(.))]
