@@ -118,6 +118,7 @@
     	  <xsl:variable name="first-tab" select="$tabs[1]" as="element(tab)"/>
         <varlistentry>
           <term>
+            <xsl:apply-templates select="$first-para/@srcpath" mode="#current"/>
             <xsl:sequence select="hub:split-term-at-tab($first-para,$first-tab)"/>
           </term>
           <xsl:copy>
