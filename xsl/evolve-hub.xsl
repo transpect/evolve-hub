@@ -2331,19 +2331,25 @@
                                                                              ]">
             <xsl:choose>
               <xsl:when test="self::row[hub:is-first-thead-row(.)]">
-               
-                  <xsl:for-each-group select="current-group()" group-adjacent="exists(entry/para) 
+                  <xsl:for-each-group select="current-group()[not(self::text()[matches(., '^\p{Zs}+$')])]" group-adjacent="exists(entry/para) 
                                                                                and (
                                                                                  every $x in entry/para satisfies
                                                                                    ($x/@role[matches(., $hub:thead-pstyle-regex)])
                                                                                    or (every $x in entry satisfies
                                                                                       ($x/@role[matches(., $hub:thead-cstyle-regex)]))
-                                                                               ) and 
+                                                                               ) and (:do not include head rows in the body of the table  :)
                                                                                empty(preceding-sibling::row[entry/para]
-                                                                               [some $x in entry/para satisfies
-                                                                                   (not($x/@role[matches(., $hub:thead-pstyle-regex)]))
-                                                                                   or (some $x in entry satisfies
-                                                                                      not($x/@role[matches(., $hub:thead-cstyle-regex)]))])">
+                                                                                                           [(some $p in entry/para/@role satisfies matches($p, $hub:thead-pstyle-regex) 
+                                                                                                             and (:if table head paras then ist has to be every para :)
+                                                                                                             (some $p2 in entry/para satisfies ($p2[not(@role) or not(matches($p2/@role, $hub:thead-pstyle-regex))]))
+                                                                                                            )
+                                                                                                            or 
+                                                                                                            (some $c in entry/@role satisfies matches($c, $hub:thead-pstyle-regex)) 
+                                                                                                             and (:if table head paras then ist has to be every para :)
+                                                                                                            (some $c2 in entry satisfies ($c2[not(@role) or not(matches($c2/@role, $hub:thead-pstyle-regex))]))
+                                                                                                            
+                                                                                                             ]
+                                                                                      )">
                     <xsl:choose>
                       <xsl:when test="current-grouping-key()">
                         <thead>
