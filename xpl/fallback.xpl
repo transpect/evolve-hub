@@ -23,6 +23,7 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.io/xproc-util/xslt-mode/xpl/xslt-mode.xpl"/>
   <p:import href="http://transpect.io/evolve-hub/xpl/evolve-hub_lists-by-indent.xpl"/>
+  <p:import href="http://transpect.io/evolve-hub/xpl/evolve-hub_lists-by-role.xpl"/>
   
   <p:documentation xmlns="http://www.w3.org/1999/xhtml">
     <p>Here all modes shall be explained. <pre class="variable">Variables</pre>, <pre class="function">functions</pre> and <span class="dependency">dependent modes</span> are tagged like this.</p>
@@ -303,11 +304,28 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
-  <hub:evolve-hub_lists-by-indent>
-    <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
-    <p:with-option name="debug" select="$debug"/>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-  </hub:evolve-hub_lists-by-indent>
+  <!--  parameter 'evolve-hub-list-processing' selects list hierarchizing by indent or by role (role|indent) -->
+  <p:choose>
+    <p:variable name="evolve-hub-list-processing" select="/*/c:param[@name='evolve-hub-list-processing']/@value">
+      <p:pipe port="parameters" step="evolve-hub"/>
+    </p:variable>
+    <p:when test="$evolve-hub-list-processing='role'">
+      <hub:evolve-hub_lists-by-role>
+        <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
+        <p:input port="parameters"><p:pipe port="parameters" step="evolve-hub"/></p:input>
+        <p:with-option name="debug" select="$debug"/>
+        <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+      </hub:evolve-hub_lists-by-role>
+    </p:when>
+    <p:otherwise>
+      <hub:evolve-hub_lists-by-indent>
+        <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
+        <p:input port="parameters"><p:pipe port="parameters" step="evolve-hub"/></p:input>
+        <p:with-option name="debug" select="$debug"/>
+        <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+      </hub:evolve-hub_lists-by-indent>
+    </p:otherwise>
+  </p:choose>
   
   <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/60" mode="hub:ids">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>

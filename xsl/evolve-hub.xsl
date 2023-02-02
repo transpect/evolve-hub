@@ -21,6 +21,7 @@
   <xsl:import href="http://transpect.io/evolve-hub/figure-captions/xsl/subfigure-captions.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/hierarchy-by-role/xsl/hierarchy-by-role.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/lists-by-indent/xsl/lists-main.xsl"/>
+  <xsl:import href="http://transpect.io/evolve-hub/lists-by-role/xsl/lists-main.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/rm-redundant-cols/xsl/rm-redundant-cols.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/table-captions/xsl/table-captions.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/relocate-indexterms/xsl/relocate-indexterms.xsl"/>
