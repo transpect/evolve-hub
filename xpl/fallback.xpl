@@ -219,13 +219,19 @@
   </p:documentation>
   
   
+  <p:parameters name="consolidate-params">
+    <p:input port="parameters">
+      <p:pipe port="parameters" step="evolve-hub"/>
+    </p:input>
+  </p:parameters>
+
   <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/00" mode="hub:split-at-tab">
+    <p:input port="source"><p:pipe step="evolve-hub" port="source"/></p:input>
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
-  
   
   <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/01" mode="hub:dissolve-sidebars-without-purpose">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
@@ -307,12 +313,12 @@
   <!--  parameter 'evolve-hub-list-processing' selects list hierarchizing by indent or by role (role|indent) -->
   <p:choose>
     <p:variable name="evolve-hub-list-processing" select="/*/c:param[@name='evolve-hub-list-processing']/@value">
-      <p:pipe port="parameters" step="evolve-hub"/>
+      <p:pipe port="result" step="consolidate-params"/>
     </p:variable>
     <p:when test="$evolve-hub-list-processing='role'">
       <hub:evolve-hub_lists-by-role>
         <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
-        <p:input port="parameters"><p:pipe port="parameters" step="evolve-hub"/></p:input>
+        <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
         <p:with-option name="debug" select="$debug"/>
         <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
       </hub:evolve-hub_lists-by-role>
@@ -320,7 +326,7 @@
     <p:otherwise>
       <hub:evolve-hub_lists-by-indent>
         <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
-        <p:input port="parameters"><p:pipe port="parameters" step="evolve-hub"/></p:input>
+        <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
         <p:with-option name="debug" select="$debug"/>
         <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
       </hub:evolve-hub_lists-by-indent>
