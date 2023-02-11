@@ -29,4 +29,12 @@
   
   <xsl:template match="@orig-role" mode="hub:restore-roles"/>
   
+  <xsl:template match="*[matches(name(),'list$') or self::blockquote[@role='hub:lists']]/@*" mode="hub:restore-roles">
+    <xsl:next-match/>
+    <xsl:if test="tr:get-role-lvl((parent::*/descendant::*[@role][matches(@role,'^list\-')])[1]/@role) ne 
+                  xs:string(count(ancestor-or-self::*[matches(name(),'list$') or self::blockquote[@role='hub:lists']]))">
+      <xsl:attribute name="remap" select="(parent::*/descendant::*[@role][matches(@role,'^list\-')])[1]/@role"/>
+    </xsl:if>
+  </xsl:template>
+  
 </xsl:stylesheet>
