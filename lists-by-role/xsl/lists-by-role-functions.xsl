@@ -26,13 +26,27 @@
   <xsl:function name="tr:get-itemized-type" as="xs:string">
     <xsl:param name="lvlText"/>
     <xsl:choose>
-      <xsl:when test="$lvlText=''"><xsl:value-of select="'square'"/></xsl:when>
-      <xsl:when test="$lvlText='o'"><xsl:value-of select="'circle'"/></xsl:when>
-      <xsl:when test="$lvlText='◽'"><xsl:value-of select="'box'"/></xsl:when>
-      <xsl:when test="$lvlText='✓'"><xsl:value-of select="'check'"/></xsl:when>
-      <xsl:when test="$lvlText='◆'"><xsl:value-of select="'diamond'"/></xsl:when>
-      <xsl:when test="$lvlText='—'"><xsl:value-of select="'dash'"/></xsl:when>
-      <xsl:otherwise><xsl:value-of select="'disc'"/></xsl:otherwise>
+      <xsl:when test="matches($lvlText,'^[⏹■▪◼◾⬛⬝🞍🞌⯀￭𝅇]$')">
+        <xsl:value-of select="'square'"/>
+      </xsl:when>
+      <xsl:when test="matches($lvlText,'^[º°○⭘◯⚪⚬oOοΟоОօՕₒⲟⲞＯ🞉🞇ｏ￮🞅🔾🔿❍]$')">
+        <xsl:value-of select="'circle'"/>
+      </xsl:when>
+      <xsl:when test="matches($lvlText,'^[◻◽☐⌑□🞑🞒🞓⸋▫⬜⬞𝅆❏❐❑❒⧠]$')">
+        <xsl:value-of select="'box'"/>
+      </xsl:when>
+      <xsl:when test="matches($lvlText,'^[✔✓🗸]$')">
+        <xsl:value-of select="'check'"/>
+      </xsl:when>
+      <xsl:when test="matches($lvlText,'^[⬥⬩⯁◆🞘♦🞗]$')">
+        <xsl:value-of select="'diamond'"/>
+      </xsl:when>
+      <xsl:when test="matches($lvlText,'^[&#x002d;&#x005f;&#x00af;&#x02d7;&#x0320;&#x2010;-&#x2015;&#x203e;&#x207b;&#x208b;&#x2212;&#x22c5;&#x23af;&#x2796;&#x2e3a;&#x2e3b;&#xfe58;&#xfe63;&#xff0d;&#xff3f;𝄖]$')">
+        <xsl:value-of select="'dash'"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="'disc'"/>
+      </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
   
@@ -130,6 +144,12 @@
                          count($lvlText)=1) and 
                         string-length($lvlText)=1">
           <xsl:value-of select="concat('list-',tr:get-itemized-type($lvlText),'-',$role-lvl)"/>
+        </xsl:when>
+        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifer']] and 
+                         distinct-values(for $id in $root//para[@role=$old-role]/phrase[@role='hub:identifier'] 
+                                         return replace(string-join($id//text(),''),'[\*†‡§\|∥#¶\s&#160;]',''))) and 
+                        (every $mark in $marks satisfies matches($mark,'^[\*†‡§\|∥#¶]+$'))">
+          <xsl:value-of select="concat('list-daggers-',$role-lvl)"/>
         </xsl:when>
         <xsl:when test="every $p in $root//para[@role=$old-role] satisfies $p[count(tab)=1]">
           <xsl:value-of select="concat('list-definition-',$role-lvl)"/>
@@ -244,7 +264,7 @@
               <xsl:choose>
                 <xsl:when test="tr:get-list-type($key)='blockquote'">
                   <xsl:element name="{tr:get-list-type($key)}">
-                    <xsl:attribute name="role" select="'hub:identifier'"/>
+                    <xsl:attribute name="role" select="'hub:lists'"/>
                     <xsl:apply-templates select="current-group()" mode="hub:lists-by-role"/>
                   </xsl:element>
                 </xsl:when>
@@ -367,6 +387,16 @@
           </xsl:for-each>
         </xsl:variable>
         <xsl:sequence select="every $b in $arabic satisfies $b"/>
+      </xsl:when>
+      <xsl:when test="every $mark in $marks satisfies matches($mark,'^[\*†‡§\|∥#¶]+$')">
+        <xsl:variable name="dagger-regex-sequence" select="('\*','\*\*','†','‡','§','[\|\||∥]','#','¶')" as="xs:string+"/>
+        <xsl:variable name="daggers" as="xs:boolean+">
+          <xsl:for-each select="$marks">
+            <xsl:variable name="pos" as="xs:integer" select="position()"/>
+            <xsl:sequence select="matches(.,concat('^',$dagger-regex-sequence[position()=$pos],'$'))"/>
+          </xsl:for-each>
+        </xsl:variable>
+        <xsl:sequence select="every $b in $daggers satisfies $b"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:sequence select="false()"/>
