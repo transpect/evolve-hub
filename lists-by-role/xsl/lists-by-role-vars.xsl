@@ -47,6 +47,6 @@
   <xsl:variable name="hub:list-role-strings" select="('Note')"/>
 
   <!-- para/@roles matching this regex are part of an ordered list -->
-  <xsl:variable name="hub:ordered-list-styles-regex" select="'^((lower|upper)(alpha|roman)|arabic|daggers|decimal(leadingzero)?)$'"/>
+  <xsl:variable name="hub:ordered-list-styles-regex" select="'^((lower|upper)(alpha|roman)|arabic|chicago|decimal(leadingzero)?)$'"/>
   
 </xsl:stylesheet>

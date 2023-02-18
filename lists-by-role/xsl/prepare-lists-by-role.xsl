@@ -57,7 +57,7 @@
               <td>
                 <xsl:value-of select="if (@css:list-style-type) 
                                       then tr:get-list-type-new-role(.) 
-                                      else tr:get-non-list-type-new-role(@name)"/>
+                                      else tr:get-non-list-type-new-role(@name,'')"/>
               </td>
               <td>
                 <xsl:value-of select="@name"/>

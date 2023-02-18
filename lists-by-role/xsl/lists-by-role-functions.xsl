@@ -80,6 +80,25 @@
     <xsl:value-of select="$list-type"/>
   </xsl:function>
   
+  <xsl:function name="tr:format-list-style-type" as="xs:string">
+    <xsl:param name="rule"/>
+    <xsl:choose>
+      <xsl:when test="$rule/@css:list-style-type='disc' and 
+                      not(tr:get-non-list-type-new-role($rule/@name,$rule/@css:list-style-type)=$rule/@name)">
+        <xsl:value-of select="tokenize(tr:get-non-list-type-new-role($rule/@name,$rule/@css:list-style-type),'\-')[2]"/>
+      </xsl:when>
+      <xsl:when test="$rule/@css:list-style-type='none'">
+        <xsl:value-of select="'simple'"/>
+      </xsl:when>
+      <xsl:when test="$rule/@css:list-style-type='decimal'">
+        <xsl:value-of select="'arabic'"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="replace($rule/@css:list-style-type,'\-','')"/>    
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
   <!-- deduce list type from @css:list-style-type for heuristic mapping -->
   <xsl:function name="tr:get-list-type-new-role" as="xs:string">
     <xsl:param name="rule"/>
@@ -92,13 +111,10 @@
         <xsl:value-of select="$rule/@name"/>
       </xsl:when>
       <xsl:when test="$rule/@numbering-level ne $role-lvl and $rule/@numbering-multilevel-type='single' and $rule/@numbering-level='1'">
-        <xsl:value-of select="concat('list-',replace(replace($rule/@css:list-style-type,'\-',''),'^decimal$','arabic'),'-',$role-lvl)"/>
+        <xsl:value-of select="concat('list-',tr:format-list-style-type($rule),'-',$role-lvl)"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="concat('list-',
-                                     replace(replace($rule/@css:list-style-type,'\-',''),'^decimal$','arabic'),
-                                     '-',
-                                     $rule/@numbering-level)"/>    
+        <xsl:value-of select="concat('list-',tr:format-list-style-type($rule),'-',$rule/@numbering-level)"/>    
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
@@ -106,62 +122,76 @@
   <!-- deduce list type from hub:identifiers of all existing paras with that same role for style without @css:list-style-type for heuristic mapping -->
   <xsl:function name="tr:get-non-list-type-new-role" as="xs:string">
     <xsl:param name="old-role"/>
+    <xsl:param name="list-style-type" as="xs:string?"/>
     <xsl:variable name="root" select="$old-role/ancestor::*[not(parent::*)]"/>
-      <xsl:variable name="marks" as="xs:string*">
-        <xsl:apply-templates select="$root//para[@role=$old-role]/phrase[@role='hub:identifier']" mode="hub:list-true-marks"/>
-      </xsl:variable>
-      <xsl:variable name="lvlText" as="xs:string*">
-        <xsl:sequence select="distinct-values(for $id in $root//para[@role=$old-role]/phrase[@role='hub:identifier'] 
-                                              return replace(string-join($id//text(),''),'[a-zA-Z0-9\s&#160;]',''))"/>
-      </xsl:variable>
-      <xsl:variable name="role-lvl" select="if (tr:get-role-lvl($old-role)='na') then '1' else tr:get-role-lvl($old-role)"/>
-      <xsl:choose>
-        <xsl:when test="matches($old-role,'^list\-') or 
-                        (some $i in $hub:exclude-prepare-list-roles-regexes satisfies matches($old-role,$i))">
-          <xsl:value-of select="$old-role"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']] and count($lvlText)=1) and 
-                        (every $mark in $marks satisfies (matches($mark,'^[ivxlcdm]+$')))">
-          <xsl:value-of select="concat('list-lowerroman-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']] and count($lvlText)=1) and 
-                        (every $mark in $marks satisfies (matches($mark,'^[IVXLCDM]+$')))">
-          <xsl:value-of select="concat('list-upperroman-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']] and count($lvlText)=1) and 
-                        (every $mark in $marks satisfies matches($mark,'^[a-z]+$'))">
-          <xsl:value-of select="concat('list-loweralpha-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']] and count($lvlText)=1) and 
-                        (every $mark in $marks satisfies matches($mark,'^[A-Z]+$'))">
-          <xsl:value-of select="concat('list-upperalpha-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']] and count($lvlText)=1) and 
-                        (every $mark in $marks satisfies matches($mark,'^[0-9]+$'))">
-          <xsl:value-of select="concat('list-arabic-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']] and 
-                         count($lvlText)=1) and 
-                        string-length($lvlText)=1">
-          <xsl:value-of select="concat('list-',tr:get-itemized-type($lvlText),'-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="(every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifer']] and 
-                         distinct-values(for $id in $root//para[@role=$old-role]/phrase[@role='hub:identifier'] 
-                                         return replace(string-join($id//text(),''),'[\*†‡§\|∥#¶\s&#160;]',''))) and 
-                        (every $mark in $marks satisfies matches($mark,'^[\*†‡§\|∥#¶]+$'))">
-          <xsl:value-of select="concat('list-daggers-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="every $p in $root//para[@role=$old-role] satisfies $p[count(tab)=1]">
-          <xsl:value-of select="concat('list-definition-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:when test="matches($old-role,$hub:list-continue-style-regex,'i') and 
-                        (every $p in $root//para[@role=$old-role] satisfies $p[not(phrase[@role='hub:identifier'])])">
-          <xsl:value-of select="concat('list-continue-',$role-lvl)"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="$old-role"/>        
-        </xsl:otherwise>
-      </xsl:choose>
+    <xsl:variable name="marks" as="xs:string*">
+      <xsl:apply-templates select="$root//para[@role=$old-role]/phrase[@role='hub:identifier']" mode="hub:list-true-marks"/>
+    </xsl:variable>
+    <xsl:variable name="lvlText" as="xs:string*">
+      <xsl:sequence select="distinct-values(for $id in $root//para[@role=$old-role]/phrase[@role='hub:identifier'] 
+                                            return replace(string-join($id//text(),''),'[a-zA-Z0-9\s&#160;]',''))"/>
+    </xsl:variable>
+    <xsl:variable name="role-lvl" select="if (tr:get-role-lvl($old-role)='na') then '1' else tr:get-role-lvl($old-role)"/>
+    <xsl:choose>
+      <xsl:when test="matches($old-role,'^list\-') or 
+                      (some $i in $hub:exclude-prepare-list-roles-regexes satisfies matches($old-role,$i))">
+        <xsl:value-of select="$old-role"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      (every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']]) and 
+                      count($lvlText)=1 and
+                      (every $mark in $marks satisfies (matches($mark,'^[ivxlcdm]+$')))">
+        <xsl:value-of select="concat('list-lowerroman-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      (every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']]) and 
+                      count($lvlText)=1 and 
+                      (every $mark in $marks satisfies (matches($mark,'^[IVXLCDM]+$')))">
+        <xsl:value-of select="concat('list-upperroman-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      (every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']]) and 
+                      count($lvlText)=1 and 
+                      (every $mark in $marks satisfies matches($mark,'^[a-z]+$'))">
+        <xsl:value-of select="concat('list-loweralpha-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      (every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']]) and 
+                      count($lvlText)=1 and 
+                      (every $mark in $marks satisfies matches($mark,'^[A-Z]+$'))">
+        <xsl:value-of select="concat('list-upperalpha-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      (every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']]) and 
+                      count($lvlText)=1 and 
+                      (every $mark in $marks satisfies matches($mark,'^[0-9]+$'))">
+        <xsl:value-of select="concat('list-arabic-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="((every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifier']]) or
+                       $list-style-type='disc') and 
+                      count($lvlText)=1 and 
+                      string-length($lvlText)=1">
+        <xsl:value-of select="concat('list-',tr:get-itemized-type($lvlText),'-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      (every $p in $root//para[@role=$old-role] satisfies $p[phrase[@role='hub:identifer']]) and 
+                      distinct-values(for $id in $root//para[@role=$old-role]/phrase[@role='hub:identifier'] 
+                                      return replace(string-join($id//text(),''),'[\*†‡§\|∥#¶\s&#160;]','')) and 
+                      (every $mark in $marks satisfies matches($mark,'^[\*†‡§\|∥#¶]+$'))">
+        <xsl:value-of select="concat('list-chicago-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and (every $p in $root//para[@role=$old-role] satisfies $p[count(tab)=1])">
+        <xsl:value-of select="concat('list-definition-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:when test="not($list-style-type='disc') and
+                      matches($old-role,$hub:list-continue-style-regex,'i') and 
+                      (every $p in $root//para[@role=$old-role] satisfies $p[not(phrase[@role='hub:identifier'])])">
+        <xsl:value-of select="concat('list-continue-',$role-lvl)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$old-role"/>        
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:function>
   
   <!-- gets numeration level from own or preceding sibling mapped role -->
