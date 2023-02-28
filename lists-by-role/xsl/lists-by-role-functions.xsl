@@ -103,7 +103,7 @@
   <xsl:function name="tr:get-list-type-new-role" as="xs:string">
     <xsl:param name="rule"/>
     <xsl:variable name="role-lvl" select="if (tr:get-role-lvl($rule/@name)='na') 
-                                          then $rule/@numbering-level 
+                                          then ($rule/@numbering-level,'1')[1] 
                                           else tr:get-role-lvl($rule/@name)"/>
     <xsl:choose>
       <xsl:when test="matches($rule/@name,'^list\-') or 
@@ -114,7 +114,7 @@
         <xsl:value-of select="concat('list-',tr:format-list-style-type($rule),'-',$role-lvl)"/>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:value-of select="concat('list-',tr:format-list-style-type($rule),'-',$rule/@numbering-level)"/>    
+        <xsl:value-of select="concat('list-',tr:format-list-style-type($rule),'-',($rule/@numbering-level,$role-lvl)[1])"/>    
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>

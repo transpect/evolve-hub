@@ -70,10 +70,11 @@
   </xsl:template>
   
   <xsl:template match="/" mode="hub:prepare-lists-by-role">
+    <xsl:variable name="href" select="concat($debug-dir-uri,'/evolve-hub/lists-by-role-style-map.xhtml')"/>
     <xsl:message>
-      Style map can be found in <xsl:value-of select="concat($debug-dir-uri,'/evolve-hub/lists-by-role-style-map.xhtml')"/>
+      Style map can be found in <xsl:value-of select="$href"/>
     </xsl:message>
-    <xsl:result-document  href="{concat($debug-dir-uri,'/evolve-hub/lists-by-role-style-map.xhtml')}">
+    <xsl:result-document href="{$href}">
       <xsl:sequence  select="$lists-by-role-map"/>
     </xsl:result-document>
     <xsl:next-match/>

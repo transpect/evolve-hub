@@ -55,6 +55,7 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
     <p:with-option name="prefix" select="concat($prefix, '0')"/>
     <p:with-option name="hub-version" select="$hub-version"/>
+    <p:with-param name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
   <tr:xslt-mode msg="yes" mode="hub:lists-by-role" name="lists-by-role">
