@@ -272,84 +272,109 @@
           <xsl:for-each-group select="current-group()[self::*]" group-adjacent="if (empty($first-non-continue-element)) 
                                                                                 then false() 
                                                                                 else . &lt;&lt; $first-non-continue-element">
-          <xsl:variable name="first-element-level" select="tr:get-numeration-level(current-group()[1])"/>
-          <xsl:variable name="first-higher-level-element" select="current-group()[tr:get-numeration-level(.) lt $first-element-level][1]"/>
-          <xsl:for-each-group select="current-group()[self::*]" group-adjacent="if (empty($first-higher-level-element)) 
-                                                                                then false() 
-                                                                                else . &lt;&lt; $first-higher-level-element">
-            <xsl:variable name="actual-level" select="if (current-grouping-key()) 
-                                                      then $first-element-level 
-                                                      else if (not(empty($first-higher-level-element))) 
-                                                           then tr:get-numeration-level($first-higher-level-element) 
-                                                           else max(($level,$first-element-level))"/>
-            <xsl:for-each-group select="current-group()[self::*]" 
-                                group-adjacent="tr:get-numeration-style-with-level(.,$actual-level)">
-              <xsl:variable name="key" select="current-grouping-key()"/>
-              <xsl:variable name="true-marks" as="xs:string*">
-                <xsl:apply-templates select="current-group()[self::*[matches(@role,'^list\-')]
-                                                                    [tr:get-numeration-level(.)=$actual-level]
-                                                                    [tr:get-numeration-style(.)=$key]]/phrase[@role='hub:identifier']" 
-                                     mode="hub:list-true-marks"/>
-              </xsl:variable>
-              <xsl:choose>
-                <xsl:when test="tr:get-list-type($key)='blockquote'">
-                  <xsl:element name="{tr:get-list-type($key)}">
-                    <xsl:attribute name="role" select="'hub:lists'"/>
-                    <xsl:apply-templates select="current-group()" mode="hub:lists-by-role"/>
-                  </xsl:element>
-                </xsl:when>
-                <xsl:when test="tr:get-list-type($key)='variablelist'">
-                  <xsl:element name="{tr:get-list-type($key)}">
-                    <xsl:for-each-group select="current-group()" group-starting-with="*[matches(@role,'^list\-')]
-                                                                                       [tr:get-numeration-level(.)=$actual-level]
-                                                                                       [tr:get-numeration-style(.)=$key]">
-                      <xsl:element name="{tr:get-list-element-type($key)}">
-                        <xsl:variable name="tabs" select="current-group()[1]//tab[not(@role) or @role='docx2hub:generated']
-                                                                                 [not(parent::tabs)]
-                                                                                 [hub:same-scope(., current())]"/>
-                        <xsl:variable name="first-tab" select="$tabs[1]" as="element(tab)?"/>
-                        <term>
-                          <xsl:sequence select="if (empty($tabs)) then '' else hub:split-term-at-tab(current-group()[1],$first-tab)"/>
-                        </term>
-                        <listitem>
-                          <xsl:choose>
-                            <xsl:when test="empty($tabs)">
-                              <xsl:apply-templates select="current-group()[1]" mode="hub:lists-by-role"/>   
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <xsl:sequence select="hub:split-listitem-at-tab(current-group()[1],$first-tab)"/>    
-                            </xsl:otherwise>
-                          </xsl:choose>
+            <xsl:variable name="first-element-level" select="tr:get-numeration-level(current-group()[1])"/>
+            <xsl:variable name="first-higher-level-element" 
+                          select="current-group()[tr:get-numeration-level(.) lt $first-element-level][1]"/>
+            <xsl:for-each-group select="current-group()[self::*]" group-adjacent="if (empty($first-higher-level-element)) 
+                                                                                  then false() 
+                                                                                  else . &lt;&lt; $first-higher-level-element">
+              <xsl:variable name="actual-level" select="if (current-grouping-key()) 
+                                                        then $first-element-level 
+                                                        else if (not(empty($first-higher-level-element))) 
+                                                             then tr:get-numeration-level($first-higher-level-element) 
+                                                             else max(($level,$first-element-level))"/>
+              <xsl:for-each-group select="current-group()[self::*]" 
+                                  group-adjacent="tr:get-numeration-style-with-level(.,$actual-level)">
+                <xsl:variable name="key" select="current-grouping-key()"/>
+                <xsl:variable name="true-marks" as="xs:string*">
+                  <xsl:apply-templates select="current-group()[self::*[matches(@role,'^list\-')]
+                                                                      [tr:get-numeration-level(.)=$actual-level]
+                                                                      [tr:get-numeration-style(.)=$key]]/phrase[@role='hub:identifier']" 
+                                       mode="hub:list-true-marks"/>
+                </xsl:variable>
+                <xsl:choose>
+                  <xsl:when test="tr:get-list-type($key)='blockquote'">
+                    <xsl:element name="{tr:get-list-type($key)}">
+                      <xsl:attribute name="role" select="'hub:lists'"/>
+                      <xsl:apply-templates select="current-group()" mode="hub:lists-by-role"/>
+                    </xsl:element>
+                  </xsl:when>
+                  <xsl:when test="tr:get-list-type($key)='variablelist'">
+                    <xsl:element name="{tr:get-list-type($key)}">
+                      <xsl:for-each-group select="current-group()" group-starting-with="*[matches(@role,'^list\-')]
+                                                                                         [tr:get-numeration-level(.)=$actual-level]
+                                                                                         [tr:get-numeration-style(.)=$key]">
+                        <xsl:element name="{tr:get-list-element-type($key)}">
+                          <xsl:variable name="tabs" select="current-group()[1]//tab[not(@role) or @role='docx2hub:generated']
+                                                                                   [not(parent::tabs)]
+                                                                                   [hub:same-scope(., current())]"/>
+                          <xsl:variable name="first-tab" select="$tabs[1]" as="element(tab)?"/>
+                          <term>
+                            <xsl:sequence select="if (empty($tabs)) then '' else hub:split-term-at-tab(current-group()[1],$first-tab)"/>
+                          </term>
+                          <listitem>
+                            <xsl:choose>
+                              <xsl:when test="empty($tabs)">
+                                <xsl:apply-templates select="current-group()[1]" mode="hub:lists-by-role"/>   
+                              </xsl:when>
+                              <xsl:otherwise>
+                                <xsl:sequence select="hub:split-listitem-at-tab(current-group()[1],$first-tab)"/>    
+                              </xsl:otherwise>
+                            </xsl:choose>
+                            <xsl:if test="count(current-group()) gt 1">
+                              <xsl:sequence select="tr:hierarchize-lists(current-group()[position() gt 1],$actual-level+1)"/>  
+                            </xsl:if>
+                          </listitem>
+                        </xsl:element>
+                      </xsl:for-each-group>
+                    </xsl:element>
+                  </xsl:when>
+                  <xsl:when test="tr:get-list-type($key)='itemizedlist' or 
+                                  (tr:get-list-type($key)='orderedlist' and hub:is-incrementing-identifier-sequence($true-marks,$key))">
+                    <xsl:element name="{tr:get-list-type($key)}">
+                      <xsl:attribute name="{if (tr:get-list-type($key)='orderedlist') then 'numeration' else 'mark'}" select="$key"/>
+                      <xsl:for-each-group select="current-group()" group-starting-with="*[matches(@role,'^list\-')]
+                                                                                         [tr:get-numeration-level(.)=$actual-level]
+                                                                                         [tr:get-numeration-style(.)=$key]">
+                        <xsl:element name="{tr:get-list-element-type($key)}">
+                          <xsl:apply-templates select="current-group()[1]" mode="hub:lists-by-role"/>
                           <xsl:if test="count(current-group()) gt 1">
                             <xsl:sequence select="tr:hierarchize-lists(current-group()[position() gt 1],$actual-level+1)"/>  
                           </xsl:if>
-                        </listitem>
+                        </xsl:element>
+                      </xsl:for-each-group>
+                    </xsl:element>    
+                  </xsl:when>
+                  <xsl:when test="tr:get-list-type($key)='orderedlist'">
+                    <xsl:variable name="current-group" select="current-group()" as="node()*"/>
+                    <xsl:for-each-group select="current-group()" 
+                                        group-starting-with="*[matches(@role,'^list\-')]
+                                                              [tr:get-numeration-level(.)=$actual-level]
+                                                              [tr:get-numeration-style(.)=$key]
+                                                              [phrase[@role='hub:identifier']]
+                                                              [not(tr:is-successor(.,$actual-level,$key,$current-group))]">
+                      <xsl:element name="{tr:get-list-type($key)}">
+                        <xsl:attribute name="numeration" select="$key"/>
+                        <xsl:for-each-group select="current-group()" 
+                                            group-starting-with="*[matches(@role,'^list\-')]
+                                                                  [tr:get-numeration-level(.)=$actual-level]
+                                                                  [tr:get-numeration-style(.)=$key]">
+                          <xsl:element name="{tr:get-list-element-type($key)}">
+                            <xsl:apply-templates select="current-group()[1]" mode="hub:lists-by-role"/>
+                            <xsl:if test="count(current-group()) gt 1">
+                              <xsl:sequence select="tr:hierarchize-lists(current-group()[position() gt 1],$actual-level+1)"/>  
+                            </xsl:if>
+                          </xsl:element>
+                        </xsl:for-each-group>
                       </xsl:element>
                     </xsl:for-each-group>
-                  </xsl:element>
-                </xsl:when>
-                <xsl:when test="tr:get-list-type($key)='itemizedlist' or 
-                                (tr:get-list-type($key)='orderedlist' and hub:is-incrementing-identifier-sequence($true-marks))">
-                  <xsl:element name="{tr:get-list-type($key)}">
-                    <xsl:attribute name="{if (tr:get-list-type($key)='orderedlist') then 'numeration' else 'mark'}" select="$key"/>
-                    <xsl:for-each-group select="current-group()" group-starting-with="*[matches(@role,'^list\-')]
-                                                                                       [tr:get-numeration-level(.)=$actual-level]
-                                                                                       [tr:get-numeration-style(.)=$key]">
-                      <xsl:element name="{tr:get-list-element-type($key)}">
-                        <xsl:apply-templates select="current-group()[1]" mode="hub:lists-by-role"/>
-                        <xsl:if test="count(current-group()) gt 1">
-                          <xsl:sequence select="tr:hierarchize-lists(current-group()[position() gt 1],$actual-level+1)"/>  
-                        </xsl:if>
-                      </xsl:element>
-                    </xsl:for-each-group>
-                  </xsl:element>    
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:apply-templates select="current-group()" mode="hub:lists-by-role"/>
-                </xsl:otherwise>
-              </xsl:choose>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:apply-templates select="current-group()" mode="hub:lists-by-role"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:for-each-group>
             </xsl:for-each-group>
-          </xsl:for-each-group>
           </xsl:for-each-group>
         </xsl:when>
         <xsl:otherwise>
@@ -357,6 +382,38 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each-group>
+  </xsl:function>
+  
+  <xsl:function name="tr:is-successor" as="xs:boolean">
+    <xsl:param name="context"/>
+    <xsl:param name="actual-level"/>
+    <xsl:param name="key"/>
+    <xsl:param name="current-group"/>
+    <xsl:variable name="mark" as="xs:string*">
+      <xsl:apply-templates select="$context[matches(@role,'^list\-')]
+                                           [tr:get-numeration-level(.)=$actual-level]
+                                           [tr:get-numeration-style(.)=$key]/phrase[@role='hub:identifier']" 
+        mode="hub:list-true-marks"/>
+    </xsl:variable>
+    <xsl:variable name="preceding-mark">
+      <xsl:apply-templates select="$context/preceding-sibling::*[matches(@role,'^list\-')]
+                                                                [tr:get-numeration-level(.)=$actual-level]
+                                                                [tr:get-numeration-style(.)=$key]
+                                                                [phrase[@role='hub:identifier']]
+                                                                [1]
+                                                                [generate-id()=(for $c in $current-group 
+                                                                                return $c/generate-id())]/phrase[@role='hub:identifier']" 
+        mode="hub:list-true-marks"/>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="not(empty($mark) or $mark='' or empty($preceding-mark) or $preceding-mark='') and 
+                      hub:is-incrementing-identifier-sequence(($preceding-mark,$mark),$key)">
+        <xsl:sequence select="true()"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="false()"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:function>
   
   <!-- determines if a para is an equation or not -->
@@ -369,6 +426,7 @@
   <!-- determines if a sequence of marks is incrementing considering numeration type -->
   <xsl:function name="hub:is-incrementing-identifier-sequence" as="xs:boolean">
     <xsl:param name="marks" as="xs:string*"/>
+    <xsl:param name="key"/>
     <xsl:choose>
       <xsl:when test="count($marks) = 0">
         <xsl:sequence select="false()"/>
@@ -376,7 +434,8 @@
       <xsl:when test="count($marks) = 1">
         <xsl:sequence select="true()"/>
       </xsl:when>
-      <xsl:when test="every $mark in $marks satisfies (matches($mark,'^[ivxlcdm]+$') and (tr:roman-to-int(upper-case($mark)) gt -1))">
+      <xsl:when test="every $mark in $marks satisfies (matches($mark,'^[ivxlcdm]+$') and (tr:roman-to-int(upper-case($mark)) gt -1)) and
+                      $key='lowerroman'">
         <xsl:variable name="lowerroman" as="xs:boolean+">
           <xsl:for-each select="$marks[position() gt 1]">
             <xsl:variable name="pos" as="xs:integer" select="position()"/>
@@ -385,7 +444,8 @@
         </xsl:variable>
         <xsl:sequence select="every $b in $lowerroman satisfies $b"/>
       </xsl:when>
-      <xsl:when test="every $mark in $marks satisfies (matches($mark,'^[IVXLCDM]+$') and (tr:roman-to-int($mark) gt -1))">
+      <xsl:when test="every $mark in $marks satisfies (matches($mark,'^[IVXLCDM]+$') and (tr:roman-to-int($mark) gt -1)) and
+                      $key='upperroman'">
         <xsl:variable name="upperroman" as="xs:boolean+">
           <xsl:for-each select="$marks[position() gt 1]">
             <xsl:variable name="pos" as="xs:integer" select="position()"/>
