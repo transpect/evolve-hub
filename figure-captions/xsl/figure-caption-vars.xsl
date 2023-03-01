@@ -159,4 +159,10 @@
   <xsl:variable name="hub:figure-units-role-regex-x" as="xs:string"
     select="'^this-should-be-overriden-by-a-custom-regex$'" />
 
+  <xsl:function name="hub:create-figure-role" as="attribute(role)?">
+    <xsl:param name="figure-nodes" as="node()*"/>
+    <!-- overwrite this in your adaptations if wanted -->
+    <!--<xsl:attribute name="role" select="($figure-nodes[self::*:para][*:mediaobject]/@role)[1]"/>-->
+  </xsl:function>
+
 </xsl:stylesheet>

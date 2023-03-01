@@ -69,6 +69,7 @@
               <xsl:if test="(current-group()[1], $note-me-maybe/*[self::copyrights or self::notes])/@srcpath">
                 <xsl:attribute name="srcpath" select="string-join((current-group()[1], $note-me-maybe/*[self::copyrights or self::notes])/@srcpath,' ')"/>
               </xsl:if>
+              <xsl:sequence select="hub:create-figure-role(current-group())"/>
               <title>
                 <xsl:apply-templates select="$title/@*" mode="#current"/>
                 <xsl:apply-templates select="$title/node()" mode="#current">
@@ -200,6 +201,7 @@
               <xsl:if test="$note-me-maybe/*/para/@srcpath | current-group()[*][hub:is-figure(.) and . &lt;&lt; $title]/@srcpath">
                 <xsl:attribute name="srcpath" select="string-join(($note-me-maybe/*/para/@srcpath, (current-group()[*][hub:is-figure(.) and . &lt;&lt; $title] | $title[hub:is-figure(.)])[1]/@srcpath),' ')"/>  
               </xsl:if>
+              <xsl:sequence select="hub:create-figure-role(current-group())"/>
               <title>
                 <xsl:if test="$title[not(hub:is-figure(.))]">
                   <xsl:apply-templates select="$title/@*" mode="#current"/>
