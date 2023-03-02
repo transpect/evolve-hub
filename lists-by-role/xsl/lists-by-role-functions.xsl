@@ -417,7 +417,7 @@
   </xsl:function>
   
   <!-- determines if a para is an equation or not -->
-  <xsl:function name="hub:is-equation-para" as="xs:boolean">
+  <xsl:function name="tr:is-equation-para" as="xs:boolean">
     <xsl:param name="para" as="element(*)"/>
     <xsl:sequence select="$para/@role = $hub:equation-roles or 
                           (count($para/node()) = 1 and ($para/inlineequation or $para/equation))"/>
@@ -520,7 +520,7 @@
     
     <xsl:sequence select="if ($elt[every $n in child::node() 
                                    satisfies $n[self::equation or self::mediaobject or self::comment() or self::processing-instruction() or self::text()[matches(.,'^[\s&#160;]*$')]]] or 
-                              hub:is-equation-para($elt) or 
+                              tr:is-equation-para($elt) or 
                               $elt/@role=$hub:list-role-strings) 
                           then true() else false()"/>
   </xsl:function>
