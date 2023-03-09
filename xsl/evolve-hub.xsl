@@ -3449,14 +3449,11 @@
   <xsl:template match="indexterm/*[ends-with(name(), 'ary')]
                                   [empty(@sortas)]
                                   [$generate-sortas = 'yes']" mode="hub:clean-hub">
-    <xsl:variable name="normalized" as="xs:string" 
-      select="normalize-space(
-                replace(
-                  replace(., '^\p{P}+', ''),
-                  '\W+',
-                  ' '
-                )
-              )"/>
+    <xsl:variable name="normalized" as="attribute(sortas)?">
+      <xsl:call-template name="generate-sortas">
+        <xsl:with-param name="indexterm" select="."/>
+      </xsl:call-template>
+    </xsl:variable>
     <xsl:choose>
       <xsl:when test="not($normalized = .)">
         <xsl:copy copy-namespaces="no">
@@ -3470,7 +3467,19 @@
     </xsl:choose>
   </xsl:template>
   
-  <xsl:template name="generate-sortas">
+  <xsl:template name="generate-sortas" as="attribute(sortas)?">
+    <xsl:param name="indexterm" as="xs:string"/>
+    <xsl:variable name="normalized" as="xs:string" 
+                  select="normalize-space(
+                            replace(
+                              replace($indexterm, '^\p{P}+', ''),
+                              '\W+',
+                              ' '
+                            )
+                          )"/>
+    <xsl:if test="not($normalized = $indexterm)">
+      <xsl:attribute name="sortas" select="$indexterm"/>
+    </xsl:if>
   </xsl:template>
   
   <xsl:template match="@hub:anchored" mode="hub:clean-hub">
