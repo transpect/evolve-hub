@@ -3455,7 +3455,7 @@
       </xsl:call-template>
     </xsl:variable>
     <xsl:choose>
-      <xsl:when test="not($normalized = .)">
+      <xsl:when test="exists($normalized) and not($normalized = .)">
         <xsl:copy copy-namespaces="no">
           <xsl:attribute name="sortas" select="$normalized"/>
           <xsl:apply-templates select="@*, node()" mode="#current"/>
@@ -3468,17 +3468,23 @@
   </xsl:template>
   
   <xsl:template name="generate-sortas" as="attribute(sortas)?">
-    <xsl:param name="indexterm" as="xs:string"/>
-    <xsl:variable name="normalized" as="xs:string" 
-                  select="normalize-space(
-                            replace(
-                              replace($indexterm, '^\p{P}+', ''),
-                              '\W+',
-                              ' '
-                            )
-                          )"/>
-    <xsl:if test="not($normalized = $indexterm)">
-      <xsl:attribute name="sortas" select="$indexterm"/>
+    <xsl:param name="indexterm" as="xs:string?"/>
+    <xsl:if test="not(matches(normalize-space($indexterm), '^[a-z]+$', 'i'))">
+      <xsl:variable name="sortas" 
+                    select="normalize-space(
+                              replace(
+                                string-join(for $char in string-to-codepoints($indexterm)
+                                            return substring(
+                                                     normalize-unicode(
+                                                       codepoints-to-string($char), 'NFKD'
+                                                     ), 1, 1
+                                                   )
+                                ), '\W', ' '
+                              )
+                            )"/>
+      <xsl:if test="not(normalize-space($indexterm) = $sortas)">
+        <xsl:attribute name="sortas" select="$sortas"/>
+      </xsl:if>
     </xsl:if>
   </xsl:template>
   
