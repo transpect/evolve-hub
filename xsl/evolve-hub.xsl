@@ -186,10 +186,14 @@
                       so that it always returns false() :)
                       not(hub:underlined(.))
                      ]" mode="hub:preprocess-hierarchy">
-      <xsl:message select="'INFO: Removed empty para', 
-                           if(@role ne '') then concat('with role ', xs:string(@role)) else '',
-                           if(@srcpath ne '') then concat(' with srcpath ', xs:string(@srcpath)) else '',
-                           if(*) then string-join(('; all descendant elements:', distinct-values(for $e in .//* return local-name($e))),' ') else ''"/>
+    <xsl:call-template name="hub:removed-empty-para-message"/>
+  </xsl:template>
+  
+  <xsl:template name="hub:removed-empty-para-message">
+    <xsl:message select="'INFO: Removed empty para', 
+                         if(@role ne '') then concat('with role ', xs:string(@role)) else '',
+                         if(@srcpath ne '') then concat(' with srcpath ', xs:string(@srcpath)) else '',
+                         if(*) then string-join(('; all descendant elements:', distinct-values(for $e in .//* return local-name($e))),' ') else ''"/>
   </xsl:template>
   
   <xsl:variable name="hub:keep-empty-para-role-regex-x" as="xs:string" select="'_-_virtual(_-_|$)'"/>
