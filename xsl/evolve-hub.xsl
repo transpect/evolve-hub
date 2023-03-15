@@ -3473,13 +3473,13 @@
       <xsl:variable name="sortas" 
                     select="normalize-space(
                               replace(
-                                string-join(for $char in string-to-codepoints($indexterm)
+                                string-join((for $char in string-to-codepoints($indexterm)
                                             return substring(
                                                      normalize-unicode(
                                                        codepoints-to-string($char), 'NFKD'
                                                      ), 1, 1
                                                    )
-                                ), '\W', ' '
+                                ),''), '\W', ' '
                               )
                             )"/>
       <xsl:if test="not(normalize-space($indexterm) = $sortas)">
