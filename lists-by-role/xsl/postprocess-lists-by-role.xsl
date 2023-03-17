@@ -71,4 +71,14 @@
     </xsl:if>
   </xsl:template>
   
+  <xsl:template match="orderedlist/listitem/para[1]/phrase[@role eq 'hub:identifier'][1]
+                      |itemizedlist/listitem/para[1]/phrase[@role eq 'hub:identifier'][1]" mode="hub:postprocess-lists-by-role"/>
+  
+  <xsl:template match="orderedlist/listitem[para[1]/phrase[@role eq 'hub:identifier'][1]]" mode="hub:postprocess-lists-by-role">
+    <xsl:copy>
+      <xsl:attribute name="override" select="para[1]/phrase[@role eq 'hub:identifier'][1]"/>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
 </xsl:stylesheet>
