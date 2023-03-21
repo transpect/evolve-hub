@@ -92,17 +92,27 @@
     <xsl:param name="node" as="node()?"/>
     <xsl:sequence select="if 
                           (
-                            $node/self::para[not(@role[matches(., $tr:preserve-para-with-fig-role-regex)])]
-                                            [mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')]
-                            or 
-                            $node/self::para[not(@role[matches(., $tr:preserve-para-with-fig-role-regex)])]
-                                            [phrase/mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')
-                              and matches(hub:same-scope-text(phrase),'^[\s&#xa0;&#x2002;]*$')]
-                            or 
-                            $node/self::mediaobject
+                            (
+                              $node/self::para[not(@role[matches(., $tr:preserve-para-with-fig-role-regex)])]
+                                              [mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')]
+                              or 
+                              $node/self::para[not(@role[matches(., $tr:preserve-para-with-fig-role-regex)])]
+                                              [phrase/mediaobject and matches(hub:same-scope-text(.),'^[\s&#xa0;&#x2002;]*$')
+                                and matches(hub:same-scope-text(phrase),'^[\s&#xa0;&#x2002;]*$')]
+                              or 
+                              $node/self::mediaobject
+                            )
+                            and not(hub:is-not-figure($node))
                           )
                           then true() 
                           else false()"/>
+  </xsl:function>
+  
+  <xsl:function name="hub:is-not-figure" as="xs:boolean">
+    <!-- Overwrite it in your customization in order to prevent, for example, 
+         mediaobjects in tables from becoming figures --> 
+    <xsl:param name="node" as="node()?"/>
+    <xsl:sequence select="false()"/>
   </xsl:function>
 
   <xsl:function name="hub:is-figure-title" as="xs:boolean">
@@ -117,7 +127,16 @@
                                    or not( $hub:figure-caption-must-begin-with-figure-caption-start-regex )
                                  )
                                ]
-                             )"/>
+                             )
+                             and 
+                             not(hub:is-not-figure-title($node))"/>
+  </xsl:function>
+  
+  <xsl:function name="hub:is-not-figure-title" as="xs:boolean">
+    <!-- Overwrite it in your customization in order to prevent, for example, 
+         mediaobjects in tables from becoming figures --> 
+    <xsl:param name="node" as="node()?"/>
+    <xsl:sequence select="false()"/>
   </xsl:function>
   
   <xsl:function name="hub:is-subfigure" as="xs:boolean">
