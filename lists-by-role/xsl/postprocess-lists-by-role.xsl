@@ -81,4 +81,18 @@
     </xsl:copy>
   </xsl:template>
   
+  <xsl:template match="itemizedlist[listitem/para[1]/phrase[@role eq 'hub:identifier']]/@mark" mode="hub:postprocess-lists-by-role">
+    <xsl:variable name="value" as="xs:string*">
+      <xsl:for-each select="parent::itemizedlist/listitem/para[1]/phrase[@role eq 'hub:identifier']
+                                                                        [not(preceding-sibling::phrase[@role eq 'hub:identifier'])]">
+        <xsl:sort order="descending" 
+                  select="count(ancestor::itemizedlist[1]/listitem/para[1]/phrase[@role eq 'hub:identifier']
+                                                                                 [not(preceding-sibling::phrase[@role eq 'hub:identifier'])]
+                                                                                 [. = current()])"/>
+        <xsl:value-of select="."/>
+      </xsl:for-each>
+    </xsl:variable>
+    <xsl:attribute name="{local-name()}" select="$value[1]"/>
+  </xsl:template>
+  
 </xsl:stylesheet>
