@@ -103,14 +103,23 @@
   </xsl:template>
   
   <xsl:template match="informaltable[not(@annotations='generated')]" priority="-5" mode="hub:table-captions">
+    <!-- https://redmine.le-tex.de/issues/14659 -->
+    <xsl:variable name="note" select="following-sibling::*[1][self::para[matches(@role, $hub:table-note-style-regex-x, 'x')]]" as="element(para)*"/>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:attribute name="frame"
         select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"
       />
       <xsl:apply-templates mode="#current"/>
+      <xsl:if test="$note[node()]">
+        <caption>
+          <xsl:copy-of select="$note"/>
+        </caption>
+      </xsl:if>
     </xsl:copy>
   </xsl:template>
+  
+  <xsl:template match="para[preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]" mode="hub:table-captions"/>
   
   <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables">
     <xsl:copy>
