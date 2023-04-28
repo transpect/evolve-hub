@@ -87,7 +87,9 @@
               <xsl:apply-templates select="if ($table/name() = 'informaltable') then $table/node() else $table/informaltable/node()" mode="#current"/>
               <xsl:if test="$note[node()]">
                 <caption>
-                    <xsl:apply-templates select="$note" mode="#current"/>
+                    <xsl:apply-templates select="$note" mode="#current">
+                      <xsl:with-param name="process" select="true()" tunnel="yes"/>
+                    </xsl:apply-templates>
                 </caption>
               </xsl:if>
               <xsl:apply-templates select="$table/descendant-or-self::informaltable/following-sibling::processing-instruction()" />
@@ -104,23 +106,38 @@
   
   <xsl:template match="informaltable[not(@annotations='generated')]" priority="-5" mode="hub:table-captions">
     <!-- https://redmine.le-tex.de/issues/14659 -->
-    <xsl:variable name="note" select="following-sibling::*[1][self::para[matches(@role, $hub:table-note-style-regex-x, 'x')]]" as="element(para)*"/>
+    <xsl:variable name="note">
+      <xsl:for-each-group select="following-sibling::*" group-ending-with="self::informaltable[not(@annotations='generated')]">
+        <xsl:choose>
+          <xsl:when test="current-group()[self::para[matches(@role, $hub:table-note-style-regex-x, 'x')]]">
+            <xsl:sequence select="current-group()"/>
+          </xsl:when>
+        </xsl:choose>
+      </xsl:for-each-group>
+    </xsl:variable>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:attribute name="frame"
-        select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"
-      />
+        select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"/>
       <xsl:apply-templates mode="#current"/>
       <xsl:if test="$note[node()]">
         <caption>
-          <xsl:copy-of select="$note"/>
+          <xsl:apply-templates select="$note" mode="#current">
+            <xsl:with-param name="process" select="true()" tunnel="yes"/>
+          </xsl:apply-templates>
         </caption>
       </xsl:if>
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="para[matches(@role, $hub:table-note-style-regex-x, 'x')]
-                           [preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]" mode="hub:table-captions"/>
+  <xsl:template match="para[matches(@role, $hub:table-note-style-regex-x, 'x')]" mode="hub:table-captions">
+    <xsl:param name="process" tunnel="yes"/>
+    <xsl:if test="$process">
+      <xsl:copy>
+        <xsl:apply-templates select="@*, node()" mode="#current"/>
+      </xsl:copy>
+    </xsl:if>
+  </xsl:template>
   
   <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables">
     <xsl:copy>
