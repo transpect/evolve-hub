@@ -119,7 +119,8 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="para[preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]" mode="hub:table-captions"/>
+  <xsl:template match="para[matches(@role, $hub:table-note-style-regex-x, 'x')]
+                           [preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]" mode="hub:table-captions"/>
   
   <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables">
     <xsl:copy>
