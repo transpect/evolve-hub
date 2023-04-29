@@ -106,8 +106,8 @@
   
   <xsl:template match="informaltable[not(@annotations='generated')]" priority="-5" mode="hub:table-captions">
     <!-- https://redmine.le-tex.de/issues/14659 -->
-    <xsl:variable name="note">
-      <xsl:for-each-group select="following-sibling::*" group-ending-with="self::informaltable[not(@annotations='generated')]">
+    <xsl:variable name="note" as="element()*">
+      <xsl:for-each-group select="following-sibling::*" group-ending-with="informaltable[not(@annotations='generated')]">
         <xsl:choose>
           <xsl:when test="current-group()[self::para[matches(@role, $hub:table-note-style-regex-x, 'x')]]">
             <xsl:sequence select="current-group()"/>
