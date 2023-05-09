@@ -4557,5 +4557,47 @@
   <xsl:template match="@hub-origin" mode="hub:remove-debugging-info-origin"/>
 
   <xsl:template match="processing-instruction('hub-origin')" mode="hub:remove-debugging-info-origin"/>
+  
+  <!-- mode: repair-language-markup -->
+  
+  <!-- group phrases of the same language that are separated by a punctuation character or whitespace -->
+  
+  <xsl:variable name="hub:lang-joiner-regex" as="xs:string" 
+                select="'^[\p{P}\p{Zs}]+$'"/>
+  
+  <xsl:template match="para[phrase[@xml:lang]]
+                      |term[phrase[@xml:lang]]
+                      |bibliomixed[phrase[@xml:lang]]" mode="hub:repair-language-markup">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:for-each-group select="node()" 
+                          group-adjacent="    self::phrase[not(@xml:lang)][matches(., $hub:lang-joiner-regex)]     
+                                          or (self::phrase[@xml:lang]
+                                                          [   following-sibling::node()[1][self::phrase][not(@xml:lang)][matches(., $hub:lang-joiner-regex)]
+                                                           or preceding-sibling::node()[1][self::phrase][not(@xml:lang)][matches(., $hub:lang-joiner-regex)]]
+                                              )">
+        <xsl:choose>
+          <xsl:when test="    current-grouping-key() 
+                          and (every $att-name in distinct-values(current-group()/@*[not(name() = ('srcpath'))]/name()) 
+                               satisfies count(distinct-values(current-group()/@*[name() = $att-name])) eq 1)">
+            <phrase>
+              <xsl:apply-templates select="current-group()/@*, current-group()/node()" mode="#current"/>
+            </phrase>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates select="current-group()" mode="#current"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:for-each-group>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="*[@xml:lang]
+                        [for $lang in @xml:lang 
+                         return ancestor::*[@xml:lang][1][@xml:lang eq $lang]]" mode="hub:repair-language-markup">
+    <xsl:copy>
+      <xsl:apply-templates select="@* except @xml:lang" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
 
 </xsl:stylesheet>
