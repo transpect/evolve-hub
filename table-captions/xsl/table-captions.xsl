@@ -131,8 +131,20 @@
   </xsl:template>
   
   <xsl:template match="para[matches(@role, $hub:table-note-style-regex-x, 'x')]
-                           [preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]" mode="hub:table-captions">
+                           [preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]
+                           [preceding-sibling::*[1]
+                                                [self::informaltable[not(@annotations='generated')]|self::para[matches(@role, $hub:table-title-role-regex-x, 'x')]]] | 
+                       para[matches(@role, $hub:table-copyright-style-regex-x, 'x')]
+                           [preceding-sibling::*[position() = (1,2,3)]
+                                                [self::informaltable[not(@annotations='generated')]]
+                           ]
+                           [preceding-sibling::*[1]
+                                                [self::informaltable[not(@annotations='generated')] | 
+                                                 self::para[matches(@role, concat($hub:table-title-role-regex-x,'|',$hub:table-note-style-regex-x), 'x')]
+                                                ]
+                          ]" mode="hub:table-captions">
     <xsl:param name="process" tunnel="yes"/>
+    <!-- discard table legends/notes and sources directly after tables when they were already processed-->
     <xsl:if test="$process">
       <xsl:copy>
         <xsl:apply-templates select="@*, node()" mode="#current"/>
@@ -151,11 +163,29 @@
           </xsl:choose>
         </xsl:for-each-group>
       </xsl:variable>
+      <xsl:variable name="copyright-statement" as="element()*">
+        <xsl:for-each-group select="following-sibling::*" group-adjacent="boolean(self::para[matches(@role, $hub:table-copyright-style-regex-x, 'x')])">
+          <xsl:choose>
+            <xsl:when test="current-grouping-key()">
+              <xsl:sequence select="current-group()"/>
+            </xsl:when>
+          </xsl:choose>
+        </xsl:for-each-group>
+      </xsl:variable>
       <xsl:apply-templates select="@*" mode="hub:table-captions"/>
       <xsl:attribute name="frame"
         select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"
       />
       <xsl:apply-templates select="@role" mode="hub:table-captions"/>
+      <xsl:if test="$copyright-statement">
+        <info>
+          <legalnotice role="copyright">
+            <xsl:apply-templates select="$copyright-statement" mode="hub:table-captions">
+            <xsl:with-param name="process" select="true()" tunnel="yes"/>
+            </xsl:apply-templates>
+          </legalnotice>
+        </info>
+      </xsl:if>
       <xsl:apply-templates mode="hub:table-captions"/>
       <xsl:if test="$note[node()]">
         <caption>
