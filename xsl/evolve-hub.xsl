@@ -4596,7 +4596,7 @@
                         [for $lang in @xml:lang 
                          return ancestor::*[@xml:lang][1][@xml:lang eq $lang]]" mode="hub:repair-language-markup">
     <xsl:copy>
-      <xsl:apply-templates select="@* except @xml:lang" mode="#current"/>
+      <xsl:apply-templates select="@* except @xml:lang, node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
 
