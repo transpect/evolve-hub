@@ -75,7 +75,9 @@
               <xsl:if test="$copyright-statement">
                 <info>
                   <legalnotice role="copyright">
-                    <xsl:apply-templates select="$copyright-statement" mode="#current"/>
+                    <xsl:apply-templates select="$copyright-statement" mode="#current">
+                      <xsl:with-param name="process" select="true()" tunnel="yes"/>
+                    </xsl:apply-templates>
                   </legalnotice>
                 </info>
               </xsl:if>
