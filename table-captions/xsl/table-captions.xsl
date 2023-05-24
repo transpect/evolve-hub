@@ -155,23 +155,22 @@
   </xsl:template>
   
   <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables">
+    <xsl:variable name="context" as="element(informaltable)" select="."/>
     <xsl:copy>
       <xsl:variable name="note" as="element()*">
         <xsl:for-each-group select="following-sibling::*" group-adjacent="boolean(self::para[matches(@role, $hub:table-note-style-regex-x, 'x')])">
-          <xsl:choose>
-            <xsl:when test="current-grouping-key()">
-              <xsl:sequence select="current-group()"/>
-            </xsl:when>
-          </xsl:choose>
+          <xsl:if test="    current-grouping-key() 
+                        and current-group()[1]/preceding-sibling::informaltable[1][. is $context](:avoid next table's note to be duplicated:)">
+            <xsl:sequence select="current-group()"/>
+          </xsl:if>
         </xsl:for-each-group>
       </xsl:variable>
       <xsl:variable name="copyright-statement" as="element()*">
         <xsl:for-each-group select="following-sibling::*" group-adjacent="boolean(self::para[matches(@role, $hub:table-copyright-style-regex-x, 'x')])">
-          <xsl:choose>
-            <xsl:when test="current-grouping-key()">
-              <xsl:sequence select="current-group()"/>
-            </xsl:when>
-          </xsl:choose>
+          <xsl:if test="    current-grouping-key() 
+                        and current-group()[1]/preceding-sibling::informaltable[1][. is $context](:avoid next table's copyright to be duplicated:)">
+            <xsl:sequence select="current-group()"/>
+          </xsl:if>
         </xsl:for-each-group>
       </xsl:variable>
       <xsl:apply-templates select="@*" mode="hub:table-captions"/>
