@@ -3479,8 +3479,10 @@
                               replace(
                                 string-join((for $char in string-to-codepoints($indexterm)
                                             return substring(
-                                                     normalize-unicode(
-                                                       codepoints-to-string($char), 'NFKD'
+                                                     replace(
+                                                       normalize-unicode(
+                                                         codepoints-to-string($char), 'NFKD'
+                                                       ), '\p{Mn}', ''
                                                      ), 1, 1
                                                    )
                                 ),''), '\W', ' '
