@@ -94,7 +94,7 @@
                     </xsl:apply-templates>
                 </caption>
               </xsl:if>
-              <!-- MP 6-2023: commented PI handling out as they might be duplicated in and out of table and even copy PIs that are located after foloowing tables -->
+              <!-- MP 6-2023: commented PI handling out as they might be duplicated in and out of table and even copy PIs that are located after following tables -->
               <!--  <xsl:apply-templates select="$table/descendant-or-self::informaltable/following-sibling::processing-instruction()" />-->
             </table>
             <xsl:apply-templates select="current-group()[. &gt;&gt; $table] except ($note, $copyright-statement)" mode="hub:process-informaltables"/>
