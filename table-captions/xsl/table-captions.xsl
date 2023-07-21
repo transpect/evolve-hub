@@ -107,8 +107,8 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="informaltable[not(@annotations='generated')]" priority="-5" mode="hub:table-captions">
-    <!-- https://redmine.le-tex.de/issues/14659 -->
+  <!--<xsl:template match="informaltable[not(@annotations='generated')]" priority="-5" mode="hub:table-captions">
+    <!-\- https://redmine.le-tex.de/issues/14659 -\->
     <xsl:variable name="note" as="element()*">
       <xsl:for-each-group select="following-sibling::*" group-ending-with="informaltable[not(@annotations='generated')]">
         <xsl:choose>
@@ -118,10 +118,28 @@
         </xsl:choose>
       </xsl:for-each-group>
     </xsl:variable>
+    <xsl:variable name="copyright-statement" as="element()*">
+        <xsl:for-each-group select="following-sibling::*" group-ending-with="informaltable[not(@annotations='generated')]">
+        <xsl:choose>
+          <xsl:when test="current-group()[self::para[matches(@role, $hub:table-copyright-style-regex-x, 'x')]]">
+            <xsl:sequence select="current-group()"/>
+          </xsl:when>
+        </xsl:choose>
+      </xsl:for-each-group>
+      </xsl:variable>
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:attribute name="frame"
         select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"/>
+      <xsl:if test="$copyright-statement">
+        <info>
+          <legalnotice role="copyright">
+            <xsl:apply-templates select="$copyright-statement" mode="hub:table-captions">
+            <xsl:with-param name="process" select="true()" tunnel="yes"/>
+            </xsl:apply-templates>
+          </legalnotice>
+        </info>
+      </xsl:if>
       <xsl:apply-templates mode="#current"/>
       <xsl:if test="$note[node()]">
         <caption>
@@ -131,7 +149,7 @@
         </caption>
       </xsl:if>
     </xsl:copy>
-  </xsl:template>
+  </xsl:template>-->
   
   <xsl:template match="para[matches(@role, $hub:table-note-style-regex-x, 'x')]
                            [preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]
@@ -155,7 +173,7 @@
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables">
+  <xsl:template match="informaltable[not(@annotations='generated')]" mode="hub:process-informaltables hub:table-captions">
     <xsl:variable name="context" as="element(informaltable)" select="."/>
     <xsl:copy>
       <xsl:variable name="note" as="element()*">
@@ -176,8 +194,7 @@
       </xsl:variable>
       <xsl:apply-templates select="@*" mode="hub:table-captions"/>
       <xsl:attribute name="frame"
-        select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"
-      />
+                     select="hub:get-frame-attribute((./@css:*[matches(name(.), 'border\-.+\-style')], hub:get-entry-outer-borders(tgroup[../@css:border-collapse = 'collapse'])))"/>
       <xsl:apply-templates select="@role" mode="hub:table-captions"/>
       <xsl:if test="$copyright-statement">
         <info>
