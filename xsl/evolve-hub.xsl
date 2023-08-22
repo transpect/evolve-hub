@@ -2817,8 +2817,8 @@
 
   <xsl:variable name="hub:footnote-role-regex" as="xs:string"
     select="'Footnoteref'"/>
-
-  <xsl:template match="link[phrase[matches(@role,$hub:footnote-role-regex)]]" mode="hub:identifiers">
+  
+  <xsl:template match="link[phrase[matches(@role,$hub:footnote-role-regex[1](:Saxon 10 workaround to fix XTTE0570:))]]" mode="hub:identifiers">
     <footnoteref>
       <xsl:attribute name="linkend" select="phrase"/>
     </footnoteref>
