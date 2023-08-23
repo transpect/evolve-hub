@@ -2561,7 +2561,7 @@
                                             self::anchor[not(@xml:id and matches(@xml:id, '^((title|para)Id|(cell)?page)_'))]
                                                         [not(@role='start' and 
                                                              @xml:id and 
-                                                             matches(following-sibling::anchor[@role='end']/@xml:id,
+                                                             matches(following-sibling::anchor[@role='end'][1]/@xml:id,
                                                                      concat('^',@xml:id,'_end$')))]]]" 
                 mode="hub:repair-hierarchy" priority="1">
     <xsl:variable name="first-valid-node-in-title" select="node()[not(self::indexterm or 
