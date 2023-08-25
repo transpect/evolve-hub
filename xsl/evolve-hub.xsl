@@ -2816,7 +2816,7 @@
     name="hub:float-title-identifier" 
     mode="hub:identifiers">
     <xsl:variable name="cleaned-text-nodes" as="node()*"
-      select=".//text()[not(ancestor-or-self::*/name() = ('annotation', 'indexterm', 'footnote'))]"/>
+      select="descendant::text()[not(ancestor-or-self::*/name() = ('annotation', 'indexterm', 'footnote'))]"/>
     <xsl:variable name="cleaned-text" as="xs:string?"
       select="string-join($cleaned-text-nodes, '')"/>
     <xsl:copy>
@@ -2950,7 +2950,7 @@
           </phrase>
           <phrase role="hub:caption-text">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'no-indext-no-label')"/>
-            <xsl:value-of select="replace(node()[1], hub:escape-for-regex($caption-number), '')" />
+            <xsl:value-of select="replace(hub:very-first-text-node-in-context(.), hub:escape-for-regex($caption-number), '')" />
             <xsl:apply-templates select="node()[position() gt 1]" mode="#current" />
           </phrase>
         </xsl:when>
