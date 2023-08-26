@@ -2931,7 +2931,7 @@
                         and not(parent::*/@label)">
           <xsl:variable name="caption-number" 
             select="replace(
-                      node()[not(self::tabs or self::info)][1], 
+                      hub:very-first-text-node-in-context(.), 
                       concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, '[A-Z]\.[0-9]+)\.?\p{Zs}.*$'),
                       '$1'
                     )" as="xs:string" />

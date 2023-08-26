@@ -396,7 +396,10 @@
        will return the first 'valid' content (can be also an element) -->
   <xsl:function name="hub:very-first-text-node-in-context" as="node()?">
     <xsl:param name="context" as="node()"/>
-    <xsl:sequence select="($context/descendant::node()[not(self::anchor)][hub:same-scope(., $context)][. != ''])[1]"/>
+    <xsl:sequence select="(
+                            $context/descendant::node()[not(local-name() = ('anchor', 'info', 'tabs'))]
+                                                       [hub:same-scope(., $context)][. != '']
+                          )[1]"/>
   </xsl:function>
   
   <!-- converts filerefs starting with 'container:' to URIs -->
