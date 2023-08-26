@@ -2929,9 +2929,10 @@
                           concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, '[A-Z]\.[0-9]+)\.?\p{Zs}.*')
                         ) 
                         and not(parent::*/@label)">
+          <xsl:variable name="very-first-text-node-in-context" select="hub:very-first-text-node-in-context(.)"/>
           <xsl:variable name="caption-number" 
             select="replace(
-                      hub:very-first-text-node-in-context(.), 
+                      $very-first-text-node-in-context, 
                       concat('^(((', $hub:figure-caption-start-regex, ')|', $hub:table-caption-start-regex, ')', $hub:caption-sep-regex, '[A-Z]\.[0-9]+)\.?\p{Zs}.*$'),
                       '$1'
                     )" as="xs:string" />
@@ -2950,8 +2951,9 @@
           </phrase>
           <phrase role="hub:caption-text">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'no-indext-no-label')"/>
-            <xsl:value-of select="replace(hub:very-first-text-node-in-context(.), hub:escape-for-regex($caption-number), '')" />
-            <xsl:apply-templates select="node()[position() gt 1]" mode="#current" />
+            <xsl:apply-templates select="node()[. &lt;&lt; $very-first-text-node-in-context]" mode="#current"/>
+            <xsl:value-of select="replace(hub:very-first-text-node-in-context(.), hub:escape-for-regex($caption-number), '')"/>
+            <xsl:apply-templates select="node()[. &gt;&gt; $very-first-text-node-in-context]" mode="#current"/>
           </phrase>
         </xsl:when>
 
