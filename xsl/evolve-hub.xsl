@@ -1710,8 +1710,8 @@
           <xsl:for-each-group select="current-group()" group-ending-with="*[matches(@role, $regex-container/@end)]">
             <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
               <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
-              <xsl:if test="current-group()[position() = ('1', last())]/@srcpath">
-                <xsl:attribute name="srcpath" select="string-join(current-group()[position() = ('1', last())]/@srcpath, '&#x20;')"/>
+              <xsl:if test="current-group()[position() = (1, last())]/@srcpath">
+                <xsl:attribute name="srcpath" select="string-join(current-group()[position() = (1, last())]/@srcpath, '&#x20;')"/>
               </xsl:if>
               <xsl:if test="current-group()[position() lt 4][@role[matches(., $regex-container/hub:regex-map[@heading='yes']/@regex)]]">
                 <title>
