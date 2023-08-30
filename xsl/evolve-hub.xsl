@@ -68,7 +68,10 @@
   <xsl:param name="generate-sortas" select="'no'"/>
   <xsl:param name="tab-leader-as-role" select="'no'"/>
   <xsl:param name="strip-lang-variant" select="'yes'"/><!-- makes 'en' from 'en-GB' -->
-
+  <xsl:param name="word-comments-as" select="'annotation'">
+    <!-- 'annotation' (unchanged) | 'oxy-PI' | 'remove' -->
+  </xsl:param>
+  
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
 
@@ -3813,6 +3816,245 @@
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </title>
   </xsl:template>
+  
+  <!-- collateral: optionally transform annotations (stemming from Word comments) into Oxygen PI comments -->
+  
+  <xsl:template match="annotation[$word-comments-as = 'oxy-PI']" mode="hub:ids">
+    <xsl:param name="process-by-start-anchor" as="xs:boolean?" tunnel="yes"/>
+    <xsl:if test="$process-by-start-anchor or empty(key('hub:linking-item-by-linkend', @linkend))">
+      <xsl:apply-templates select="." mode="hub:oxy-PI"/>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="anchor[$word-comments-as = 'oxy-PI']
+                             [@role = 'start']
+                             [matches(@xml:id, '^comment_\d+$')]" mode="hub:ids">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+      <xsl:apply-templates select="key('hub:linking-item-by-id', @xml:id)" mode="#current">
+        <xsl:with-param name="process-by-start-anchor" select="true()" tunnel="yes"/>
+      </xsl:apply-templates>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="anchor[$word-comments-as = 'oxy-PI']
+                             [@role = 'end']
+                             [matches(@xml:id, '^comment_\d+_end$')]" mode="hub:ids">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+      <xsl:if test="key('hub:linking-item-by-linkend', @xml:id => replace('_end$', ''))">
+        <xsl:processing-instruction name="oxy_comment_end"/>
+      </xsl:if>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="annotation" mode="hub:oxy-PI">
+    <xsl:param name="process-by-start-anchor" as="xs:boolean?" tunnel="yes"/>
+    <xsl:variable name="parent-annotation-id" as="xs:string?">
+      <xsl:apply-templates select="info/keywordset/keyword[@role = 'parent-comment-ids']" mode="#current"/>
+    </xsl:variable>
+    <xsl:if test="$parent-annotation-id">
+      <xsl:message select="'PPPPPPPP ',@linkend, $parent-annotation-id"></xsl:message>
+      <!-- for subaltern annotations, linkend on the start anchor (!) points to a parent annotation -->
+      <xsl:attribute name="linkend" select="$parent-annotation-id"/>
+    </xsl:if>
+    <xsl:processing-instruction name="oxy_comment_start">
+      <xsl:apply-templates select="info/(author/personname/othername[1], date, 
+                                   keywordset/keyword[not(@role = 'parent-comment-ids')])" mode="#current"/>
+      <xsl:if test="$parent-annotation-id">
+        <xsl:text> parentID="</xsl:text>
+        <xsl:value-of select="$parent-annotation-id"/>
+        <xsl:text>"</xsl:text>
+      </xsl:if>
+      <xsl:text> comment="</xsl:text>
+      <xsl:apply-templates select="* except info" mode="#current"/>
+      <xsl:text>"</xsl:text>
+    </xsl:processing-instruction>
+    <xsl:if test="not($process-by-start-anchor)">
+      <xsl:processing-instruction name="oxy_comment_end"/>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:template match="othername" mode="hub:oxy-PI">
+    <xsl:text> author="</xsl:text>
+    <xsl:value-of select="."/>
+    <xsl:text>"</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="date" mode="hub:oxy-PI">
+    <xsl:text> timestamp="</xsl:text>
+    <xsl:value-of select="replace(replace(., '[:-]', ''), 'Z$', '+0000')"/>
+    <xsl:text>"</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="keywordset/keyword[@role = 'done'][. = '1']" mode="hub:oxy-PI">
+    <xsl:text> flag="done"</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="keywordset/keyword[@role = 'done'][not(. = '1')]" mode="hub:oxy-PI"/>
+  
+  <xsl:template match="keywordset/keyword[@role = 'parent-comment-ids']" mode="hub:oxy-PI" as="xs:string?">
+    <xsl:variable name="pci" as="xs:string*" select="distinct-values(tokenize(., '\s+'))"/>
+    <xsl:if test="count($pci) ne 1">
+      <xsl:message terminate="yes" select="'Annotation ', ancestor::annotation[1]/@xml:id, 
+                                           ' has ', count($pci), 'parent annotations.'"/>
+    </xsl:if>
+    <xsl:variable name="annotation-chain" as="xs:string+" 
+      select="hub:resolve-annotation-chain(key('hub:linking-item-by-id', $pci[1]), string(ancestor::annotation[1]/@xml:id))"/>
+    <xsl:if test="count($annotation-chain) gt 1">
+      <!-- Oxygen only links to the origin of the thread, not to the immediate parent -->
+      <xsl:sequence select="$annotation-chain[1]"/>
+    </xsl:if>
+  </xsl:template>
+  
+  <xsl:function name="hub:resolve-annotation-chain" as="xs:string+">
+    <!-- the ID of the root annotation (without replies) comes first -->
+    <xsl:param name="parent-annotation" as="element(annotation)"/>
+    <xsl:param name="so-far" as="xs:string+"/>
+    <xsl:variable name="parent-links-to" as="xs:string*" 
+      select="distinct-values(
+                for $a in $parent-annotation/info/keywordset/keyword[@role = 'parent-comment-ids']
+                return tokenize($a, '\s+')
+              )"/>
+    <xsl:if test="count($parent-links-to) gt 1">
+      <xsl:message terminate="yes" select="'hub:resolve-annotation-chain(): Annotation ', $parent-annotation/@linkend, 
+                                           ' has ', count($parent-links-to), 'parent annotations.'"/>
+    </xsl:if>
+    <xsl:choose>
+      <xsl:when test="empty($parent-links-to)">
+        <xsl:sequence select="(string($parent-annotation/@linkend), $so-far)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="hub:resolve-annotation-chain(key('hub:linking-item-by-id', $parent-links-to, root($parent-annotation)),
+                              (string($parent-annotation/@linkend), $so-far))"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+  
+  <xsl:template match="para" mode="hub:oxy-PI">
+    <xsl:apply-templates mode="#current"/>
+    <xsl:text>&#xa;</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="link[@xlink:href]" mode="hub:oxy-PI">
+    <xsl:text>[</xsl:text>
+    <xsl:apply-templates mode="#current"/>
+    <xsl:text>](</xsl:text>
+    <xsl:value-of select="@xlink:href"/>
+    <xsl:text>)</xsl:text>
+  </xsl:template>
+  
+  <xsl:template match="orderedlist/listitem[@override]" mode="hub:oxy-PI">
+    <xsl:value-of select="@override"/>
+    <xsl:text> </xsl:text>
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xsl:template match="*" mode="hub:oxy-PI">
+    <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+
+
+  <!-- generate mid pseudo attributes for nested comments in mode hub:cross-link -->
+
+  <xsl:template match="anchor[processing-instruction('oxy_comment_start')]
+                             [@role = 'start']
+                             [matches(@xml:id, '^comment_\d+$')]" mode="hub:cross-link">
+    <xsl:param name="threaded-comments" as="document-node(element(div))" tunnel="yes"/>
+    <xsl:variable name="mid" as="xs:integer?" select="hub:oxy-mid-number(@xml:id, $threaded-comments)"/>
+    <xsl:apply-templates select="processing-instruction('oxy_comment_start')" mode="#current">
+      <xsl:with-param name="mid" select="$mid" as="xs:integer?" tunnel="yes"/>
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="anchor[processing-instruction('oxy_comment_end')]
+                             [@role = 'end']
+                             [matches(@xml:id, '^comment_\d+_end$')]" mode="hub:cross-link">
+    <xsl:param name="threaded-comments" as="document-node(element(div))" tunnel="yes"/>
+    <xsl:variable name="mid" as="xs:integer?" select="hub:oxy-mid-number(@xml:id, $threaded-comments)"/>
+    <xsl:apply-templates select="processing-instruction('oxy_comment_end')" mode="#current">
+      <xsl:with-param name="mid" select="$mid" as="xs:integer?" tunnel="yes"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template match="processing-instruction('oxy_comment_start') |
+                       processing-instruction('oxy_comment_end')" mode="hub:cross-link" priority="1">
+    <xsl:param name="mid" as="xs:integer?" tunnel="yes"/>
+    <xsl:choose>
+      <xsl:when test="exists($mid)">
+        <xsl:processing-instruction name="{name()}">
+          <xsl:value-of select="."/>
+          <xsl:text> mid="</xsl:text>
+          <xsl:value-of select="$mid"/>
+          <xsl:text>"</xsl:text>
+        </xsl:processing-instruction>    
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="processing-instruction('oxy_comment_start')" mode="hub:cross-link">
+    <xsl:param name="threaded-comments" as="document-node(element(div))" tunnel="yes"/>
+    <xsl:choose>
+        <xsl:when test="../@xml:id = $threaded-comments/div/div/anchor[1]/@xml:id">
+        <!-- parent anchor is thread root and needs an ID -->
+        <xsl:processing-instruction name="{name()}">
+          <xsl:value-of select="."/>
+          <xsl:text> id="</xsl:text>
+          <xsl:value-of select="../@xml:id"/>
+          <xsl:text>"</xsl:text>
+        </xsl:processing-instruction>  
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="/*[$word-comments-as = 'oxy-PI']" mode="hub:cross-link" priority="4">
+    <xsl:variable name="threaded-comments" as="document-node(element(div))">
+      <xsl:document>
+        <div>
+          <xsl:for-each-group select="//anchor[@role = 'start'][@linkend]" group-by="@linkend">
+            <div>
+              <xsl:sequence select="key('hub:linking-item-by-linkend', current-grouping-key()),
+                                    current-group(),
+                                    key('hub:linking-item-by-linkend', concat(current-grouping-key(), '_end')),
+                                    for $i in current-group()/@xml:id return key('hub:linking-item-by-linkend', concat($i, '_end'))"/>  
+            </div>
+          </xsl:for-each-group>
+        </div>
+      </xsl:document>
+    </xsl:variable>
+    <xsl:next-match>
+      <xsl:with-param name="threaded-comments" as="document-node(element(div))" tunnel="yes"
+        select="$threaded-comments"/>
+    </xsl:next-match>
+  </xsl:template>
+  
+  <xsl:function name="hub:oxy-mid-number" as="xs:integer?">
+    <!-- nesting level for threaded comment PIs -->
+    <xsl:param name="id" as="xs:string"/>
+    <xsl:param name="threaded-comments" as="document-node(element(div))"/>
+    <xsl:variable name="anchor" as="element(anchor)?" select="key('hub:linking-item-by-linkend', $id, $threaded-comments)"/>
+    <xsl:variable name="anchor-pos" as="xs:integer?" select="hub:index-of($anchor/../*, $anchor)"/>
+    <xsl:choose>
+      <xsl:when test="exists($anchor) and ends-with($id, '_end')">
+        <xsl:variable name="total-anchors-in-group" as="xs:integer" select="count($anchor/../*)"/>        
+        <xsl:sequence select="($total-anchors-in-group - $anchor-pos)[. gt 0]"/>
+        <!-- example: 5 start anchors, 5 end anchors. The first and the last anchor belong to the thread root and should return 0 
+          (which yields an empty sequence since the thread root will not get a mid pseudo attribute). The nesting numbers are
+             0,1,2,3,4; 4,3,2,1,0. -->
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="($anchor-pos - 1)[. gt 0]"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+
+  
 
   <!-- mode: hub:aux -->
 

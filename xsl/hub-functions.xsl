@@ -412,4 +412,10 @@
                                       $source-dir-uri)"/>
   </xsl:function>
 
+  <xsl:function name="hub:index-of" as="xs:integer*">
+    <xsl:param name="set" as="node()*"/>
+    <xsl:param name="srch" as="node()*"/>
+    <xsl:sequence select="for $gi in $srch/generate-id() return index-of($set/generate-id(), $gi)"/>
+  </xsl:function>
+
 </xsl:stylesheet>
