@@ -3842,7 +3842,7 @@
                              [matches(@xml:id, '^comment_\d+_end$')]" mode="hub:ids">
     <xsl:copy>
       <xsl:apply-templates select="@*, node()" mode="#current"/>
-      <xsl:if test="key('hub:linking-item-by-linkend', @xml:id => replace('_end$', ''))">
+      <xsl:if test="for $i in @xml:id return key('hub:linking-item-by-linkend', replace($i, '_end$', ''))">
         <xsl:processing-instruction name="oxy_comment_end"/>
       </xsl:if>
     </xsl:copy>
