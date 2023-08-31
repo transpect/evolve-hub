@@ -739,7 +739,7 @@
        -->
 
   <!-- for finding sidebar[@linkend] to a given anchor[@xml:id]: -->
-  <xsl:key name="hub:linking-item-by-id" match="*[@linkend]" use="@linkend" />
+  <xsl:key name="hub:linking-item-by-id" match="*[@linkend | @annotates]" use="(@linkend, @annotates)[1]" />
   <!-- for finding anchor[@xml:id] to a given sidebar[@linkend]: -->
   <xsl:key name="hub:linking-item-by-linkend" match="*[@*:id]" use="@*:id" />
 
@@ -3821,7 +3821,7 @@
   
   <xsl:template match="annotation[$word-comments-as = 'oxy-PI']" mode="hub:ids">
     <xsl:param name="process-by-start-anchor" as="xs:boolean?" tunnel="yes"/>
-    <xsl:if test="$process-by-start-anchor or empty(key('hub:linking-item-by-linkend', @linkend))">
+    <xsl:if test="$process-by-start-anchor or empty(key('hub:linking-item-by-linkend', @annotates))">
       <xsl:apply-templates select="." mode="hub:oxy-PI"/>
     </xsl:if>
   </xsl:template>
@@ -3854,7 +3854,7 @@
       <xsl:apply-templates select="info/keywordset/keyword[@role = 'parent-comment-ids']" mode="#current"/>
     </xsl:variable>
     <xsl:if test="$parent-annotation-id">
-      <xsl:message select="'PPPPPPPP ',@linkend, $parent-annotation-id"></xsl:message>
+      <xsl:message select="'PPPPPPPP ',@annotates, $parent-annotation-id"></xsl:message>
       <!-- for subaltern annotations, linkend on the start anchor (!) points to a parent annotation -->
       <xsl:attribute name="linkend" select="$parent-annotation-id"/>
     </xsl:if>
@@ -3917,16 +3917,16 @@
                 return tokenize($a, '\s+')
               )"/>
     <xsl:if test="count($parent-links-to) gt 1">
-      <xsl:message terminate="yes" select="'hub:resolve-annotation-chain(): Annotation ', $parent-annotation/@linkend, 
+      <xsl:message terminate="yes" select="'hub:resolve-annotation-chain(): Annotation ', $parent-annotation/@annotates, 
                                            ' has ', count($parent-links-to), 'parent annotations.'"/>
     </xsl:if>
     <xsl:choose>
       <xsl:when test="empty($parent-links-to)">
-        <xsl:sequence select="(string($parent-annotation/@linkend), $so-far)"/>
+        <xsl:sequence select="(string($parent-annotation/@annotates), $so-far)"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:sequence select="hub:resolve-annotation-chain(key('hub:linking-item-by-id', $parent-links-to, root($parent-annotation)),
-                              (string($parent-annotation/@linkend), $so-far))"/>
+                              (string($parent-annotation/@annotates), $so-far))"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
