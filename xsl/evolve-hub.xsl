@@ -2818,12 +2818,25 @@
                        | formalpara[@role eq 'Programcode'][$hub:caption-tagging-for-listings]/title" 
     name="hub:float-title-identifier" 
     mode="hub:identifiers">
+
+    <!--Following cases can be used for testing the different branches
+    <figure>
+      <title srcpath="1">Abbildung 3: Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
+      <title srcpath="2">Abbildung 3:<tab/>Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an …)</title>
+      <title srcpath="3"><anchor xml:id="testi"/><phrase role="test">Abbildung 3:</phrase><tab/>Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
+      <title srcpath="4">Testi<tab/>Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
+      <title srcpath="5">3: Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
+      <title srcpath="6">Abbildung A.1. Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
+      <title  srcpath="7">Mimimi: Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
+      <mediaobject srcpath="word/document.xml?xpath=/w:document[1]/w:body[1]/w:p[590]/w:r[1]/w:drawing[1]"/>
+    </figure>-->
+
     <xsl:variable name="cleaned-text-nodes" as="node()*"
       select="descendant::text()[not(ancestor-or-self::*/name() = ('annotation', 'indexterm', 'footnote'))]"/>
     <xsl:variable name="cleaned-text" as="xs:string?"
       select="string-join($cleaned-text-nodes, '')"/>
     <xsl:copy>
-      <xsl:apply-templates select="@*|processing-instruction()" mode="#current"/>
+      <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:choose>
 
         <!-- example: <phrase>Table 4.1</phrase><tab/><phrase>…</phrase> 
@@ -3021,6 +3034,10 @@
         </xsl:non-matching-substring>
       </xsl:analyze-string>
     </phrase>
+
+    <!-- in this scenario PIs might be lost because only text is processed. Therefore apply them here.-->
+    <xsl:apply-templates select="processing-instruction()[following-sibling::text()[1][matches(., $caption-number)]]" mode="#current"/>
+
     <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
       <phrase role="hub:caption-text">
         <xsl:if test="every $n in $cleaned-text-nodes satisfies $n/ancestor::*[. is $phrase-wrapper]">
