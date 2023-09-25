@@ -2892,6 +2892,7 @@
         </xsl:when>
         <!-- examples: ^Fig. 2$,  ^Table 4.1$,  ^Listing 1.3$ -->
         <xsl:when test="matches($cleaned-text, concat($hub:caption-number-without-sep-regex, '\p{Zs}*$')) and not(parent::*/@label)">
+          <xsl:apply-templates select="processing-instruction()" mode="#current"/>
           <xsl:for-each select=".//text()">
             <xsl:if test="not(ancestor-or-self::*/name() = ('annotation', 'indexterm', 'footnote'))">
               <phrase role="hub:caption-number">
@@ -3018,6 +3019,11 @@
     </xsl:variable>
     <xsl:variable name="phrase-wrapper" as="element(phrase)?"
       select="($cleaned-text-nodes/ancestor::phrase[last()])[1]"/>
+    
+    <!-- in this scenario PIs might be lost because only text is processed. Therefore apply them here.-->
+    
+    <xsl:apply-templates select="processing-instruction()[following-sibling::node()[self::text()|self::phrase][1][contains($caption-number, .)]]" mode="#current"/>
+    
     <phrase role="hub:caption-number">
       <xsl:if test="every $n in $cleaned-text-nodes satisfies $n/ancestor::*[. is ($phrase-wrapper)]">
         <xsl:apply-templates select="$cleaned-text-nodes/ancestor::phrase[last()]/descendant-or-self::*/@css:*" mode="#current"/>
@@ -3034,9 +3040,6 @@
         </xsl:non-matching-substring>
       </xsl:analyze-string>
     </phrase>
-
-    <!-- in this scenario PIs might be lost because only text is processed. Therefore apply them here.-->
-    <xsl:apply-templates select="processing-instruction()[following-sibling::text()[1][matches(., $caption-number)]]" mode="#current"/>
 
     <xsl:variable name="caption-number-with-tagged-separator" as="element(phrase)">
       <phrase role="hub:caption-text">
