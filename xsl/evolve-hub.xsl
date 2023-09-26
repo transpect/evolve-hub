@@ -3021,8 +3021,8 @@
       select="($cleaned-text-nodes/ancestor::phrase[last()])[1]"/>
     
     <!-- in this scenario PIs might be lost because only text is processed. Therefore apply them here.-->
-    
-    <xsl:apply-templates select="processing-instruction()[following-sibling::node()[self::text()|self::phrase][1][contains($caption-number, .)]]" mode="#current"/>
+    <!--  <xsl:message select="'cap-nr after PI',$caption-number, '//', for $i in processing-instruction()/(following-sibling::node()[self::text()|self::phrase])[1] return $i "/>-->
+    <xsl:apply-templates select="processing-instruction()[following-sibling::node()[self::text()|self::phrase][1][contains($caption-number, .) or contains(., $caption-number)]]" mode="#current"/>
     
     <phrase role="hub:caption-number">
       <xsl:if test="every $n in $cleaned-text-nodes satisfies $n/ancestor::*[. is ($phrase-wrapper)]">
