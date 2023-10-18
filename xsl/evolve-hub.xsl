@@ -71,6 +71,7 @@
   <xsl:param name="word-comments-as" select="'annotation'">
     <!-- 'annotation' (unchanged) | 'oxy-PI' | 'remove' -->
   </xsl:param>
+  <xsl:param name="create-removed-superscript-pi" select="'yes'"/>
   
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
@@ -2075,6 +2076,87 @@
     <xsl:sequence select="."/>
   </xsl:template>
     
+  <!-- mode: hub:remove-superscript -->
+  <!-- Optional mode that will remove superscript from certain characters.
+       For example '®' or '™' could be removed from superscript.
+       Requires that hub:handle-phrase has run before. -->
+  <xsl:variable name="remove-from-superscript-characters-regex" as="xs:string" select="'[®™]+'"/>
+
+  <!-- A superscript with a descendant::text() that contains "remove-from-superscript-characters" will
+       be split into separate superscript elements/subtrees using the upwards projection method:
+       https://archive.xmlprague.cz/2019/files/xmlprague-2019-proceedings.pdf,
+       "Splitting XML Documents at Milestone Elements Using the XSLT Upward Projection Method"
+       The split points are right before and after the characters, that should be removed from the superscript.
+       The resulting superscript trees are reproduced fully for the parts that should remain in superscript.
+       From the resulting superscript trees for the "remove-from-superscript-characters", only superscript/node()
+       will be reproduced.
+
+       We borrow templates from mode hub:upward-project-tab.
+
+       Examples:
+       <superscript>a</superscript> -> <superscript>a</superscript>
+       <superscript>®</superscript> -> ®
+       <superscript>a®<b>b®</b></superscript> -> <superscript>a</superscript>®<superscript><b>b</b></superscript><b>®</b>
+  -->
+  <xsl:template match="superscript[descendant::text()[matches(., $remove-from-superscript-characters-regex)]]" mode="hub:remove-superscript">
+    <xsl:variable name="context" select="." as="element(*)"/>
+    <xsl:variable name="marked" as="element(*)">
+      <!-- Insert split marker before and after remove-from-superscript-characters to facilitate splitting. -->
+      <xsl:apply-templates select="$context" mode="insert-split-marker"/>
+    </xsl:variable>
+    <xsl:variable name="processed-content" as="document-node()">
+      <xsl:document>
+        <xsl:for-each-group select="$marked/descendant::node()[not(node())]" group-starting-with="split-marker">
+          <!-- Only create something for nodes other than split-marker. -->
+          <xsl:if test="current-group()[not(self::split-marker)]">
+            <xsl:variable name="restriction" as="node()*" select="current-group()[not(self::split-marker)]/ancestor-or-self::node()">
+              <!-- Restrict upwards-projection to ancestors of nodes in current-group except for split-marker. -->
+            </xsl:variable>
+            <xsl:if test="$restriction/node()">
+              <!-- Not sure if this is really necessary since we test if the current-group is empty (besides split-marker) but will not hurt. -->
+              <xsl:choose>
+                <xsl:when test="matches(string-join(current-group()[not(self::split-marker)], ''), $remove-from-superscript-characters-regex)">
+                  <!-- This group contains the characters that should be removed from superscript,
+                       so we do not reproduce the superscript. The "root" of $marked is the superscript. -->
+                  <xsl:if test="$create-removed-superscript-pi">
+                    <xsl:processing-instruction name="hub_removed-from-superscript" select="string-join(current-group()[not(self::split-marker)], '')"/>
+                  </xsl:if>
+                  <xsl:apply-templates select="$marked/node()" mode="hub:upward-project-tab">
+                    <xsl:with-param name="restricted-to" select="$restriction" tunnel="yes"/>
+                  </xsl:apply-templates>
+                </xsl:when>
+                <xsl:otherwise>
+                  <!-- This group contains the stuff that should remain superscripted. -->
+                  <xsl:apply-templates select="$marked" mode="hub:upward-project-tab">
+                    <xsl:with-param name="restricted-to" select="$restriction" tunnel="yes"/>
+                  </xsl:apply-templates>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:if>
+          </xsl:if>
+        </xsl:for-each-group>
+      </xsl:document>
+    </xsl:variable>
+    <!-- As in mode hub:split-at-tab. -->
+    <xsl:apply-templates select="$processed-content/node()" mode="hub:postprocess-splitted-tabs">
+      <xsl:with-param name="elements-with-srcpaths" as="element(*)*" tunnel="yes" select="key('hub:element-by-srcpath', $processed-content//@srcpath, $processed-content)"/>
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="text()[matches(., $remove-from-superscript-characters-regex)]" mode="insert-split-marker">
+    <xsl:analyze-string select="." regex="{$remove-from-superscript-characters-regex}">
+      <xsl:matching-substring>
+        <split-marker/>
+        <xsl:sequence select="."/>
+        <split-marker/>
+      </xsl:matching-substring>
+      <xsl:non-matching-substring>
+        <xsl:sequence select="."/>
+      </xsl:non-matching-substring>
+    </xsl:analyze-string>
+  </xsl:template>
+
+
   <!-- mode: hub:right-tab-to-tables -->
   <!-- Optional mode that creates two-columns informaltables with the role hub:right-tab of 
        adjacent paras with right tabs. There is no preferred point in the pipeline when this 
