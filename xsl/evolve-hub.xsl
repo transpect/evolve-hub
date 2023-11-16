@@ -27,6 +27,7 @@
   <xsl:import href="http://transpect.io/evolve-hub/relocate-indexterms/xsl/relocate-indexterms.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/table-merge/xsl/table-merge.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/handle-phrase/xsl/handle-phrase.xsl"/>
+  <xsl:import href="http://transpect.io/evolve-hub/group-environments/xsl/group-environments.xsl"/>
 
   <xsl:include href="http://transpect.io/evolve-hub/xsl/hub-functions.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/functx/Strings/Replacing/escape-for-regex.xsl"/>
