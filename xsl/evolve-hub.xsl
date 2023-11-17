@@ -2099,7 +2099,9 @@
        <superscript>®</superscript> -> ®
        <superscript>a®<b>b®</b></superscript> -> <superscript>a</superscript>®<superscript><b>b</b></superscript><b>®</b>
   -->
-  <xsl:template match="superscript[descendant::text()[matches(., $remove-from-superscript-characters-regex)]]" mode="hub:remove-superscript">
+  <xsl:template match="superscript[descendant::text()[matches(., $remove-from-superscript-characters-regex)]
+                                                     [not(ancestor::para[1]/generate-id()=current()/descendant::para/generate-id())]]" 
+                mode="hub:remove-superscript">
     <xsl:variable name="context" select="." as="element(*)"/>
     <xsl:variable name="marked" as="element(*)">
       <!-- Insert split marker before and after remove-from-superscript-characters to facilitate splitting. -->
