@@ -20,8 +20,8 @@
   <xsl:variable name="hub:environment-paras-start" as="xs:string" select="replace($hub:environment-paras, '\|stop', '')"/>
   <xsl:variable name="hub:environment-paras-end" as="xs:string" select="replace($hub:environment-paras-start, 'start', 'stop')"/>
   
-   <!-- call environment grouping template -->
-  <xsl:template match="*[dbk:para[matches(@role, $hub:environment-paras-end)]]" mode="hub:group-environments" priority="5">
+   <!-- call environment grouping template like this -->
+  <xsl:template match="*[dbk:para[matches(@role, $hub:environment-paras-end)]]" mode="hub:group-environmentsgroup-environments" priority="5">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:call-template name="environments">
@@ -66,7 +66,7 @@
     <xsl:sequence select="normalize-space($div-role)"/>
   </xsl:function>
   
-  <xsl:function name="hub:get-input-depth" as="xs:int">
+  <xsl:function name="hub:get-input-depth" as="xs:integer">
     <xsl:param name="element" as="element(*)"/>
     <xsl:param name="depth-map" as="document-node()"/>
     <xsl:sequence select="$depth-map/*:item[@s = $element/@srcpath]/@d"/>
@@ -89,12 +89,10 @@
         <xsl:variable name="curr" select="."/>
         <xsl:variable name="position" select="index-of($starts/@srcpath union $ends/@srcpath, current()/@srcpath)"/>
         <xsl:variable name="depth" select="$global-depth-map[position() = $position] - $min-depth"/>
-        <xsl:sequence>
           <item s="{$curr/@srcpath}" 
                 p="{$position}"
                 t="{if (hub:is-environment-end($curr)) then 'e' else 's'}"
                 d="{$depth}"/>
-        </xsl:sequence>
       </xsl:for-each>
     </xsl:variable>
     <xsl:for-each-group select="$input" group-starting-with="dbk:para[hub:is-environment-start(.)][hub:get-input-depth(.,$enriched-depth-map) = 0]">
