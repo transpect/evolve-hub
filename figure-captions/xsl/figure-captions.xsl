@@ -162,7 +162,9 @@
                         [$hub:handle-several-images-per-caption]" mode="hub:figure-captions" priority="2">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.) and not(preceding-sibling::*[1][hub:is-figure(.)])]">
+      <xsl:for-each-group select="node()" group-starting-with="*[hub:is-figure(.) and not(preceding-sibling::*[1][hub:is-figure(.)])] | 
+                                                               *[self::chapter|self::part|self::section(:do not group over sections if figure is under /hub. 
+                                                                  otherwise all srcpaths of following sections would go to this figure:)]">
      
         <xsl:choose>
           <xsl:when test="current-group()[1][hub:is-figure(.)]
