@@ -263,19 +263,19 @@
     <xsl:param name="context" as="node()+"/>
     <xsl:param name="level" as="xs:integer"/>
     
-    <xsl:for-each-group select="$context[self::*]" group-adjacent="tr:is-level-element(.,$level)">
+    <xsl:for-each-group select="$context[self::*|self::processing-instruction()]" group-adjacent="tr:is-level-element(.,$level)">
       <xsl:choose>
         <xsl:when test="current-grouping-key()">
           <xsl:variable name="first-non-continue-element" select="if (tr:get-numeration-style(current-group()[1])='continue') 
                                                                   then current-group()[tr:get-numeration-style(.) ne 'continue'][1] 
                                                                   else ()"/>
-          <xsl:for-each-group select="current-group()[self::*]" group-adjacent="if (empty($first-non-continue-element)) 
+          <xsl:for-each-group select="current-group()[self::*|self::processing-instruction()]" group-adjacent="if (empty($first-non-continue-element)) 
                                                                                 then false() 
                                                                                 else . &lt;&lt; $first-non-continue-element">
             <xsl:variable name="first-element-level" select="tr:get-numeration-level(current-group()[1])"/>
             <xsl:variable name="first-higher-level-element" 
                           select="current-group()[tr:get-numeration-level(.) lt $first-element-level][1]"/>
-            <xsl:for-each-group select="current-group()[self::*]" group-adjacent="if (empty($first-higher-level-element)) 
+            <xsl:for-each-group select="current-group()[self::*|self::processing-instruction()]" group-adjacent="if (empty($first-higher-level-element)) 
                                                                                   then false() 
                                                                                   else . &lt;&lt; $first-higher-level-element">
               <xsl:variable name="actual-level" select="if (current-grouping-key()) 
@@ -283,7 +283,7 @@
                                                         else if (not(empty($first-higher-level-element))) 
                                                              then tr:get-numeration-level($first-higher-level-element) 
                                                              else max(($level,$first-element-level))"/>
-              <xsl:for-each-group select="current-group()[self::*]" 
+              <xsl:for-each-group select="current-group()[self::*|self::processing-instruction()]" 
                                   group-adjacent="tr:get-numeration-style-with-level(.,$actual-level)">
                 <xsl:variable name="key" select="current-grouping-key()"/>
                 <xsl:variable name="true-marks" as="xs:string*">
