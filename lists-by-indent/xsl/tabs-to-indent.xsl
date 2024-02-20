@@ -15,7 +15,7 @@
   <xsl:variable name="mark-exceptions" select="'^(BEISPIEL|ANMERKUNG)$'" as="xs:string"/>
   <xsl:variable name="hub:float-names" select="('figure', 'table', 'informaltable')"/>
   <xsl:variable name="hub:default-tabstop" as="xs:double" select="400"/>
-	<xsl:variable name="hub:no-tabs" select="('bibliomisc','biblioentry','anchor', 'appendix')"/>
+	<xsl:variable name="hub:no-tabs" select="('bibliomisc','biblioentry','anchor', 'appendix', 'citation')"/>
   
 
   <!-- seems to work for IDML output already (@margin-left, @text-indent already present). 
