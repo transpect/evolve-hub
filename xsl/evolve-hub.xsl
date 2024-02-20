@@ -2637,6 +2637,7 @@
                        [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
 		                   [not(ancestor::phrase[hub:same-scope(current(), .)][@role eq 'hub:identifier'])]
 		                   [not(ancestor::*:math)]
+		                   [not(ancestor::citation)]
 		                   [
                          matches(., $hub:itemizedlist-mark-at-start-regex) 
                          and ancestor::para[xs:double(@margin-left) gt $hub:indent-epsilon]
@@ -2818,6 +2819,7 @@
                      [empty(ancestor::*[self::title|self::para][phrase[@role eq 'hub:identifier']])]
                      [not(ancestor::*[matches(@role, $hub:no-identifier-needed)])]
                      [not(ancestor::*:math)]
+                     [not(ancestor::citation)]
                      [matches(., $hub:orderedlist-mark-at-start-regex)]
                      [not(matches(., concat($hub:orderedlist-mark-at-start-regex,$text-to-identifiy-not-identifier)))]
                      [ (
