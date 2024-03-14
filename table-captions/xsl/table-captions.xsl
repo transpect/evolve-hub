@@ -48,7 +48,7 @@
             <xsl:variable name="note" select="current-group()[self::para[matches(@role, $hub:table-note-style-regex-x, 'x')]]" as="element(para)*"/>
             <xsl:variable name="copyright-statement" select="current-group()[self::para[matches(@role, $hub:table-copyright-style-regex-x, 'x')]]" as="element(para)*"/>
             <xsl:variable name="text" select="current-group()[position() &gt; 1 and . &lt;&lt; $table] 
-                                              except $note" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
+                                              except ($copyright-statement,$note)" as="element(*)*"/><!-- usually para, but a sidebar has also been spotted -->
             <table>
               <xsl:attribute name="frame" select="if ($table/name()='informaltable') 
                                                   then hub:get-frame-attribute(
