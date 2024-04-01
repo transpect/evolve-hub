@@ -20,8 +20,6 @@
   exclude-result-prefixes="w o v wx xs dbk pkg r rel word200x exsl fn tr hub css"
   version="2.0">
 
-  <xsl:import href="figure-caption-vars.xsl"/>
-
   <xsl:template match="*[para[matches(@role, $hub:subfigure-caption-role-regex-x)]]" mode="hub:subfigure-captions">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
