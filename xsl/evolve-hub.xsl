@@ -2855,7 +2855,7 @@
   
   <xsl:function name="tr:exception-from-identifier-detection" as="xs:boolean">
     <xsl:param name="context" as="node()"/>
-    <xsl:sequence select="false()"/>
+    <xsl:sequence select="if (matches($context/parent::*/@role, $hub:no-identifier-needed)) then true() else false()"/>
   </xsl:function>
   
   <xsl:template name="hub:section-title-identifier" as="element(title)">
@@ -4853,16 +4853,18 @@
   <xsl:variable name="hub:lang-joiner-regex" as="xs:string" 
                 select="'^[\p{P}\p{Zs}]+$'"/>
   
-  <xsl:template match="para[phrase[@xml:lang]]
-                      |term[phrase[@xml:lang]]
-                      |bibliomixed[phrase[@xml:lang]]" mode="hub:repair-language-markup">
+  <xsl:variable name="semantic-phrase-roles" select="'^hub:(identifier|caption-text|caption-number)$'"/>
+  
+  <xsl:template match="para[phrase[@xml:lang][not(matches(@role,$semantic-phrase-roles))]]
+                      |term[phrase[@xml:lang][not(matches(@role,$semantic-phrase-roles))]]
+                      |bibliomixed[phrase[@xml:lang][not(matches(@role,$semantic-phrase-roles))]]" mode="hub:repair-language-markup">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" 
-                          group-adjacent="    self::phrase[not(@xml:lang)][matches(., $hub:lang-joiner-regex)]     
-                                          or (self::phrase[@xml:lang]
-                                                          [   following-sibling::node()[1][self::phrase][not(@xml:lang)][matches(., $hub:lang-joiner-regex)]
-                                                           or preceding-sibling::node()[1][self::phrase][not(@xml:lang)][matches(., $hub:lang-joiner-regex)]]
+                          group-adjacent="    self::phrase[not(@xml:lang)][matches(., $hub:lang-joiner-regex)][not(matches(@role,$semantic-phrase-roles))]     
+                                          or (self::phrase[@xml:lang][not(matches(@role,$semantic-phrase-roles))]
+                                                          [   following-sibling::node()[1][self::phrase][not(@xml:lang)][not(matches(@role,$semantic-phrase-roles))][matches(., $hub:lang-joiner-regex)]
+                                                           or preceding-sibling::node()[1][self::phrase][not(@xml:lang)][not(matches(@role,$semantic-phrase-roles))][matches(., $hub:lang-joiner-regex)]]
                                               )">
         <xsl:choose>
           <xsl:when test="    current-grouping-key() 
