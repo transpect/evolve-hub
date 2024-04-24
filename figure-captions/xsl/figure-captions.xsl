@@ -65,7 +65,7 @@
                         then ($title//anchor[not(@role = ('start', 'end'))][@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(., $title)], 
                               $title//anchor[not(@role = ('start', 'end'))][@xml:id][hub:same-scope(., $title)])[1] 
                         else ()"/>
-              <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation"/>
+              <xsl:sequence select="$anchor/@xml:id | current-group()[1]//@css:orientation | current-group()[1]//@css:page"/>
               <xsl:if test="(current-group()[1], $note-me-maybe/*[self::copyrights or self::notes])/@srcpath">
                 <xsl:attribute name="srcpath" select="string-join((current-group()[1], $note-me-maybe/*[self::copyrights or self::notes])/@srcpath,' ')"/>
               </xsl:if>
