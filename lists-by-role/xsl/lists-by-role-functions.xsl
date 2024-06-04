@@ -220,13 +220,17 @@
     <xsl:choose>
       <xsl:when test="matches($elt/@role,'^list\-')">
         <xsl:choose>
-          <xsl:when test="matches($elt/@role,'continue') and exists($elt/preceding-sibling::*[matches(@role,'^list\-')]
-            [not(matches(@role,'continue'))]
-            [tr:get-numeration-level(.)=tr:get-numeration-level($elt)][. &gt;&gt; $elt/preceding-sibling::*[not(tr:is-level-element(.,$level))][1]])">
+          <xsl:when test="matches($elt/@role,'continue') and 
+                          exists($elt/preceding-sibling::*[matches(@role,'^list\-')]
+                                                          [not(matches(@role,'continue'))]
+                                                          [tr:get-numeration-level(.)=tr:get-numeration-level($elt)]
+                                                          [not($elt/preceding-sibling::*[not(tr:is-level-element(.,$level))]) or 
+                                                           (. &gt;&gt; $elt/preceding-sibling::*[not(tr:is-level-element(.,$level))][1])])">
             <xsl:sequence select="tr:get-numeration-style-with-level($elt/preceding-sibling::*[matches(@role,'^list\-')]
                                                                                               [not(matches(@role,'continue'))]
                                                                                               [tr:get-numeration-level(.)=tr:get-numeration-level($elt)]
-                                                                                              [. &gt;&gt; $elt/preceding-sibling::*[not(tr:is-level-element(.,$level))][1]]
+                                                                                              [not($elt/preceding-sibling::*[not(tr:is-level-element(.,$level))]) or 
+                                                                                               (. &gt;&gt; $elt/preceding-sibling::*[not(tr:is-level-element(.,$level))][1])]
                                                                                               [1],$level)"/>
           </xsl:when>
           <xsl:when test="tr:get-numeration-level($elt) gt $level and exists($elt/preceding-sibling::*[matches(@role,'^list\-')]
@@ -501,12 +505,12 @@
     <xsl:sequence select="$elt[(local-name()=$hub:level-element-names) or 
                                self::para[not(matches(@role,'^list\-'))]
                                          [tr:is-level-element-para(.)]]
-                                         [preceding-sibling::*[not((local-name()=$hub:level-element-names) or 
+                              [preceding-sibling::*[not((local-name()=$hub:level-element-names) or 
                                                         self::para[not(matches(@role,'^list\-'))]
                                                                   [tr:is-level-element-para(.)])]
                                                    [1]
                                                    [matches(@role,'^list\-') and tr:get-numeration-level(.) ge $level] and
-                                          following-sibling::*[not((local-name()=$hub:level-element-names) or 
+                               following-sibling::*[not((local-name()=$hub:level-element-names) or 
                                                         self::para[not(matches(@role,'^list\-'))]
                                                                   [tr:is-level-element-para(.)])]
                                                    [1]
