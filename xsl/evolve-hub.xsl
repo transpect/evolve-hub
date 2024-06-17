@@ -3459,7 +3459,7 @@
   <xsl:template match="*[self::phrase[not(matches(@role, '^hub:'))]
                         |self::superscript
                         |self::subscript]
-                        [not(@css:text-decoration-line or @css:background-color or @css:background)]
+                        [not(@css:text-decoration-line or @css:background-color or @css:background or @css:direction)]
                         [matches(., '^\s+$')]" mode="hub:strip-space">
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
