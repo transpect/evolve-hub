@@ -210,7 +210,7 @@
       select="($text-nodes/ancestor::* intersect $elt/descendant-or-self::*)
                 /(. | key('hub:style-by-role', @role))/@*[name() = 'css:text-decoration-line']
                                                          [. = 'underline']
-                                                         [../@css:text-decoration-width[not(matches(., '^0(pt)?$'))]]"/>
+                                                         [not(../@css:text-decoration-width[matches(., '^0(pt)?$')])]"/>
     <xsl:sequence select="exists($underlines)"/>
   </xsl:function>
   
@@ -3060,7 +3060,7 @@
             <xsl:apply-templates select="node()[. &gt;&gt; $very-first-text-node-in-context]" mode="#current"/>
           </phrase>
         </xsl:when>
-
+        
         <xsl:otherwise>
           <phrase role="hub:caption-text">
             <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'no-indext-no-label-otherw')"/>
