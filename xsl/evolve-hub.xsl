@@ -370,6 +370,7 @@
   
   <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]
                                       [not(@morerows) or @morerows='0']]" mode="hub:join-tables">
+    <xsl:param name="root" as="document-node()?" select="root()" tunnel="yes"/>
     <!-- some customers wished to join entries that have a rowspan. 
          In this case the tables have to be normalized before (http://transpect.io/xslt-util/calstable/xsl/call-normalize.xsl) and the 
          @role of the entries copied (not a default in normalization).
@@ -410,7 +411,8 @@
                                                      )[1]/entry[position() eq $pos]/@*[name() = ('css:border-bottom-width', 'morerows')], 
                                                     key('hub:style-by-role',
                                                          (../following-sibling::row[entry[position() eq $pos][not(matches(@role, '_-_SPLIT'))]]
-                                                        )[1]/entry[position() eq $pos]/@role)/@css:border-bottom-width)[1]" mode="#current"/>
+                                                        )[1]/entry[position() eq $pos]/@role, 
+                                                        $root)/@css:border-bottom-width)[1]" mode="#current"/>
                     <xsl:for-each-group select="current-group()/entry[position() eq $pos]/node()" group-starting-with="*[hub:split-start-para(., $pos)]">
                       <xsl:for-each-group select="current-group()" group-adjacent="hub:to-be-grouped-with-split(., $pos)">
                         <xsl:choose>
