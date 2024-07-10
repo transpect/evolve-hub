@@ -9,6 +9,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:css="http://www.w3.org/1996/css"
   xmlns:hub="http://transpect.io/hub"
+  xmlns:calstable="http://docs.oasis-open.org/ns/oasis-exchange/table" 
   xmlns="http://docbook.org/ns/docbook"
   xpath-default-namespace="http://docbook.org/ns/docbook"
   exclude-result-prefixes="functx xs saxon tr xlink hub dbk idml2xml"
@@ -28,7 +29,8 @@
   <xsl:import href="http://transpect.io/evolve-hub/table-merge/xsl/table-merge.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/handle-phrase/xsl/handle-phrase.xsl"/>
   <xsl:import href="http://transpect.io/evolve-hub/group-environments/xsl/group-environments.xsl"/>
-
+  <xsl:import href="http://transpect.io/xslt-util/calstable/xsl/call-normalize.xsl"/>
+  
   <xsl:include href="http://transpect.io/evolve-hub/xsl/hub-functions.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/functx/Strings/Replacing/escape-for-regex.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
@@ -73,7 +75,8 @@
     <!-- 'annotation' (unchanged) | 'oxy-PI' | 'remove' -->
   </xsl:param>
   <xsl:param name="create-removed-superscript-pi" select="'yes'"/>
-  
+  <xsl:param name="join-entire-tables" select="'no'"/>
+     
   <!-- Variables: evolve-hub -->
   <xsl:variable name="stylesheet-dir" select="replace(base-uri(document('')), '[^/]+$', '')" as="xs:string" />
 
@@ -367,6 +370,110 @@
       <xsl:apply-templates select="*[matches(@role, $hub:split-style-regex)]/node(), following-sibling::*[1]/*[1]/node()" mode="#current"/>
     </para>
   </xsl:template>
+  
+  <xsl:template match="informaltable[matches(@role, $hub:split-style-regex)]
+                                    [$join-entire-tables = ('yes', 'true')]
+                                    [following-sibling::*[1][self::informaltable] 
+                                     or (:tables with ~SPLIT in paras:)
+                                     ..[self::para][following-sibling::*[1][descendant-or-self::informaltable]]]
+                                    [not(preceding-sibling::*[1][self::informaltable[matches(@role, $hub:split-style-regex)]]) 
+                                     and (:is first ~SPLIT table:)
+                                     not(..[self::para][preceding-sibling::*[1][descendant-or-self::informaltable[1][matches(@role, $hub:split-style-regex)]]])]" mode="hub:join-tables" priority="4">
+    <xsl:variable name="root" select="root()" as="document-node()"/>
+    <!-- - merge tables and normalize them. 
+         - tables shouldnt be normalized before
+         - param join-entire-tables must be set to true or yes -->
+    <xsl:variable name="rest-tables" as="element(*)*">
+      <xsl:for-each-group select="if (..[self::para]) then ../following-sibling::* else following-sibling::*" group-adjacent="exists(self::informaltable | self::para[informaltable])">
+        <xsl:sequence select="current-group()/descendant-or-self::informaltable[1]"/>
+      </xsl:for-each-group>
+    </xsl:variable>
+    <!-- step 1: merge table into one and let the existing ~SPLIT mechanism do its work after -->
+    <xsl:variable name="merged-tgroup" as="element(tgroup)">
+      <tgroup>
+          <!-- determine table with maximum amount of columns-->
+          <xsl:variable name="tgroups-sorted-by-cols" as="element(tgroup)+">
+            <xsl:for-each-group select="tgroup|$rest-tables/tgroup" group-by="xs:integer(@cols)">
+              <xsl:sort order="descending" select="current-grouping-key()"/>
+              <xsl:sequence select="current-group()"/>
+            </xsl:for-each-group>
+          </xsl:variable>
+          <xsl:sequence select="$tgroups-sorted-by-cols[1]/@*, $tgroups-sorted-by-cols[1]/colspec,
+                                tgroup/(thead|tbody), $rest-tables/tgroup/(thead|tbody|tfoot)"/>
+      </tgroup>
+    </xsl:variable>
+    <xsl:variable name="sorted-tgroup" as="element(tgroup)">
+      <tgroup>
+        <xsl:sequence select="$merged-tgroup/@*, $merged-tgroup/colspec"/> 
+        <!-- - discard rows with ~DISCARD
+             - merge tbodies and theads
+             - change thead after tbody to tbody
+        -->
+        <xsl:for-each-group select="$merged-tgroup/*[row[entry](:leave discarded rows out:)]" 
+          group-starting-with=".[name() != preceding-sibling::*[1]/name() or not(preceding-sibling::*)]
+                                [not(name() = 'thead' and preceding-sibling::tbody)]
+                                [not(name() = 'tbody' and preceding-sibling::*[1][self::thead][preceding-sibling::tbody])]">
+          <xsl:element name="{current-group()[1]/name()}">
+            <xsl:sequence select="current-group()/node()[entry(:leave discarded rows out:)]"/>
+          </xsl:element>
+        </xsl:for-each-group>
+      </tgroup>
+    </xsl:variable>
+    
+    <xsl:variable name="merged-table" as="element(informaltable)">  
+      <xsl:copy>
+        <xsl:sequence select="@*"/>
+        <xsl:variable name="sorted-tgroup-with-appended-colspans" as="element(tgroup)">
+          <xsl:apply-templates select="$sorted-tgroup" mode="add-colspans">
+            <xsl:with-param name="cols" select="xs:integer($sorted-tgroup/@cols)" tunnel="yes" as="xs:integer"/>
+        </xsl:apply-templates>
+        </xsl:variable>
+        <xsl:sequence select="calstable:normalize($sorted-tgroup-with-appended-colspans)"/>
+      </xsl:copy>
+    </xsl:variable>
+    
+    <xsl:apply-templates select="$merged-table" mode="#current">
+      <xsl:with-param name="root" select="$root" tunnel="yes" as="document-node()"/>
+    </xsl:apply-templates>
+  </xsl:template>
+  
+  <xsl:template match="informaltable[preceding-sibling::*[1][self::informaltable[matches(@role, $hub:split-style-regex)]]
+                                     or 
+                                     ..[self::para][preceding-sibling::*[1][descendant-or-self::informaltable[1][matches(@role, $hub:split-style-regex)]]]]" mode="hub:join-tables" priority="4"/>
+
+  <xsl:template match="@* | node()" mode="add-colspans" priority="0.25">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="row" mode="add-colspans" priority="3">
+    <xsl:copy>
+      <xsl:message select="'##', count(entry) + (if (entry[@nameend and @namest]) then xs:integer(substring-after(entry/@nameend, 'c')) - xs:integer(substring-after(entry/@namest, 'c')) else 0)"/>
+    <xsl:apply-templates select="node()" mode="#current">
+      <xsl:with-param name="entries" select="count(entry) + (if (entry/@nameend) then xs:integer(substring-after(entry/@nameend, 'c')) - xs:integer(substring-after(entry/@namest, 'c')) else 0)" tunnel="yes" as="xs:integer"/>
+    </xsl:apply-templates>
+      </xsl:copy>
+  </xsl:template>
+  
+   <xsl:template match="colspec/@colnum" mode="add-colspans" priority="3">
+<!--     <xsl:attribute name="colnum" select="."/>-->
+     <xsl:attribute name="colname" select="."/>
+   </xsl:template>
+  
+  <xsl:template match="row/entry[last()]" mode="add-colspans" priority="3">
+    <xsl:param name="cols" tunnel="yes" as="xs:integer"/>
+    <xsl:param name="entries" tunnel="yes" as="xs:integer"/>
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:if test="$cols gt $entries">
+        <xsl:attribute name="namest" select="concat('c', $entries)"/>
+        <xsl:attribute name="nameend" select="concat('c',$cols)"/>
+      </xsl:if>
+      <xsl:apply-templates select="node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
   
   <xsl:template match="tbody[row/entry[matches(@role, $hub:split-style-regex)]
                                       [not(@morerows) or @morerows='0']]" mode="hub:join-tables">
