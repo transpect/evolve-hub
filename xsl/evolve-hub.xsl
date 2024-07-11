@@ -12,7 +12,7 @@
   xmlns:calstable="http://docs.oasis-open.org/ns/oasis-exchange/table" 
   xmlns="http://docbook.org/ns/docbook"
   xpath-default-namespace="http://docbook.org/ns/docbook"
-  exclude-result-prefixes="functx xs saxon tr xlink hub dbk idml2xml"
+  exclude-result-prefixes="functx xs saxon tr xlink hub dbk idml2xml calstable"
   version="2.0">
  
   <!--  catch all must be first -->
@@ -2975,7 +2975,7 @@
           <xsl:apply-templates mode="#current"/>
         </xsl:when>
         <xsl:when test="not(tab) and matches(normalize-space(.), $hub:orderedlist-mark-regex)">
-          <xsl:apply-templates mode="#current">
+         <xsl:apply-templates mode="#current">
             <xsl:with-param name="hub:already-identified" select="false()" tunnel="yes" as="xs:boolean"/>
           </xsl:apply-templates>
         </xsl:when>
