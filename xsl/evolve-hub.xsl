@@ -4315,13 +4315,14 @@
     select="false()"/>
   
   <xsl:template match="para//text()[not(ancestor::*/name() = ('link', 'olink', 'ulink'))]" mode="hub:cross-link">
+    <xsl:param name="remove-doi-text-prefix" select="$hub:remove-doi-text-prefix" tunnel="yes"/>
     <xsl:choose>
       <xsl:when test="$create-ulinks-from-text='yes'">
         <xsl:analyze-string select="." regex="{$hub:url-regex}([,.;]?)" flags="i">
           <xsl:matching-substring>
             <xsl:variable name="address" as="xs:string"
               select="replace(replace(., '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
-            <xsl:if test="not($hub:remove-doi-text-prefix) and matches(., '^(doi\s?:\s*).+$')">
+            <xsl:if test="not($remove-doi-text-prefix) and matches(., '^(doi\s?:\s*).+$', 'i')">
               <xsl:value-of select="replace(., '^(doi\s?:\s*).+$', '$1', 'i')"/>
             </xsl:if>
             <xsl:element name="{$hub:cross-link-ulink-element-name}">
@@ -4341,7 +4342,7 @@
                 <xsl:variable name="address" as="xs:string"
                   select="replace(replace(regex-group(3), '^(doi\s?:\s*)', '', 'i'), '[,.;]$', '')"/>
                 <xsl:value-of select="regex-group(1)"/>
-                <xsl:if test="not($hub:remove-doi-text-prefix) and matches(regex-group(3), '^(doi\s?:\s*).+$')">
+                <xsl:if test="not($remove-doi-text-prefix) and matches(regex-group(3), '^(doi\s?:\s*).+$', 'i')">
                   <xsl:value-of select="replace(regex-group(3), '^(doi\s?:\s*).+$', '$1', 'i')"/>
                 </xsl:if>
                 <link xlink:href="{concat($hub:doi-link-starting-string, $address)}">
