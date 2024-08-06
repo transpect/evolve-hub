@@ -47,6 +47,9 @@
   <xsl:variable name="hub:table-note-style-regex-x" as="xs:string" 
     select="'^letex_table_note$'"/>
 
+  <xsl:variable name="hub:role-thats-never-table-title" as="xs:string" 
+    select="'^letex_standard$|^letex_linking$'"/>
+
   <xsl:variable name="hub:table-copyright-style-regex-x" as="xs:string" select="'^letex_table_copyright$'"/>
   
   <xsl:function name="hub:is-table-title" as="xs:boolean">
@@ -62,7 +65,9 @@
                                    matches(
                                      string-join(descendant::text()[hub:same-scope(., $node)], ''), 
                                      concat('^(', $hub:table-caption-start-regex, ')')
-                                   ) 
+                                   )
+                                   and not(some $role in descendant-or-self::*/@role 
+                                           satisfies matches($role,$hub:role-thats-never-table-title))
                                    and
                                    (
                                      $node/following-sibling::node()[1][
