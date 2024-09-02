@@ -29,7 +29,7 @@
   <xsl:variable name="hub:orderedlist-one-or-more-letter-chars-regex" as="xs:string"  
     select="'[a-z]|[A-Z]'"/>
   <xsl:variable name="hub:orderedlist-mark-chars-regex" as="xs:string"
-    select="concat('[\(\[]?(([ivx]+|[IVX]+|', $hub:orderedlist-one-or-more-letter-chars-regex,'|\p{Zs}*[0-9]+)(\.\d+)*)[.:]?[\)\]]?')"/>
+    select="concat('[\(\[]?(([ivx]+|[IVX]+|', $hub:orderedlist-one-or-more-letter-chars-regex,'|\p{Zs}*\d+[a-z]*)(\.\d+)*[a-z]*)[.:]?[\)\]]?')"/>
   <!-- orderedlist-mark-chars-regex: the case &#x2007;(9) was not handled. perhas it should be done in the general regex as well?-->
   <xsl:variable name="hub:itemizedlist-mark-regex" as="xs:string"
     select="concat('^', $hub:itemizedlist-mark-chars-regex, '$')"/>
