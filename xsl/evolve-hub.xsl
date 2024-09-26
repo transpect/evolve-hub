@@ -1113,6 +1113,8 @@
 
   <xsl:variable name="hub:join-phrases-element-names" as="xs:string+"
     select="('phrase', 'subscript', 'superscript')"/>
+  
+  <xsl:variable name="hub:dont-join-phrases-role" select="'letex-spaced'"/>
 
   <xsl:template match="@srcpath[not(hub:boolean-param($srcpaths))]" mode="hub:join-phrases" />
 
@@ -1127,7 +1129,7 @@
                           not(self::superscript or self::subscript)">
             <xsl:apply-templates select="current-group()" mode="hub:join-phrases-unwrap" />
           </xsl:when>
-          <xsl:when test="self::*[name() = $hub:join-phrases-element-names]">
+          <xsl:when test="self::*[name() = $hub:join-phrases-element-names] and not(self::*[matches(@role, $hub:dont-join-phrases-role)])">
             <xsl:copy>
               <xsl:apply-templates select="@*" mode="hub:join-phrases-copy-attributes">
                 <xsl:with-param name="new-srcpath" 
@@ -4297,7 +4299,7 @@
   <!-- mode: hub:cross-link -->
 
   <xsl:variable name="hub:url-regex" as="xs:string"
-    select="'(www\.[a-zA-ZäÄöÖüÜßẞ][-a-zA-ZäÄöÖüÜßẞ0-9.]+\.[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%?=~_|!:,.;]*[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%=~_|])|(doi\s?:\s*)?((https?|ftp|file|rtsp)://[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%?=~_|!:,.;\(\)]*[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%=~_|])'"/>
+    select="'(www\.[a-zA-ZäÄöÖüÜßẞ][-a-zA-ZäÄöÖüÜßẞ0-9.]+\.[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%?=~_|!:,.;\[\]]*[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%=~_|\[\]])|(doi\s?:\s*)?((https?|ftp|file|rtsp)://[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%?=~_|!:,.;\(\)\[\]]*[-a-zA-ZäÄöÖüÜßẞ0-9+&amp;@#/%=~_|\[\]])'"/>
 
   <xsl:variable name="hub:doi-regex" as="xs:string"
     select="'(^|\s)(doi\s?:\s*)?(10\.\d\d\d\d(\.|\d+)*/[&quot;&amp;&lt;&gt;\S\(\)]+)(\s|$)'"/>
