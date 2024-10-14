@@ -30,6 +30,7 @@
   <xsl:include href="postprocess-lists-by-role.xsl"/>
   <xsl:include href="prepare-lists-by-role.xsl"/>
   <xsl:include href="restore-roles.xsl"/>
+  <xsl:include href="../../lists-by-indent/xsl/tabs-to-indent.xsl"/>
 
   <xsl:output
     name="debug"
@@ -40,8 +41,12 @@
   <xsl:param name="debug-dir-uri" select="concat(base-uri(),'/debug')"/>
   <xsl:param name="lists-by-role-style-map" select="'lists-by-role-style-map.xhtml'"/>
   
+  <xsl:variable name="hub:tabs-to-indent">
+    <xsl:apply-templates select="/" mode="hub:tabs-to-indent"/>
+  </xsl:variable>
+  
   <xsl:variable name="hub:prepare-lists-by-role">
-    <xsl:apply-templates select="/" mode="hub:prepare-lists-by-role"/>
+    <xsl:apply-templates select="$hub:tabs-to-indent" mode="hub:prepare-lists-by-role"/>
   </xsl:variable>
   
   <xsl:variable name="hub:lists-by-role">
