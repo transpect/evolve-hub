@@ -41,11 +41,26 @@
       <p:pipe port="parameters" step="evolve-hub_lists-by-role"/>
     </p:input>
   </p:parameters>
-
-  <tr:xslt-mode msg="yes" mode="hub:prepare-lists-by-role" name="prepare-lists-by-role">
+  
+  <tr:xslt-mode msg="yes" mode="hub:tabs-to-indent" name="tabs-to-indent">
     <p:input port="source">
       <p:pipe step="evolve-hub_lists-by-role" port="source"/>
     </p:input>
+    <p:input port="stylesheet"><p:pipe step="evolve-hub_lists-by-role" port="stylesheet"/></p:input>
+    <p:input port="models"><p:empty/></p:input>
+    <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
+    <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-indent" select="$debug-indent"/>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+    <p:with-option name="prefix" select="concat($prefix, '0')"/>
+    <p:with-option name="hub-version" select="$hub-version"/>
+  </tr:xslt-mode>
+
+  <tr:xslt-mode msg="yes" mode="hub:prepare-lists-by-role" name="prepare-lists-by-role">
+     <!--<p:input port="source">
+      <p:pipe step="evolve-hub_lists-by-role" port="source"/>
+    </p:input>-->
     <p:input port="stylesheet"><p:pipe step="evolve-hub_lists-by-role" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
     <p:input port="parameters"><p:pipe port="result" step="consolidate-params"/></p:input>
