@@ -4973,10 +4973,10 @@
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:for-each-group select="node()" 
-                          group-adjacent="    self::phrase[not(@xml:lang)][matches(., $hub:lang-joiner-regex)][not(matches(@role,$semantic-phrase-roles))]     
+                          group-adjacent="    self::phrase[matches(., $hub:lang-joiner-regex)][not(matches(@role,$semantic-phrase-roles))]     
                                           or (self::phrase[@xml:lang][not(matches(@role,$semantic-phrase-roles))]
-                                                          [   following-sibling::node()[1][self::phrase][not(@xml:lang)][not(matches(@role,$semantic-phrase-roles))][matches(., $hub:lang-joiner-regex)]
-                                                           or preceding-sibling::node()[1][self::phrase][not(@xml:lang)][not(matches(@role,$semantic-phrase-roles))][matches(., $hub:lang-joiner-regex)]]
+                                                          [   following-sibling::node()[1][self::phrase][not(matches(@role,$semantic-phrase-roles))][matches(., $hub:lang-joiner-regex)]
+                                                           or preceding-sibling::node()[1][self::phrase][not(matches(@role,$semantic-phrase-roles))][matches(., $hub:lang-joiner-regex)]]
                                               )">
         <xsl:choose>
           <xsl:when test="    current-grouping-key() 
