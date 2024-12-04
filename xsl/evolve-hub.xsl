@@ -4983,11 +4983,12 @@
                                               )">
         <xsl:choose>
           <xsl:when test="    current-grouping-key() 
-                          and distinct-values(
-                                for $elm in * 
-                                return string-join(
-                                  for $att in $elm/@*[not(name() = $hub:atts-to-be-ignored-for-lang-merging)] 
-                                  return concat($att/name(), '-', $att), ', '
+                          and count(
+                                distinct-values(
+                                  for $elm in current-group() 
+                                  return string-join(
+                                    for $att in $elm/@*[not(name() = $hub:atts-to-be-ignored-for-lang-merging)] 
+                                    return concat($att/name(), '-', $att), ', ')
                                 )
                               ) = 1">
             <phrase>
