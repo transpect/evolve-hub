@@ -4965,6 +4965,9 @@
   <xsl:variable name="hub:lang-joiner-regex" as="xs:string" 
                 select="'^[\p{P}\p{Zs}]+$'"/>
   
+  <xsl:variable name="hub:atts-to-be-ignored-for-lang-merging" as="xs:string+" 
+                select="'srcpath'"/>
+  
   <xsl:variable name="semantic-phrase-roles" select="'^hub:(identifier|caption-text|caption-number)$'"/>
   
   <xsl:template match="para[phrase[@xml:lang][not(matches(@role,$semantic-phrase-roles))]]
@@ -4980,8 +4983,13 @@
                                               )">
         <xsl:choose>
           <xsl:when test="    current-grouping-key() 
-                          and (every $att-name in distinct-values(current-group()/@*[not(name() = ('srcpath'))]/name()) 
-                               satisfies count(distinct-values(current-group()/@*[name() = $att-name])) eq 1)">
+                          and distinct-values(
+                                for $elm in * 
+                                return string-join(
+                                  for $att in $elm/@*[not(name() = $hub:atts-to-be-ignored-for-lang-merging)] 
+                                  return concat($att/name(), '-', $att), ', '
+                                )
+                              ) = 1">
             <phrase>
               <xsl:apply-templates select="current-group()/@*, current-group()/node()" mode="#current"/>
             </phrase>
