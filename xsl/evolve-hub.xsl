@@ -1477,6 +1477,15 @@
 
   <xsl:variable name="hub:motto-formalpara-para-role-regex" as="xs:string"
     select="'^Motto_Text-1$'" />
+  
+  <xsl:variable name="hub:poetry-heading-role-regex" as="xs:string"
+    select="'^PoetryVerse_Heading$'"/>
+  
+  <xsl:variable name="hub:poetry-para-role-regex" as="xs:string"
+    select="'^PoetryVerse$'"/>
+  
+  <xsl:variable name="hub:poetry-source-role-regex" as="xs:string"
+    select="'^PoetryVerse_Source$'"/>
 
   <xsl:variable name="hub:learninggoals-formalpara-heading-role-regex" as="xs:string"
     select="'^LearningGoals_Headline$'" />
@@ -1637,6 +1646,14 @@
       <hub:regex-map regex="{$hub:motto-formalpara-para-role-regex}" role="Motto" heading="no"/>
     </hub:regex-container>
   </xsl:variable>
+  
+  <xsl:variable name="hub:poetry-role-regex-container" as="element(hub:regex-container)">
+    <hub:regex-container container-elementname="poetry">
+      <hub:regex-map regex="{$hub:poetry-heading-role-regex}" heading="yes"/>
+      <hub:regex-map regex="{$hub:poetry-para-role-regex}" heading="no"/>
+      <hub:regex-map regex="{$hub:poetry-source-role-regex}" heading="no"/>
+    </hub:regex-container>
+  </xsl:variable>
 
   <xsl:variable name="hub:learninggoals-role-regex-container" as="element(hub:regex-container)">
     <hub:regex-container>
@@ -1758,6 +1775,7 @@
                          $hub:trailer-role-regex-container,
                          $hub:example-role-regex-container,
                          $hub:motto-role-regex-container,
+                         $hub:poetry-role-regex-container,
                          $hub:learninggoals-role-regex-container,
                          $hub:legaltext-role-regex-container,
                          $hub:question-role-regex-container,
@@ -1825,7 +1843,9 @@
                         $regex-container/@end/normalize-space(.)">
           <xsl:for-each-group select="current-group()" group-ending-with="*[matches(@role, $regex-container/@end)]">
             <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
-              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              <xsl:if test="$regex-container/*[1]/@role">
+                <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              </xsl:if>
               <xsl:if test="current-group()[position() = (1, last())]/@srcpath">
                 <xsl:attribute name="srcpath" select="string-join(current-group()[position() = (1, last())]/@srcpath, '&#x20;')"/>
               </xsl:if>
@@ -1851,7 +1871,9 @@
                         count(current-group()) gt 1">
           <xsl:for-each-group select="current-group()" group-ending-with="*[some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]">
             <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
-              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              <xsl:if test="$regex-container/*[1]/@role">
+                <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              </xsl:if>
               <title>
                 <xsl:apply-templates select="current-group()[last()]/@srcpath, node()" mode="#current" />
               </title>
@@ -1862,7 +1884,9 @@
         <xsl:when test="current-grouping-key()  and  current-group()[1][some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]  and  count(current-group()) gt 1">
           <xsl:for-each-group select="current-group()" group-starting-with="*[some $u in $regex-container/hub:regex-map[@heading='yes']/@regex satisfies matches(@role, $u)]">
             <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
-              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              <xsl:if test="$regex-container/*[1]/@role">
+                <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+              </xsl:if>
               <title>
                 <xsl:apply-templates select="current-group()[1]/@srcpath, node()" mode="#current" />
               </title>
@@ -1872,7 +1896,9 @@
         </xsl:when>
         <xsl:when test="current-grouping-key()">
           <xsl:element name="{($regex-container/@container-elementname, 'formalpara')[1]}">
-            <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+            <xsl:if test="$regex-container/*[1]/@role">
+              <xsl:attribute name="role" select="$regex-container/*[1]/@role"/>
+            </xsl:if>
             <xsl:apply-templates select="current-group()" mode="#current" />
           </xsl:element>
         </xsl:when>
@@ -2369,6 +2395,40 @@
         <xsl:apply-templates select="@*, node()" mode="#current"/>
       </xsl:copy>
     </xsl:if>
+  </xsl:template>
+
+  <!-- build poetry linegroup in mode 'repair-hierarchy' after mode 'special-para' -->
+  <xsl:template match="poetry[some $re in $hub:poetry-role-regex-container/* 
+                              satisfies (some $e in * satisfies (matches($e/@role, $re/@regex)))
+                             ]" mode="hub:repair-hierarchy">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:if test="title or *[matches(@role, $hub:poetry-source-role-regex)]">
+        <info>
+          <xsl:apply-templates select="title, *[matches(@role, $hub:poetry-source-role-regex)]" mode="#current"/>
+        </info>
+      </xsl:if>
+      <xsl:for-each-group select="*[matches(@role, $hub:poetry-para-role-regex)]" group-adjacent="boolean(matches(@role, $hub:poetry-para-role-regex))">
+        <linegroup>
+          <xsl:apply-templates select="current-group()" mode="#current"/>
+        </linegroup>
+      </xsl:for-each-group>
+      <xsl:apply-templates select="node()[not(some $re in $hub:poetry-role-regex-container/* 
+                                              satisfies (some $e in . satisfies (matches($e/@role, $re/@regex)))
+                                          )]" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="poetry/*[matches(@role, $hub:poetry-para-role-regex)]" mode="hub:repair-hierarchy">
+    <line>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </line>
+  </xsl:template>
+  
+  <xsl:template match="poetry/*[matches(@role, $hub:poetry-source-role-regex)]" mode="hub:repair-hierarchy">
+    <bibliosource>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </bibliosource>
   </xsl:template>
 
   <!-- Hierarchiesprünge -->
@@ -3654,6 +3714,10 @@
   
   <xsl:template match="@hub:anchored" mode="hub:clean-hub">
     <!-- If you need it in downstream modes, overwrite this template’s sequence constructor with <xsl:copy/> -->
+  </xsl:template>
+  
+  <xsl:template match="poetry/info[every $n in node() satisfies $n[self::title]]" mode="hub:clean-hub">
+    <xsl:apply-templates mode="#current"/>
   </xsl:template>
 
   <xsl:template match="*[matches(@conditon, 'Story(ID|Ref)')]" mode="hub:clean-hub">
