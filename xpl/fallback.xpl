@@ -347,6 +347,13 @@
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
   </tr:xslt-mode>
   
+  <tr:xslt-mode hub-version="1.2" msg="yes" prefix="evolve-hub/83" mode="hub:repair-language-markup">
+    <p:input port="stylesheet"><p:pipe port="stylesheet" step="evolve-hub"/></p:input>
+    <p:input port="models"><p:empty/></p:input>
+    <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+  </tr:xslt-mode>
+
   <tr:xslt-mode msg="yes" hub-version="1.2" prefix="evolve-hub/90" mode="hub:clean-hub">
     <p:input port="stylesheet"><p:pipe step="evolve-hub" port="stylesheet"/></p:input>
     <p:input port="models"><p:empty/></p:input>
