@@ -39,16 +39,18 @@
               <xsl:for-each-group select="current-group()[. &gt;&gt; $title]"
                 group-adjacent="(
                                   for $r in (@role, 'NONE')[1]
-                                  return ($hub:figure-note-role-regex, $hub:figure-copyright-statement-role-regex)[matches($r, .)],
+                                  return ($hub:figure-note-role-regex, $hub:figure-copyright-statement-role-regex, $hub:figure-credit-statement-role-regex)[matches($r, .)],
                                   ''
                                 )[1]">
                 <xsl:choose>
-                  <xsl:when test="current-grouping-key() = $hub:figure-note-role-regex">
+                    <xsl:when test="current-grouping-key() = $hub:figure-note-role-regex">
                     <notes>
                       <xsl:call-template name="hub:figure-notes"/>
                     </notes>
                   </xsl:when>
-                  <xsl:when test="current-grouping-key() = $hub:figure-copyright-statement-role-regex">
+                  <xsl:when test="current-grouping-key() = $hub:figure-copyright-statement-role-regex
+                                  or
+                                  current-grouping-key() = $hub:figure-credit-statement-role-regex">
                     <copyrights>
                       <xsl:call-template name="hub:figure-copyrights"/>
                     </copyrights>
@@ -76,7 +78,16 @@
                   <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
                 </xsl:apply-templates>
               </title>
-              <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
+              <xsl:choose>
+                <xsl:when test="count($note-me-maybe/self::copyrights/info) gt 1">
+                  <info>
+                    <xsl:sequence select="$note-me-maybe/self::copyrights/info/node()"/>
+                  </info>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
+                </xsl:otherwise>
+              </xsl:choose>
               <xsl:apply-templates select="current-group()[1]" mode="#current"/>
               
               <xsl:sequence select="($note-me-maybe/self::notes/node())"/>
@@ -152,6 +163,23 @@
     </xsl:choose>
   </xsl:template>
   
+  <xsl:template match="para[matches(@role, $hub:figure-credit-statement-role-regex)]" mode="hub:figure-captions">
+    <xsl:param name="figure-env-created" as="xs:boolean?" tunnel="yes"/>
+    <xsl:choose>
+      <xsl:when test="$figure-env-created">
+        <xsl:element name="info">
+          <xsl:element name="legalnotice">
+            <xsl:attribute name="role" select="'credit'"/>
+            <xsl:next-match/>
+          </xsl:element>
+        </xsl:element>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:next-match/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+  
   <!-- This is another figure caption template to handle figures with more than one actual image in figure. Split figures for example or really several images with just one caption.
        Still has to be tested thoroughly if used. Use it while setting the parameter hub:handle-several-images-per-caption (in caption vars) in your adaptions to true() -->
   <xsl:template match="*[
@@ -174,7 +202,7 @@
               <xsl:for-each-group select="current-group()[. &gt;&gt; $title]"
                 group-adjacent="(
                 for $r in (@role, 'NONE')[1]
-                return ($hub:figure-note-role-regex, $hub:figure-copyright-statement-role-regex)[matches($r, .)],
+                return ($hub:figure-note-role-regex, $hub:figure-copyright-statement-role-regex, $hub:figure-credit-statement-role-regex)[matches($r, .)],
                 ''
                 )[1]">
                 <xsl:choose>
@@ -183,7 +211,9 @@
                       <xsl:call-template name="hub:figure-notes"/>
                     </notes>
                   </xsl:when>
-                  <xsl:when test="matches(current-grouping-key(), $hub:figure-copyright-statement-role-regex)">
+                  <xsl:when test="current-grouping-key() = $hub:figure-copyright-statement-role-regex
+                                  or
+                                  current-grouping-key() = $hub:figure-credit-statement-role-regex">
                     <copyrights>
                       <xsl:call-template name="hub:figure-copyrights"/>
                     </copyrights>
@@ -212,7 +242,16 @@
                   </xsl:apply-templates>
                 </xsl:if>
               </title>
-              <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
+              <xsl:choose>
+                <xsl:when test="count($note-me-maybe/self::copyrights/info) gt 1">
+                  <info>
+                    <xsl:sequence select="$note-me-maybe/self::copyrights/info/node()"/>
+                  </info>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:sequence select="$note-me-maybe/self::copyrights/node()"/>
+                </xsl:otherwise>
+              </xsl:choose>
               <xsl:apply-templates select="current-group()[*][hub:is-figure(.) and . &lt;&lt; $title] | $title[hub:is-figure(.)]" mode="#current"/>
               <xsl:sequence select="$note-me-maybe/self::notes/node()"/>
             </figure>

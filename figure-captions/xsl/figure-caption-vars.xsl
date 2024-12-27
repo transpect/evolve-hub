@@ -51,6 +51,8 @@
   
   <xsl:variable name="hub:figure-copyright-statement-role-regex"  as="xs:string" select="'^figure_copyright$'" />
   
+  <xsl:variable name="hub:figure-credit-statement-role-regex"  as="xs:string" select="'^figure_credit$'" />
+  
   <!-- variable hub:use-title-child-anchor-id-for-figure-id
        Wether if there is an anchor[@xml:id] in the figure environment (will be suppressed), 
        should the ID be used as figure/@xml:id ?
