@@ -2402,14 +2402,14 @@
                               satisfies (some $e in * satisfies (matches($e/@role, $re/@regex)))
                              ]" mode="hub:repair-hierarchy">
     <xsl:copy>
-      <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:if test="title or *[matches(@role, $hub:poetry-source-role-regex)]">
-        <info>
-          <xsl:apply-templates select="title, *[matches(@role, $hub:poetry-source-role-regex)]" mode="#current"/>
-        </info>
-      </xsl:if>
-      <xsl:for-each-group select="*[matches(@role, $hub:poetry-para-role-regex)]" group-adjacent="boolean(matches(@role, $hub:poetry-para-role-regex))">
+      <xsl:apply-templates select="@*, title" mode="#current"/>
+      <xsl:for-each-group select="*[matches(@role, $hub:poetry-para-role-regex)]" group-adjacent="@role">
         <linegroup>
+          <xsl:apply-templates select="current-group()" mode="#current"/>
+        </linegroup>
+      </xsl:for-each-group>
+      <xsl:for-each-group select="*[matches(@role, $hub:poetry-source-role-regex)]" group-adjacent="@role">
+        <linegroup role="credit">
           <xsl:apply-templates select="current-group()" mode="#current"/>
         </linegroup>
       </xsl:for-each-group>
@@ -2426,9 +2426,9 @@
   </xsl:template>
   
   <xsl:template match="poetry/*[matches(@role, $hub:poetry-source-role-regex)]" mode="hub:repair-hierarchy">
-    <bibliosource>
+    <line>
       <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </bibliosource>
+    </line>
   </xsl:template>
 
   <!-- Hierarchiesprünge -->
