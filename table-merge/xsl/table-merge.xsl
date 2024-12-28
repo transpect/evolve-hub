@@ -14,7 +14,7 @@
   
   <xsl:import href="http://transpect.io/xslt-util/lengths/xsl/lengths.xsl"/>
 
-  <xsl:variable name="continuation-regex" as="xs:string" select="'\(fortgesetzt\)'"/>
+  <xsl:variable name="continuation-regex" as="xs:string" select="'\([fF]ort(ge)?setz(t|ung)\)'"/>
 
   <xsl:template match="*[*[hub:is-continued-table(.)][preceding-sibling::*:table[not(hub:is-continued-table(.))]]]" mode="hub:table-merge">
     <xsl:call-template name="merge-tables">
