@@ -5068,6 +5068,7 @@
   </xsl:template>
   
   <xsl:template match="*[@xml:lang]
+                        [not(self::chapter)]
                         [for $lang in @xml:lang 
                          return ancestor::*[@xml:lang][1][@xml:lang eq $lang]]" mode="hub:repair-language-markup">
     <xsl:copy>
