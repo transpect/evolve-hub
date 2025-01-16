@@ -152,9 +152,9 @@
   </xsl:template>-->
   
   <xsl:template match="para[matches(@role, $hub:table-note-style-regex-x, 'x')]
-                           [preceding-sibling::*[position() = (1,2)][self::informaltable[not(@annotations='generated')]]]
                            [preceding-sibling::*[1]
-                                                [self::informaltable[not(@annotations='generated')]|self::para[matches(@role, $hub:table-title-role-regex-x, 'x')]]] | 
+                                                [self::informaltable[not(@annotations='generated')] |
+                                                 self::para[matches(@role, concat($hub:table-title-role-regex-x,'|',$hub:table-note-style-regex-x), 'x')]]] | 
                        para[matches(@role, $hub:table-copyright-style-regex-x, 'x')]
                            [preceding-sibling::*[position() = (1,2,3)]
                                                 [self::informaltable[not(@annotations='generated')]]
