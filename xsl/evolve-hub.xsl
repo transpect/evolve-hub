@@ -1116,8 +1116,6 @@
   
   <xsl:variable name="hub:dont-join-phrases-role" select="'letex-spaced'"/>
 
-  <xsl:template match="@srcpath[not(hub:boolean-param($srcpaths))]" mode="hub:join-phrases" />
-
   <xsl:template match="*[*/name() = $hub:join-phrases-element-names]" mode="hub:join-phrases">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current" />
