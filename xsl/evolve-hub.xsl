@@ -3870,6 +3870,8 @@
     </xsl:copy>
     <xsl:value-of select="replace(., '^(.+?)([\p{Zs}]+)$', '$2')"/>
   </xsl:template>
+  
+  <xsl:template match="@srcpath[hub:boolean-param($remove-srcpaths)]" mode="hub:clean-hub"/>
 
   <!-- In an importing stylesheet, you may overwrite this function and invoke 
        css:equiv-props (from http://transpect.io/hub2html/xsl/css-atts2wrap.xsl) 
