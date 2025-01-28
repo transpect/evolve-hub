@@ -53,7 +53,7 @@
   <xsl:param name="debug" select="'yes'"/>
   <xsl:param name="debug-path" select="concat($stylesheet-dir, 'debug')"/>
   <xsl:param name="set-debugging-info-origin" select="'no'"/>
-  <xsl:param name="srcpaths" select="'no'"/>
+  <xsl:param name="remove-srcpaths" select="'no'"/>
   <xsl:param name="create-caption-numtext-separator" select="'no'"/>
   <xsl:param name="expand-css-properties" select="'yes'"/>
   <xsl:param name="remove-HyperlinkTextDestination-links" select="'no'"/>
@@ -1182,7 +1182,7 @@
 
   <xsl:template match="@srcpath" mode="hub:join-phrases-copy-attributes">
     <xsl:param name="new-srcpath" as="xs:string"/>
-    <xsl:if test="hub:boolean-param($srcpaths)">
+    <xsl:if test="hub:boolean-param($remove-srcpaths)">
       <xsl:attribute name="srcpath" select="$new-srcpath"/>
     </xsl:if>
   </xsl:template>
