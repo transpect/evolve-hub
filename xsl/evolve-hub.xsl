@@ -1182,7 +1182,7 @@
 
   <xsl:template match="@srcpath" mode="hub:join-phrases-copy-attributes">
     <xsl:param name="new-srcpath" as="xs:string"/>
-    <xsl:if test="hub:boolean-param($remove-srcpaths)">
+    <xsl:if test="not(hub:boolean-param($remove-srcpaths))">
       <xsl:attribute name="srcpath" select="$new-srcpath"/>
     </xsl:if>
   </xsl:template>
