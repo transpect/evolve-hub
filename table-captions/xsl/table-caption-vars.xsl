@@ -49,6 +49,9 @@
 
   <xsl:variable name="hub:role-thats-never-table-title" as="xs:string" 
     select="'^letex_standard$|^letex_linking$'"/>
+  
+  <xsl:variable name="hub:use-title-child-anchor-id-for-table-id"  as="xs:boolean"
+    select="true()" />
 
   <xsl:variable name="hub:table-copyright-style-regex-x" as="xs:string" select="'^letex_table_copyright$'"/>
   

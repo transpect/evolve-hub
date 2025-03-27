@@ -66,10 +66,18 @@
               <xsl:apply-templates select="$table/@*[not(some $i in (parent::*/descendant::*/@*) satisfies $i=.)] | ($table[self::para]/informaltable/@role, $table/@role)[1]" mode="#current"/>
               <xsl:apply-templates select="$table/self::informaltable/(@css:*)
                                            | $table/informaltable/(@css:*)" mode="#current"/>
+              <xsl:variable name="anchor" as="element(anchor)?" 
+                select="if($hub:use-title-child-anchor-id-for-table-id) 
+                        then (current-group()[1]//anchor[not(@role = ('start', 'end'))][@xml:id][not(matches(@xml:id, '^(cell)?page'))][not(key('hub:linking-item-by-id', @xml:id)[self::sidebar])][hub:same-scope(.,current-group()[1])], 
+                              current-group()[1]//anchor[not(@role = ('start', 'end'))][@xml:id][hub:same-scope(.,current-group()[1])])[1] 
+                        else ()"/>
+              <xsl:sequence select="$anchor/@xml:id"/>
               <title>
                 <xsl:if test="current-group()[1][hub:is-table-title(.)][not(descendant::informaltable)]">
                   <xsl:apply-templates select="current-group()[1]/@*" mode="#current"/>
-                  <xsl:apply-templates select="current-group()[1]/node()" mode="#current"/>
+                  <xsl:apply-templates select="current-group()[1]/node()" mode="#current">
+                    <xsl:with-param name="suppress" select="$anchor" tunnel="yes"/>
+                  </xsl:apply-templates>
                 </xsl:if>
                 </title>
               <xsl:if test="$copyright-statement">
