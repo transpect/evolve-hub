@@ -51,7 +51,7 @@
     select="'^letex_standard$|^letex_linking$'"/>
   
   <xsl:variable name="hub:use-title-child-anchor-id-for-table-id"  as="xs:boolean"
-    select="true()" />
+    select="false()" />
 
   <xsl:variable name="hub:table-copyright-style-regex-x" as="xs:string" select="'^letex_table_copyright$'"/>
   
