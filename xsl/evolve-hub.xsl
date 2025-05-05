@@ -2758,7 +2758,7 @@
   
   <xsl:variable name="hub:seealso-indexentry-text-regex" select="'\s*[sS]iehe\p{Zs}+auch'"/>
   
-  <xsl:template match="primaryie[matches(string-join(text(),''),$hub:seealso-indexentry-text-regex)]"  mode="hub:repair-hierarchy" priority="4">
+  <xsl:template match="primaryie[matches(string-join(descendant::text(),''),$hub:seealso-indexentry-text-regex)]"  mode="hub:repair-hierarchy" priority="4">
     <xsl:copy>
       <xsl:apply-templates select="node()[not(matches(string-join(text(),''),$hub:seealso-indexentry-text-regex))]" mode="#current"/>
     </xsl:copy>
@@ -2784,6 +2784,12 @@
         </xsl:element>
       </xsl:non-matching-substring>
     </xsl:analyze-string>
+  </xsl:template>
+  
+  <xsl:template match="see[matches(string-join(descendant::text(),''),$hub:seealso-indexentry-text-regex)]"  mode="hub:repair-hierarchy" priority="4">
+    <xsl:element name="seealso">
+      <xsl:apply-templates mode="#current"/>
+    </xsl:element>
   </xsl:template>
   
   <xsl:template match="preface/@renderas | bibliography/@renderas" mode="hub:repair-hierarchy"/>
