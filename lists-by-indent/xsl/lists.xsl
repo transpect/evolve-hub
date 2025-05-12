@@ -663,8 +663,7 @@
       <xsl:when test="exists($true-marks) and 
                       (every $x in $true-marks 
                       satisfies matches($x, concat('^\p{Zs}*', $hub:orderedlist-mark-open-quote-regex, '[0-9]+$')))">arabic</xsl:when>
-      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^&#x2022;$'))">bullet</xsl:when>
-      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^&#xb7;$'))">bullet</xsl:when>
+      <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, '^[&#xb7;&#x2022;]$'))">bullet</xsl:when>
       <xsl:when test="exists($true-marks) and (every $x in $true-marks satisfies matches($x, $hub:itemizedlist-mark-chars-regex))">
         <xsl:value-of select="$marks" />
       </xsl:when>
