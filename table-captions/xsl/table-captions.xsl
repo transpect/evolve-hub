@@ -32,7 +32,7 @@
         <xsl:choose>
           <xsl:when test="$hub:table-graphic-creation-enabled 
                           and current-group()[1][hub:is-table-title(.)] 
-                          and current-group()[2][self::para[not(.//text())][mediaobject]]">
+                          and current-group()[2][self::para[not(.//text()[not(ancestor::alt)])][mediaobject]]">
             <table>
               <title>
                 <xsl:apply-templates select="current-group()[1]/@*" mode="#current"/>
