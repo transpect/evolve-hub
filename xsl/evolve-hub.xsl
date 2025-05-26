@@ -3081,6 +3081,7 @@
     name="hub:float-title-identifier" 
     mode="hub:identifiers">
 
+
     <!--Following cases can be used for testing the different branches
     <figure>
       <title srcpath="1">Abbildung 3: Transdisziplinäre Bearbeitung <?TeX \break?>(eigene Darstellung, angelehnt an…)</title>
