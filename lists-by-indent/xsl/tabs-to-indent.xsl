@@ -11,7 +11,7 @@
   version="2.0">
 
   <!-- variable mark-regex: a node matching this regex always has to be followed by a tab element! -->
-  <xsl:variable name="mark-regex" select="'^([&#x25a1;&#x25cf;&#x2212;&#x2022;&#x2012;-&#x2015;&#x23AF;&#xF0B7;&#xF0BE;&#61485;-]|[\(\[]?(\p{Ll}+|\p{Lu}+|[0-9]+)[.\)\]]?)$'"/>
+  <xsl:variable name="mark-regex" select="'^([&#x25a1;&#x25cf;&#x2212;&#x2022;&#x2012;-&#x2015;&#x23AF;&#xF0B7;&#xF0BE;&#61485;-]|[\(\[]?(\p{Ll}+(/\p{Ll}+)?|\p{Lu}+(/\p{Lu}+)?|\p{L}+\p{Lu}|[0-9]+)[.\)\]]?)$'"/>
   <xsl:variable name="mark-exceptions" select="'^(BEISPIEL|ANMERKUNG)$'" as="xs:string"/>
   <xsl:variable name="hub:float-names" select="('figure', 'table', 'informaltable')"/>
   <xsl:variable name="hub:default-tabstop" as="xs:double" select="400"/>
