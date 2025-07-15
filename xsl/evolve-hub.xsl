@@ -2593,7 +2593,7 @@
                                                                              ]">
             <xsl:choose>
               <xsl:when test="self::row[hub:is-first-thead-row(.)]">
-                  <xsl:for-each-group select="current-group()[not(self::text()[matches(., '^\p{Zs}+$')])]" group-adjacent="exists(entry/para) 
+                  <xsl:for-each-group select="current-group()" group-adjacent="exists(entry/para) 
                                                                                and (
                                                                                  every $x in entry/para satisfies
                                                                                    ($x/@role[matches(., $hub:thead-pstyle-regex)])
