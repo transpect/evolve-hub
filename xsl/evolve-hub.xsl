@@ -3272,10 +3272,10 @@
         </xsl:when>
         <!-- input examples: ^Fig. 4.1: bla .*$, ^Tab. 3[&#x2002;]bla .*$-->
         <xsl:otherwise>
-          <xsl:value-of select="replace($cleaned-text, 
-                                        concat($hub:caption-number-plus-sep-regex, '(.+)$'), 
+          <xsl:value-of select="replace(tokenize($cleaned-text,'\n')[normalize-space()][1], 
+                                        concat($hub:caption-number-plus-sep-regex, '.+$'), 
                                         '$1$2$3',
-                                        'mi'
+                                        'i'
                                         )"/>
         </xsl:otherwise>
       </xsl:choose>
