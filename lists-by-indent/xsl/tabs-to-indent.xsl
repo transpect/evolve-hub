@@ -243,7 +243,7 @@
   </xsl:template>
   
   <xsl:template match="@css:list-style-type" mode="hub:list-style-type">
-    <xsl:if test=". ne 'decimal'">
+    <xsl:if test="not(. = ('none','decimal'))">
       <phrase role="hub:identifier">
         <xsl:sequence select="hub:set-origin($set-debugging-info-origin, 'tabs-to-indent_liststyletype')"/>
         <xsl:choose>
