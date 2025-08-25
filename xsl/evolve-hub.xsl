@@ -2944,12 +2944,13 @@
     <xsl:variable name="no-identifier-but-simple-equation-starts" select="matches(., concat($hub:orderedlist-mark-at-start-regex, '[=\-\+÷]'))" as="xs:boolean"/>
     <xsl:variable name="parent" select="parent::*[1]" as="element()"/>
     <xsl:analyze-string select="." regex="{$hub:orderedlist-mark-at-start-regex}">
-      <xsl:matching-substring>
+      <xsl:matching-substring><xsl:message select="'~~', $hub:orderedlist-mark-at-start-regex"/>
         <xsl:choose>
           <xsl:when test="$context/following-sibling::node()[1]/self::tab 
                           and (
                             (: GI 2018-09-06: [A-Za-z] → \p{L} so that in 'o.ä.' 'o.' won’t be marked up as hub:identifier :)
-                            matches($context, concat($hub:orderedlist-mark-at-start-regex, '\p{L}'))
+                            (: MP 2025-08-25: avoid identifier for D 1 tab :)
+                            matches($context, concat($hub:orderedlist-mark-at-start-regex, '[\p{L}\d]'))
                           )
                           or $hub:already-identified
                           or $no-identifier-but-simple-equation-starts">
