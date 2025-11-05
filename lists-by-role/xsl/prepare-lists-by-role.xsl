@@ -30,13 +30,28 @@
   <xsl:variable name="lists-by-role-map" as="element(html:html)">
     <xsl:choose>
       <xsl:when test="not(empty($lists-by-role-style-map-doc))">
-        <xsl:sequence select="$lists-by-role-style-map-doc//html:html"/>
+        <xsl:apply-templates select="$lists-by-role-style-map-doc//html:html" mode="hub:sort-style-map"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates select="//css:rules" mode="hub:build-style-map"/>        
       </xsl:otherwise>
     </xsl:choose>
   </xsl:variable>
+  
+  <xsl:template match="node() | @*" mode="hub:sort-style-map">
+    <xsl:copy>
+      <xsl:apply-templates select="@* | node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="html:table" mode="hub:sort-style-map">
+    <xsl:copy>
+      <xsl:apply-templates select="@* | html:tr[html:th] | node()[not(html:th or html:td) or not(self::html:tr)]" mode="#current"/>
+      <xsl:apply-templates select="html:tr[html:td]" mode="#current">
+        <xsl:sort order="descending" select="string-length(html:td[2])"/>
+      </xsl:apply-templates>
+    </xsl:copy>
+  </xsl:template>
 
   <!-- generates style map using included word styles -->
   <xsl:template match="css:rules" mode="hub:build-style-map">
