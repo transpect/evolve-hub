@@ -74,12 +74,20 @@
   <xsl:template match=" orderedlist/listitem/para[1]//phrase[@role eq 'hub:identifier'][1]
                       | orderedlist/listitem/para[1][.//phrase[@role eq 'hub:identifier'][1]]/tab[preceding-sibling::*[1][self::phrase[@role eq 'hub:identifier']]]
                       | itemizedlist/listitem/para[1]//phrase[@role eq 'hub:identifier'][1]
-                      | itemizedlist/listitem/para[1][.//phrase[@role eq 'hub:identifier'][1]]/tab[preceding-sibling::*[1][self::phrase[@role eq 'hub:identifier']]]" mode="hub:postprocess-lists-by-role"/>
+                      | itemizedlist/listitem/para[1][.//phrase[@role eq 'hub:identifier'][1]]/tab[preceding-sibling::*[1][self::phrase[@role eq 'hub:identifier']]]" mode="hub:postprocess-lists-by-role">
+    <xsl:param name="context-el" select="()" as="element()?" tunnel="yes"/>
+    <xsl:if test="not(hub:same-scope(., $context-el))">
+      <xsl:next-match/>
+    </xsl:if>
+  </xsl:template>
   
   <xsl:template match="orderedlist/listitem[para[1]//phrase[@role eq 'hub:identifier'][1]]" mode="hub:postprocess-lists-by-role">
+    <xsl:variable name="context-el" select="para[1]"/>
     <xsl:copy>
-      <xsl:attribute name="override" select="(para[1]/phrase[@role eq 'hub:identifier'][1], para[1]//phrase[@role eq 'hub:identifier'][1])[1]"/>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
+      <xsl:attribute name="override" select="(para[1]/phrase[@role eq 'hub:identifier'][1], para[1]//phrase[@role eq 'hub:identifier'][hub:same-scope(., $context-el)][1])[1]"/>
+      <xsl:apply-templates select="@*, node()" mode="#current">
+        <xsl:with-param name="context-el" select="$context-el" as="element()?" tunnel="yes"/>
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
   
