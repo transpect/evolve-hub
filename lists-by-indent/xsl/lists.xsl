@@ -68,7 +68,7 @@
 
   <!-- orderedlist -->
 
-  <xsl:template match="orderedlist[hub:is-ordered-list(.)]" mode="hub:lists">
+  <xsl:template match="orderedlist[hub:is-ordered-list(.)]" mode="hub:lists"  priority="1">
     <xsl:variable name="list-type" select="hub:get-list-type-with-warning(listitem/para[1]//phrase[hub:is-identifier(.)])"/>
     <xsl:copy>
       <xsl:attribute name="numeration" select="$list-type"/>
@@ -91,7 +91,7 @@
 
   <!-- variablelist -->
 
-  <xsl:template match="orderedlist[hub:is-variable-list(.)]" mode="hub:lists">
+  <xsl:template match="orderedlist[hub:is-variable-list(.)]" mode="hub:lists"  priority="1">
     <variablelist>
       <xsl:apply-templates mode="#current">
         <xsl:with-param name="is-variable-list" select="true()"/>
