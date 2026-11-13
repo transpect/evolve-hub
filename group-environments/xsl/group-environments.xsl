@@ -20,8 +20,10 @@
   <xsl:variable name="hub:environment-paras-start" as="xs:string" select="replace($hub:environment-paras, '\|stop', '')"/>
   <xsl:variable name="hub:environment-paras-end" as="xs:string" select="replace($hub:environment-paras-start, 'start', 'stop')"/>
   
+  <xsl:variable name="preferred-environment-element" select="'div'"/>
+  
    <!-- call environment grouping template like this -->
-  <xsl:template match="*[dbk:para[matches(@role, $hub:environment-paras-end)]]" mode="hub:group-environmentsgroup-environments" priority="5">
+  <xsl:template match="*[dbk:para[matches(@role, $hub:environment-paras-end)]]" mode="hub:group-environments" priority="5">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:call-template name="environments">
@@ -102,13 +104,14 @@
           <xsl:variable name="end" select="current-group()/self::dbk:para[hub:is-environment-end(.)][hub:get-input-depth(.,$enriched-depth-map) = 0][1]"/>
           <xsl:variable name="environment" select="$start/following-sibling::* intersect $end/preceding-sibling::*"/>
           <xsl:variable name="div-role" as="xs:string" select="tr:box-role(.[1])"/>
-        	<div role="{$div-role}">
+        	<xsl:element name="{$preferred-environment-element}" >
+        	  <xsl:attribute name="role" select="$div-role"/>
         	  <xsl:apply-templates select="$start" mode="#current"/>
             <xsl:call-template name="environments">
               <xsl:with-param name="input" select="$environment"/>
             </xsl:call-template>
         	  <xsl:apply-templates select="$end" mode="#current"/>
-        	</div>
+        	</xsl:element>
           <xsl:apply-templates select="current-group()[not(. intersect ($start/following-sibling::* intersect $end/preceding-sibling::* union ($end,$start)))]" mode="#current"/>
         </xsl:when>
         <xsl:otherwise>
